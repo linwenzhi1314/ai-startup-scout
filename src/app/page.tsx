@@ -1,35 +1,262 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
+'use client';
 
-export const metadata: Metadata = {
-  title: '扣子编程 - AI 开发伙伴',
-  description: '扣子编程，你的 AI 开发伙伴已就位',
-};
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [domain, setDomain] = useState('');
+
+  useEffect(() => {
+    const d = process.env.NEXT_PUBLIC_COZE_PROJECT_DOMAIN_DEFAULT || window.location.origin || '';
+    setDomain(d);
+  }, []);
+
   return (
-    <div className="flex h-full items-center justify-center bg-background text-foreground transition-colors duration-300 dark:bg-background dark:text-foreground overflow-hidden min-h-screen">
-      {/* 主容器 */}
-      <main className="flex w-full h-full max-w-3xl flex-col items-center justify-center px-16 py-32 sm:items-center">
-        <div className="flex flex-col items-center justify-between gap-4">
-           <Image
-            src="https://lf-coze-web-cdn.coze.cn/obj/eden-cn/lm-lgvj/ljhwZthlaukjlkulzlp/coze-coding/icon/coze-coding.gif"
-            alt="扣子编程 Logo"
-            width={156}
-            height={130}
-          />
-          <div>
-            <div className="flex flex-col items-center gap-2 text-center sm:items-center sm:text-center">
-              <h1 className="max-w-xl text-base font-semibold leading-tight tracking-tight text-foreground dark:text-foreground">
-                应用开发中
-              </h1>
-              <p className="max-w-2xl text-sm leading-8 text-muted-foreground dark:text-muted-foreground">
-                请稍后，页面即将呈现
-              </p>
+    <div className="min-h-screen bg-[#0F1117] text-white overflow-x-hidden">
+      {/* Animated background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
+        <div
+          className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-amber-500/8 blur-[100px]"
+          style={{ animationDuration: '4s' }}
+        />
+        <div className="absolute top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-indigo-500/5 blur-[80px] animate-pulse" />
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9" />
+              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <span className="text-lg font-semibold tracking-tight">AI Startup Scout</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">功能</a>
+          <a href="#how-it-works" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">使用方式</a>
+          <a
+            href={domain ? `${domain}/api/download` : '#'}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
+          >
+            安装扩展
+          </a>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-xs text-indigo-300">Chrome 扩展</span>
+        </div>
+
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl leading-tight">
+          发现下一个
+          <br />
+          <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-amber-400 bg-clip-text text-transparent">
+            AI 独角兽
+          </span>
+        </h1>
+
+        <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed">
+          智能搜索 AI 软件创业项目，一键获取市场洞察与投资分析。
+          <br className="hidden md:block" />
+          你的 AI 创业雷达，始终在线。
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
+          <a
+            href="#how-it-works"
+            className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
+          >
+            开始使用
+          </a>
+          <a
+            href="#features"
+            className="px-8 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-medium rounded-xl transition-all text-base"
+          >
+            了解功能
+          </a>
+        </div>
+
+        {/* Popup Preview */}
+        <div className="mt-16 w-full max-w-sm">
+          <div className="bg-[#1A1D27] border border-[#2D3348] rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+            {/* Mini header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#2D3348]">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9" />
+                  </svg>
+                </div>
+                <span className="text-xs font-semibold text-slate-200">AI Startup Scout</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            {/* Search bar mockup */}
+            <div className="px-4 pt-3 pb-2">
+              <div className="flex items-center gap-2 bg-[#232736] border border-[#2D3348] rounded-lg px-3 py-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <span className="text-xs text-slate-500">AI Agent 创业项目</span>
+              </div>
+              <div className="flex gap-1.5 mt-2">
+                {['全部', '融资', '产品', '开源', '模型'].map((tab, i) => (
+                  <span
+                    key={tab}
+                    className={`px-2 py-0.5 text-[10px] rounded-full ${i === 0 ? 'bg-indigo-600 text-white' : 'border border-[#2D3348] text-slate-500'}`}
+                  >
+                    {tab}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* Mock results */}
+            <div className="px-4 pb-3 space-y-2">
+              {[
+                { name: 'Cognosys AI', desc: 'AI Agent 自动化平台，完成复杂工作流', tag: '融资' },
+                { name: 'LangChain', desc: 'LLM 应用开发框架，开源生态领先', tag: '开源' },
+                { name: 'Mistral AI', desc: '欧洲AI新锐，开源模型赛道领跑者', tag: '模型' },
+              ].map((item) => (
+                <div key={item.name} className="bg-[#232736] border border-[#2D3348] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-200">{item.name}</span>
+                    <span className="px-1.5 py-0.5 bg-indigo-500/15 text-indigo-400 text-[9px] rounded">{item.tag}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+            {/* AI summary bar */}
+            <div className="px-4 py-2 border-t border-[#2D3348] bg-amber-500/5">
+              <div className="flex items-center gap-1.5">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
+                </svg>
+                <span className="text-[10px] text-amber-400 font-medium">AI 分析市场趋势...</span>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="relative z-10 px-6 md:px-12 py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">核心功能</h2>
+            <p className="mt-4 text-slate-400 text-lg">专为 AI 创业者打造的搜索工具</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                ),
+                title: '智能搜索',
+                desc: '输入关键词即可搜索全球 AI 创业项目，支持按融资、产品、开源、模型等分类筛选。',
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
+                    <path d="M9 21h6M10 17v4M14 17v4" />
+                  </svg>
+                ),
+                title: 'AI 深度分析',
+                desc: '一键生成市场洞察报告，重点推荐项目，投资建议，AI 为你解读行业趋势。',
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                ),
+                title: '收藏追踪',
+                desc: '一键收藏感兴趣的项目，建立你的 AI 创业项目关注列表，随时回顾。',
+              },
+            ].map((feature) => (
+              <div
+                key={feature.title}
+                className="group bg-[#1A1D27] border border-[#2D3348] rounded-2xl p-8 hover:border-indigo-500/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5"
+              >
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-5 group-hover:bg-indigo-500/20 transition-colors">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="relative z-10 px-6 md:px-12 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">使用方式</h2>
+            <p className="mt-4 text-slate-400 text-lg">三步开始发现 AI 创业机会</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: '01', title: '安装扩展', desc: '从 Chrome Web Store 安装 AI Startup Scout 扩展到浏览器' },
+              { step: '02', title: '搜索项目', desc: '点击扩展图标，输入关键词搜索感兴趣的 AI 创业方向' },
+              { step: '03', title: '获取洞察', desc: '使用 AI 分析功能获取市场洞察和投资建议' },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white text-xl font-bold mb-5">
+                  {item.step}
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-slate-400 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-14">
+            <a
+              href={domain ? `${domain}/api/download` : '#'}
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" />
+                <path d="M2 17L12 22L22 17" />
+                <path d="M2 12L12 17L22 12" />
+              </svg>
+              立即安装
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-[#2D3348] px-6 md:px-12 py-8">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9" />
+              </svg>
+            </div>
+            <span className="text-sm text-slate-400">AI Startup Scout</span>
+          </div>
+          <p className="text-xs text-slate-600">AI 驱动的创业项目搜索引擎</p>
+        </div>
+      </footer>
     </div>
   );
 }

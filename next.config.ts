@@ -1,8 +1,7 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
-  // outputFileTracingRoot: path.resolve(__dirname, '../../'),  // Uncomment and add 'import path from "path"' if needed
-  /* config options here */
   allowedDevOrigins: ['*.dev.coze.site'],
   images: {
     remotePatterns: [
@@ -12,6 +11,14 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/extension/:path*',
+        destination: '/extension/:path*',
+      },
+    ];
   },
 };
 

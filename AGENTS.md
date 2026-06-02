@@ -1,5 +1,8 @@
 # 项目上下文
 
+## 项目概述
+AI Startup Scout - Chrome 浏览器扩展，用于搜索 AI 软件创业项目，提供市场洞察与投资分析。
+
 ### 版本技术栈
 
 - **Framework**: Next.js 16 (App Router)
@@ -7,59 +10,79 @@
 - **Language**: TypeScript 5
 - **UI 组件**: shadcn/ui (基于 Radix UI)
 - **Styling**: Tailwind CSS 4
+- **集成服务**: coze-coding-dev-sdk (Web Search + LLM)
+- **Chrome Extension**: Manifest V3
 
 ## 目录结构
 
 ```
-├── public/                 # 静态资源
-├── scripts/                # 构建与启动脚本
-│   ├── build.sh            # 构建脚本
-│   ├── dev.sh              # 开发环境启动脚本
-│   ├── prepare.sh          # 预处理脚本
-│   └── start.sh            # 生产环境启动脚本
+├── public/
+│   ├── extension/           # Chrome 扩展源文件
+│   │   ├── manifest.json    # 扩展清单 (Manifest V3)
+│   │   ├── popup.html       # 弹窗 UI
+│   │   ├── popup.css        # 弹窗样式
+│   │   ├── popup.js         # 弹窗逻辑
+│   │   ├── background.js    # Service Worker
+│   │   └── icons/           # 扩展图标 (16/32/48/128px)
+│   └── ai-startup-scout.zip # 打包好的扩展 ZIP
+├── scripts/                 # 构建与启动脚本
 ├── src/
-│   ├── app/                # 页面路由与布局
-│   ├── components/ui/      # Shadcn UI 组件库
-│   ├── hooks/              # 自定义 Hooks
-│   ├── lib/                # 工具库
-│   │   └── utils.ts        # 通用工具函数 (cn)
-│   └── server.ts           # 自定义服务端入口
-├── next.config.ts          # Next.js 配置
-├── package.json            # 项目依赖管理
-└── tsconfig.json           # TypeScript 配置
+│   ├── app/
+│   │   ├── page.tsx         # Landing Page (首页)
+│   │   ├── layout.tsx       # 根布局
+│   │   ├── globals.css      # 全局样式
+│   │   └── api/
+│   │       ├── search/      # 搜索 API (web-search SDK)
+│   │       ├── analyze/     # AI 分析 API (LLM SDK, SSE 流式)
+│   │       ├── config/      # 配置 API (返回后端域名)
+│   │       └── download/    # 扩展 ZIP 下载 API
+│   ├── components/ui/       # Shadcn UI 组件库
+│   ├── hooks/
+│   └── lib/
+├── next.config.ts
+├── package.json
+└── tsconfig.json
 ```
 
-- 项目文件（如 app 目录、pages 目录、components 等）默认初始化到 `src/` 目录下。
+## API 接口
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/search` | POST | 搜索 AI 创业项目 (web-search SDK) |
+| `/api/analyze` | POST | AI 深度分析 (LLM SDK, SSE 流式输出) |
+| `/api/config` | GET | 获取后端配置 (API 域名等) |
+| `/api/download` | GET | 下载 Chrome 扩展 ZIP 包 |
 
 ## 包管理规范
 
 **仅允许使用 pnpm** 作为包管理器，**严禁使用 npm 或 yarn**。
-**常用命令**：
-- 安装依赖：`pnpm add <package>`
-- 安装开发依赖：`pnpm add -D <package>`
-- 安装所有依赖：`pnpm install`
-- 移除依赖：`pnpm remove <package>`
 
 ## 开发规范
 
 ### 编码规范
+- 默认按 TypeScript `strict` 心智写代码
+- 禁止隐式 `any` 和 `as any`
+- 函数参数、返回值、解构项、事件对象应有明确类型
 
-- 默认按 TypeScript `strict` 心智写代码；优先复用当前作用域已声明的变量、函数、类型和导入，禁止引用未声明标识符或拼错变量名。
-- 禁止隐式 `any` 和 `as any`；函数参数、返回值、解构项、事件对象、`catch` 错误在使用前应有明确类型或先完成类型收窄，并清理未使用的变量和导入。
-
-### next.config 配置规范
-
-- 配置的路径不要写死绝对路径，必须使用 path.resolve(__dirname, ...)、import.meta.dirname 或 process.cwd() 动态拼接。
+### Chrome 扩展开发
+- 扩展使用 Manifest V3，文件位于 `public/extension/`
+- 扩展通过后端 API 获取数据，不在扩展端暴露 API 密钥
+- 扩展的 API_BASE 配置需与部署域名一致
+- 修改扩展文件后需重新打包 ZIP：`cd public/extension && zip -r ../ai-startup-scout.zip .`
 
 ### Hydration 问题防范
+- 严禁在 JSX 渲染逻辑中直接使用 typeof window、Date.now()、Math.random() 等动态数据
+- 必须使用 'use client' 并配合 useEffect + useState
 
-1. 严禁在 JSX 渲染逻辑中直接使用 typeof window、Date.now()、Math.random() 等动态数据。**必须使用 'use client' 并配合 useEffect + useState 确保动态内容仅在客户端挂载后渲染**；同时严禁非法 HTML 嵌套（如 <p> 嵌套 <div>）。
-2. **禁止使用 head 标签**，优先使用 metadata，详见文档：https://nextjs.org/docs/app/api-reference/functions/generate-metadata
-   1. 三方 CSS、字体等资源可在 `globals.css` 中顶部通过 `@import` 引入或使用 next/font
-   2. preload, preconnect, dns-prefetch 通过 ReactDOM 的 preload、preconnect、dns-prefetch 方法引入
-   3. json-ld 可阅读 https://nextjs.org/docs/app/guides/json-ld
+### next.config 配置规范
+- 配置路径使用 path.resolve(__dirname, ...) 动态拼接
 
-## UI 设计与组件规范 (UI & Styling Standards)
+## UI 设计与组件规范
+- 使用 shadcn/ui 组件、风格和规范
+- 暗色主题为主（深空灰 #0F1117 基底）
+- 强调色：电光靛蓝 #6366F1，高亮色：琥珀 #F59E0B
 
-- 模板默认预装核心组件库 `shadcn/ui`，位于`src/components/ui/`目录下
-- Next.js 项目**必须默认**采用 shadcn/ui 组件、风格和规范，**除非用户指定用其他的组件和规范。**
+## 集成服务
+- **Web Search**: 使用 `SearchClient` from `coze-coding-dev-sdk`
+- **LLM**: 使用 `LLMClient` from `coze-coding-dev-sdk`，默认使用流式输出
+- **Header 转发**: 必须使用 `HeaderUtils.extractForwardHeaders(request.headers)`
