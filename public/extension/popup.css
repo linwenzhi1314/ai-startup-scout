@@ -1,5 +1,5 @@
 /* ==============================================
-   AI Startup Scout - Popup Styles (v1.1.1)
+   AI Startup Scout - Popup Styles (v1.1.5)
    暗色主题设计规范：
    - 主背景：深空灰 #0F1117
    - 卡片背景：#1A1D27
@@ -9,73 +9,89 @@
 
 /* ---- 全局重置 ---- */
 * {
-  margin: 0;      /* 清除默认外边距 */
-  padding: 0;     /* 清除默认内边距 */
-  box-sizing: border-box; /* 盒模型包含内边距和边框 */
+  margin: 0;                          /* 清除默认外边距 */
+  padding: 0;                         /* 清除默认内边距 */
+  box-sizing: border-box;             /* 盒模型包含内边距和边框 */
 }
 
 /* ---- CSS 变量（Design Tokens） ---- */
 :root {
-  --bg-base: #0F1117;           /* 主背景色：深空灰 */
-  --bg-card: #1A1D27;           /* 卡片背景色 */
-  --bg-elevated: #232736;       /* 提升层背景色（输入框、卡片内部） */
-  --accent: #6366F1;            /* 强调色：电光靛蓝 */
-  --accent-hover: #818CF8;      /* 强调色悬停态 */
-  --amber: #F59E0B;             /* 高亮色：琥珀 */
+  --bg-base: #0F1117;                 /* 主背景色：深空灰 */
+  --bg-card: #1A1D27;                 /* 卡片背景色 */
+  --bg-elevated: #232736;             /* 提升层背景色（输入框、卡片内部） */
+  --accent: #6366F1;                  /* 强调色：电光靛蓝 */
+  --accent-hover: #818CF8;            /* 强调色悬停态 */
+  --amber: #F59E0B;                   /* 高亮色：琥珀 */
   --amber-dim: rgba(245, 158, 11, 0.15); /* 琥珀半透明 */
-  --text-primary: #F1F5F9;      /* 主文字色 */
-  --text-secondary: #94A3B8;    /* 次文字色 */
-  --text-muted: #64748B;        /* 弱化文字色 */
-  --border: #2D3348;            /* 边框色 */
+  --text-primary: #F1F5F9;            /* 主文字色 */
+  --text-secondary: #94A3B8;          /* 次文字色 */
+  --text-muted: #64748B;              /* 弱化文字色 */
+  --border: #2D3348;                  /* 边框色 */
   --border-accent: rgba(99, 102, 241, 0.4); /* 强调边框色 */
-  --radius: 8px;                /* 默认圆角 */
-  --radius-sm: 6px;             /* 小圆角 */
+  --radius: 8px;                      /* 默认圆角 */
+  --radius-sm: 6px;                   /* 小圆角 */
 }
 
 /* ---- Body 基础样式 ---- */
 body {
-  width: 360px;          /* 弹窗固定宽度 */
-  min-height: 480px;     /* 最小高度 */
-  max-height: 560px;     /* 最大高度 */
-  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif; /* 中文字体栈 */
-  background: var(--bg-base);    /* 深空灰背景 */
-  color: var(--text-primary);    /* 浅色文字 */
-  font-size: 13px;               /* 基础字号 */
-  line-height: 1.5;              /* 行高 */
-  overflow: hidden;              /* 禁止 body 滚动 */
+  width: 360px;                       /* 弹窗固定宽度 */
+  min-height: 480px;                  /* 最小高度 */
+  max-height: 560px;                  /* 最大高度 */
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-base);         /* 深空灰背景 */
+  color: var(--text-primary);         /* 浅色文字 */
+  font-size: 13px;                    /* 基础字号 */
+  line-height: 1.5;                   /* 行高 */
+  overflow: hidden;                   /* 禁止 body 滚动 */
 }
 
 /* ---- 应用容器 ---- */
 .app {
-  display: flex;          /* 弹性布局 */
-  flex-direction: column; /* 纵向排列 */
+  display: flex;                      /* 弹性布局 */
+  flex-direction: column;             /* 纵向排列 */
   height: 100%;
-  max-height: 560px;      /* 限制最大高度 */
+  max-height: 560px;                  /* 限制最大高度 */
 }
 
-/* ---- 顶栏 ---- */
+/* ====================
+   顶栏
+   ==================== */
 .header {
-  display: flex;                /* 弹性布局 */
-  align-items: center;          /* 垂直居中 */
-  justify-content: space-between; /* 两端对齐 */
-  padding: 12px 16px;           /* 内边距 */
+  display: flex;                      /* 弹性布局 */
+  align-items: center;                /* 垂直居中 */
+  justify-content: space-between;     /* 两端对齐 */
+  padding: 12px 16px;                 /* 内边距 */
   border-bottom: 1px solid var(--border); /* 底部分割线 */
-  background: var(--bg-card);   /* 卡片背景 */
+  background: var(--bg-card);         /* 卡片背景 */
 }
 
 /* 顶栏左侧（Logo + 标题） */
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;  /* Logo 与标题间距 */
+  gap: 8px;                           /* Logo 与标题间距 */
+}
+
+/* Logo 图标 */
+.logo {
+  width: 24px;                        /* 固定宽度 */
+  height: 24px;                       /* 固定高度 */
+  border-radius: 4px;                 /* 微圆角 */
 }
 
 /* 应用标题 */
-.header-title {
+.app-title {
   font-size: 14px;
-  font-weight: 600;     /* 半粗体 */
+  font-weight: 600;                   /* 半粗体 */
   color: var(--text-primary);
-  letter-spacing: -0.01em; /* 微调字间距 */
+  letter-spacing: -0.01em;            /* 微调字间距 */
+}
+
+/* 顶栏右侧（语言切换 + 收藏按钮） */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;                           /* 按钮间距 */
 }
 
 /* ---- 图标按钮（通用） ---- */
@@ -99,24 +115,35 @@ body {
   color: var(--text-primary);         /* 亮色文字 */
 }
 
-/* 图标按钮激活态（如收藏夹打开时） */
+/* 图标按钮激活态 */
 .icon-btn.active {
   color: var(--amber);                /* 琥珀高亮色 */
 }
 
-/* 小尺寸图标按钮 */
-.icon-btn.small {
-  width: 20px;
-  height: 20px;
+/* 语言切换按钮：比图标按钮更宽，容纳文字标签 */
+.lang-btn {
+  width: auto;                        /* 自适应宽度 */
+  padding: 2px 6px;                   /* 左右内边距 */
+  gap: 3px;                           /* 图标与文字间距 */
+  font-size: 11px;                    /* 小字号 */
 }
 
-/* ---- 搜索区 ---- */
-.search-section {
-  padding: 12px 16px 8px; /* 上 左右 下 */
+/* 语言标签文字 */
+.lang-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
-/* 搜索栏容器 */
-.search-bar {
+/* ====================
+   搜索区
+   ==================== */
+#searchContainer {
+  padding: 12px 16px 8px;             /* 上 左右 下 */
+}
+
+/* 搜索框容器：输入框 + 按钮横排 */
+.search-box {
   display: flex;
   align-items: center;
   gap: 8px;                           /* 图标与输入框间距 */
@@ -127,8 +154,8 @@ body {
   transition: border-color 0.2s;      /* 边框颜色过渡 */
 }
 
-/* 搜索栏聚焦态：边框变为强调色 + 发光效果 */
-.search-bar:focus-within {
+/* 搜索框聚焦态：边框变为强调色 + 发光效果 */
+.search-box:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15); /* 外发光 */
 }
@@ -140,7 +167,7 @@ body {
 }
 
 /* 搜索输入框 */
-.search-bar input {
+.search-input {
   flex: 1;                            /* 占满剩余空间 */
   background: transparent;
   border: none;
@@ -152,7 +179,7 @@ body {
 }
 
 /* 搜索输入框占位文本 */
-.search-bar input::placeholder {
+.search-input::placeholder {
   color: var(--text-muted);
 }
 
@@ -183,168 +210,306 @@ body {
   transform: scale(0.95);             /* 缩小 5% */
 }
 
-/* ---- 分类标签 ---- */
+/* ====================
+   分类标签
+   ==================== */
 .category-tabs {
   display: flex;
   gap: 6px;                           /* 标签间距 */
-  margin-top: 10px;
-  overflow-x: auto;                   /* 水平滚动 */
-  scrollbar-width: none;              /* Firefox 隐藏滚动条 */
+  margin-top: 8px;                    /* 与搜索框间距 */
+  overflow-x: auto;                   /* 横向可滚动 */
+  padding-bottom: 2px;                /* 滚动条空间 */
 }
 
-/* Chrome 隐藏滚动条 */
-.category-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-/* 单个分类标签 */
-.tab {
-  flex-shrink: 0;                     /* 不收缩 */
-  padding: 4px 12px;
+/* 分类标签按钮 */
+.category-tab {
+  padding: 4px 10px;                  /* 上下 4px，左右 10px */
   border: 1px solid var(--border);
+  border-radius: 999px;               /* 胶囊形圆角 */
   background: transparent;
   color: var(--text-secondary);
-  border-radius: 20px;                /* 胶囊形圆角 */
-  font-size: 11px;
+  font-size: 11px;                    /* 小字号 */
   cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
+  white-space: nowrap;                /* 不换行 */
+  transition: all 0.2s;               /* 过渡动画 */
 }
 
 /* 分类标签悬停态 */
-.tab:hover {
-  border-color: var(--border-accent);
+.category-tab:hover {
+  border-color: var(--border-accent); /* 边框亮起 */
   color: var(--text-primary);
 }
 
-/* 分类标签激活态：强调色背景 */
-.tab.active {
-  background: var(--accent);
+/* 分类标签选中态（active class 由 JS 切换） */
+.category-tab.active {
+  background: var(--accent);          /* 靛蓝背景 */
   border-color: var(--accent);
-  color: white;
+  color: white;                       /* 白色文字 */
+  font-weight: 500;                   /* 中粗体 */
 }
 
-/* ---- 结果区域 ---- */
-.results-area {
-  flex: 1;                         /* 占满剩余空间 */
-  overflow-y: auto;                /* 垂直滚动 */
-  padding: 8px 16px;
-  scrollbar-width: thin;           /* Firefox 细滚动条 */
-  scrollbar-color: var(--border) transparent; /* 滚动条颜色 */
+/* ====================
+   搜索结果计数
+   ==================== */
+.result-count {
+  padding: 4px 16px;                  /* 上下 4px，左右 16px */
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-/* Chrome 细滚动条 */
-.results-area::-webkit-scrollbar {
-  width: 4px;
+/* ====================
+   加载指示器
+   ==================== */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;                           /* 动画与文字间距 */
+  padding: 32px 16px;                 /* 上下留白 */
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
-.results-area::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+/* 脉冲动画圆点 */
+.pulse {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;                 /* 圆形 */
+  background: var(--accent);
+  animation: pulse 1.5s ease-in-out infinite; /* 无限脉冲动画 */
 }
 
-/* ---- 空状态 ---- */
+/* 脉冲关键帧 */
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+/* ====================
+   空状态提示
+   ==================== */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 40px 24px;                 /* 大留白居中 */
   text-align: center;
 }
 
-/* 空状态标题 */
-.empty-title {
-  margin-top: 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
+/* 空状态图标 */
+.empty-icon {
+  margin-bottom: 12px;                /* 图标与文字间距 */
+  opacity: 0.6;                       /* 半透明弱化 */
 }
 
-/* 空状态描述 */
+/* 空状态主标题 */
+.empty-title {
+  font-size: 15px;
+  font-weight: 600;                   /* 半粗体 */
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+/* 空状态副标题 */
 .empty-desc {
-  margin-top: 6px;
   font-size: 12px;
   color: var(--text-muted);
 }
 
-/* ---- 加载骨架屏 ---- */
-.loading-state {
+/* ====================
+   无结果状态
+   ==================== */
+.no-results {
   display: flex;
   flex-direction: column;
-  gap: 10px;                       /* 骨架卡片间距 */
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
 }
 
-/* 骨架卡片占位 */
-.skeleton-card {
-  height: 72px;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  animation: pulse 1.5s ease-in-out infinite; /* 脉冲闪烁动画 */
+/* 无结果图标 */
+.no-results-icon {
+  margin-bottom: 12px;
+  opacity: 0.5;
 }
 
-/* 脉冲闪烁关键帧 */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+/* 无结果描述 */
+.no-results-desc {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-/* ---- 搜索结果卡片 ---- */
+/* ====================
+   搜索结果列表
+   ==================== */
+.results {
+  flex: 1;                            /* 占满剩余空间 */
+  overflow-y: auto;                   /* 纵向可滚动 */
+  padding: 0 16px 8px;               /* 上0 左右16 下8 */
+  scroll-behavior: smooth;            /* 平滑滚动 */
+}
+
+/* 结果卡片 */
 .result-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 8px;               /* 卡片间距 */
-  cursor: pointer;
-  transition: all 0.2s ease;
-  animation: slideIn 0.3s ease forwards; /* 淡入滑入动画 */
-  opacity: 0;                        /* 初始透明，动画后变为 1 */
+  border-radius: var(--radius);       /* 8px 圆角 */
+  padding: 12px;                      /* 内边距 */
+  margin-bottom: 8px;                 /* 卡片间距 */
+  transition: all 0.2s;               /* 过渡动画 */
+  cursor: default;
 }
 
-/* 结果卡片悬停态：上移 + 边框亮起 + 阴影 */
+/* 卡片悬停态：上移 + 边框亮起 */
 .result-card:hover {
   border-color: var(--border-accent);
-  transform: translateY(-1px);       /* 上移 1px */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);        /* 上移 1px */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 浮起阴影 */
 }
 
-/* 淡入滑入关键帧 */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);      /* 从下方 8px 滑入 */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* 卡片头部 */
+.card-header {
+  margin-bottom: 6px;
 }
 
-/* 结果卡片头部（标题 + 收藏按钮） */
-.result-card-header {
+/* 卡片标题行：标题 + 收藏按钮 */
+.card-title-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  align-items: flex-start;            /* 顶部对齐 */
+  gap: 6px;
 }
 
-/* 结果标题 */
-.result-title {
+/* 卡片标题 */
+.card-title {
+  flex: 1;                            /* 占满剩余空间 */
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 600;                   /* 半粗体 */
   color: var(--text-primary);
   line-height: 1.4;
-  flex: 1;                           /* 占满剩余空间 */
+  /* 标题过长时截断显示省略号 */
   display: -webkit-box;
-  -webkit-line-clamp: 2;            /* 最多显示 2 行 */
+  -webkit-line-clamp: 2;              /* 最多 2 行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* 收藏按钮 */
 .fav-btn {
-  flex-shrink: 0;
+  flex-shrink: 0;                     /* 不收缩 */
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* 收藏按钮悬停 */
+.fav-btn:hover {
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+/* 收藏按钮已收藏态（active class 由 JS 切换） */
+.fav-btn.active {
+  color: var(--amber);                /* 琥珀色实心 */
+}
+
+/* 卡片摘要 */
+.card-snippet {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  /* 摘要过长时截断 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;              /* 最多 3 行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 卡片底部：来源 + 链接 */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;     /* 两端对齐 */
+}
+
+/* 来源元信息 */
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 来源名称 */
+.card-source {
+  max-width: 120px;                   /* 限制最大宽度 */
+  overflow: hidden;
+  text-overflow: ellipsis;            /* 超长省略 */
+  white-space: nowrap;
+}
+
+/* 发布时间 */
+.card-time {
+  white-space: nowrap;
+}
+
+/* 查看链接 */
+.card-link {
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+/* 查看链接悬停 */
+.card-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ====================
+   AI 分析面板
+   ==================== */
+.summary-panel {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  max-height: 240px;                  /* 限制最大高度 */
+  overflow-y: auto;                   /* 纵向可滚动 */
+  padding: 12px 16px;                 /* 内边距 */
+}
+
+/* 面板头部：标题 + 关闭按钮 */
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;                /* 与内容间距 */
+}
+
+/* 面板标题行 */
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;                           /* 图标与文字间距 */
+  font-size: 13px;
+  font-weight: 600;                   /* 半粗体 */
+  color: var(--text-primary);
+}
+
+/* 关闭按钮 */
+.close-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,333 +518,221 @@ body {
   border: none;
   background: transparent;
   color: var(--text-muted);
-  cursor: pointer;
   border-radius: 4px;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-/* 收藏按钮悬停态 */
-.fav-btn:hover {
-  color: var(--amber);               /* 琥珀色 */
-  background: var(--amber-dim);      /* 琥珀半透明背景 */
+/* 关闭按钮悬停 */
+.close-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
-/* 已收藏状态 */
-.fav-btn.favorited {
-  color: var(--amber);
-}
-
-/* 已收藏 SVG 图标填充 + 弹跳动画 */
-.fav-btn.favorited svg {
-  fill: var(--amber);
-  animation: heartBounce 0.3s ease;  /* 心形弹跳 */
-}
-
-/* 心形弹跳关键帧 */
-@keyframes heartBounce {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }    /* 放大到 130% */
-  100% { transform: scale(1); }
-}
-
-/* 结果摘要 */
-.result-snippet {
-  margin-top: 6px;
+/* 分析内容区域 */
+.summary-content {
   font-size: 12px;
+  line-height: 1.8;                   /* 大行高，提升可读性 */
   color: var(--text-secondary);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;            /* 最多 2 行 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  word-break: break-word;             /* 长单词断行 */
+  overflow-wrap: break-word;          /* 溢出断词 */
 }
 
-/* 结果元信息（来源 + 标签） */
-.result-meta {
+/* 分析内容中的 Markdown 标题 */
+.summary-content h1,
+.summary-content h2,
+.summary-content h3 {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 4px;
+}
+
+/* 分析内容中的列表 */
+.summary-content ul,
+.summary-content ol {
+  padding-left: 16px;
+  margin: 4px 0;
+}
+
+/* 分析内容中的列表项 */
+.summary-content li {
+  margin-bottom: 2px;
+}
+
+/* 分析内容中的加粗 */
+.summary-content strong {
+  color: var(--text-primary);
+}
+
+/* 分析内容中的链接 */
+.summary-content a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.summary-content a:hover {
+  text-decoration: underline;
+}
+
+/* AI 分析加载态 */
+.summary-loading {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
-  font-size: 11px;
   color: var(--text-muted);
-}
-
-/* 来源信息 */
-.result-source {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;          /* 溢出省略号 */
-  white-space: nowrap;              /* 单行显示 */
-}
-
-/* 分类标签（靛蓝半透明） */
-.result-tag {
-  padding: 1px 6px;
-  background: rgba(99, 102, 241, 0.15); /* 靛蓝半透明 */
-  color: var(--accent);
-  border-radius: 3px;
-  font-size: 10px;
-}
-
-/* ---- AI 分析摘要区 ---- */
-.summary-section {
-  border-top: 1px solid var(--border); /* 顶部分割线 */
-  background: var(--bg-card);
-  max-height: 240px;                    /* 最大高度调大至 240px，展示更多内容 */
-  overflow-y: auto;                     /* 超出滚动 */
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.summary-section::-webkit-scrollbar {
-  width: 4px;
-}
-
-.summary-section::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
-}
-
-/* 摘要头部（AI 标识 + 关闭按钮） */
-.summary-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px 6px;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--amber);                 /* 琥珀色标题 */
 }
 
-.summary-header span {
-  flex: 1;                             /* 占满空间，推关闭按钮到右侧 */
+.summary-loading .pulse {
+  width: 12px;                        /* 比搜索脉冲小一些 */
+  height: 12px;
 }
 
-/* 摘要内容区 */
-.summary-content {
-  padding: 0 16px 12px;
-  font-size: 12px;
-  line-height: 1.8;                       /* 加大行高，提升可读性 */
-  color: var(--text-secondary);
-  word-break: break-word;                 /* 长单词/URL 自动换行，防止溢出 */
-  overflow-wrap: break-word;              /* 兜底换行策略 */
-}
-
-/* 摘要内容中的 h2 标题 */
-.summary-content h2 {
-  font-size: 13px;
-  color: var(--text-primary);
-  margin-top: 10px;
-  margin-bottom: 4px;
-}
-
-/* 第一个 h2 无上边距 */
-.summary-content h2:first-child {
-  margin-top: 0;
-}
-
-/* 摘要内容中的列表 */
-.summary-content ul {
-  padding-left: 16px;                  /* 列表缩进 */
-}
-
-.summary-content li {
-  margin-bottom: 4px;
-}
-
-/* 摘要内容中的加粗文字 */
-.summary-content strong {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-/* ---- 底栏 ---- */
+/* ====================
+   底部操作栏
+   ==================== */
 .bottom-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;     /* 两端对齐 */
-  padding: 8px 16px;
+  padding: 8px 16px 12px;             /* 上 左右 下 */
   border-top: 1px solid var(--border);
   background: var(--bg-base);
-  min-height: 40px;
 }
 
-/* 底栏操作按钮（AI 分析） */
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 14px;
-  border: 1px solid var(--amber);       /* 琥珀边框 */
-  background: var(--amber-dim);         /* 琥珀半透明背景 */
-  color: var(--amber);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-/* 操作按钮悬停态：琥珀实色 */
-.action-btn:hover {
-  background: var(--amber);
-  color: #000;                           /* 黑色文字对比 */
-}
-
-/* 操作按钮禁用态 */
-.action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 结果计数文本 */
-.result-count {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-/* ---- 收藏夹卡片 ---- */
-.fav-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;                             /* 内容与删除按钮间距 */
-  transition: all 0.2s;
-}
-
-/* 收藏卡片悬停态 */
-.fav-card:hover {
-  border-color: var(--border-accent);
-}
-
-/* 收藏卡片内容区 */
-.fav-card-content {
-  flex: 1;
-  min-width: 0;                          /* 允许收缩，使省略号生效 */
-}
-
-/* 收藏卡片标题 */
-.fav-card-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;               /* 溢出省略号 */
-  white-space: nowrap;                   /* 单行显示 */
-}
-
-/* 收藏卡片摘要 */
-.fav-card-snippet {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 3px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;                /* 最多 1 行 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* 收藏卡片删除按钮 */
-.fav-remove-btn {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
+/* AI 分析按钮 */
+.analyze-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  gap: 6px;                           /* 图标与文字间距 */
+  width: 100%;                        /* 撑满宽度 */
+  padding: 8px 0;                     /* 上下内边距 */
+  border: 1px solid var(--border);
+  border-radius: var(--radius);       /* 8px 圆角 */
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-/* 删除按钮悬停态：红色 */
-.fav-remove-btn:hover {
-  color: #EF4444;
-  background: rgba(239, 68, 68, 0.1);   /* 红色半透明背景 */
+/* 分析按钮悬停态 */
+.analyze-btn:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+  background: var(--bg-elevated);
 }
 
-/* 收藏夹空状态 */
-.fav-empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-  font-size: 12px;
+/* 分析按钮禁用态 */
+.analyze-btn:disabled {
+  opacity: 0.4;                       /* 低透明度 */
+  cursor: not-allowed;                /* 禁止点击光标 */
 }
 
-/* 空状态图标降低透明度 */
-.fav-empty svg {
-  opacity: 0.3;
-  margin-bottom: 10px;
-}
-
-/* ---- AI 分析中指示器 ---- */
-.analyzing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  font-size: 11px;
+/* 分析按钮分析中态（由 JS 添加 analyzing class） */
+.analyze-btn.analyzing {
+  border-color: var(--amber);
   color: var(--amber);
 }
 
-/* 分析中跳动圆点 */
-.analyzing-dots span {
-  display: inline-block;
-  width: 4px;
-  height: 4px;
-  background: var(--amber);
-  border-radius: 50%;                   /* 圆形 */
-  animation: dotPulse 1.4s infinite;    /* 循环脉冲 */
-  margin-right: 3px;
-}
-
-/* 第 2、3 个圆点延迟动画 */
-.analyzing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.analyzing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-/* 圆点脉冲关键帧 */
-@keyframes dotPulse {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1.2); }  /* 120% 放大 */
-}
-
-/* ---- 错误状态 ---- */
+/* ====================
+   错误状态
+   ==================== */
 .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
   text-align: center;
-  padding: 30px 20px;
-}
-
-.error-state p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 12px;
 }
 
 /* 重试按钮 */
-.error-state .retry-btn {
-  margin-top: 10px;
+.retry-btn {
+  margin-top: 8px;
   padding: 6px 16px;
   border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text-primary);
   border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
-  font-family: inherit;
   transition: all 0.2s;
 }
 
-/* 重试按钮悬停态 */
-.error-state .retry-btn:hover {
-  border-color: var(--accent);
+.retry-btn:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+/* ====================
+   骨架屏（搜索中占位）
+   ==================== */
+.skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 8px;
+  animation: shimmer 1.5s infinite;   /* 闪烁动画 */
+}
+
+/* 骨架条 */
+.skeleton-card .bar {
+  height: 10px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+/* 骨架条宽度变化 */
+.skeleton-card .bar:last-child {
+  width: 60%;
+  margin-bottom: 0;
+}
+
+/* 骨架屏闪烁关键帧 */
+@keyframes shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* ====================
+   滚动条美化
+   ==================== */
+::-webkit-scrollbar {
+  width: 4px;                         /* 细滚动条 */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;            /* 透明轨道 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);          /* 滚动条颜色 */
+  border-radius: 2px;                 /* 圆角 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);      /* 悬停变亮 */
+}
+
+/* ====================
+   搜索结果进入动画
+   ==================== */
+.result-card {
+  animation: fadeInUp 0.3s ease-out;  /* 淡入上移动画 */
+}
+
+/* 淡入上移关键帧 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);       /* 从下方 8px 处开始 */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);         /* 移到原位 */
+  }
 }
