@@ -89,10 +89,20 @@ export async function POST(request: NextRequest) {
     // 构建搜索查询词：默认使用用户原始查询
     let searchQuery = query;
     // 根据语言获取分类关键词
+    const lang = (locale || 'en').split('-')[0];
     const keywords = getCategoryKeywords(locale || 'en');
+
+    // 英文模式下的语言优化策略：
+    // 1. 如果用户输入的是中文但 locale 为英文，提示搜索引擎优先返回英文源
+    // 2. 添加英文语境引导词，让搜索引擎倾向于返回英文内容
+    if (lang === 'en') {
+      // 拼接语言引导词，帮助搜索引擎理解期望结果语言
+      searchQuery = `${query} in English`;
+    }
+
     // 如果指定了分类且非"全部"，则追加分类关键词增强搜索精确度
     if (category && category !== 'all' && keywords[category]) {
-      searchQuery = `${query} ${keywords[category]}`;
+      searchQuery = `${searchQuery} ${keywords[category]}`;
     }
 
     // 调用 SDK 高级搜索接口
