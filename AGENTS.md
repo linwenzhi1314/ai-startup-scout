@@ -70,6 +70,12 @@ AI Startup Scout - Chrome 浏览器扩展，用于搜索 AI 软件创业项目�
 - **重大更新**（整体重构）：major +1（1.x → 2.0.0）
 - 每次代码变更必须同步更新 manifest.json 中的 version 字段并重新打包 ZIP
 
+### 版本备份规范
+- 每次更新版本后，将当前 ZIP 备份到 `public/archive/ai-startup-scout-{version}.zip`
+- 主下载包 `public/ai-startup-scout.zip` 始终是最新版本
+- 备份命令：`cp public/ai-startup-scout.zip public/archive/ai-startup-scout-{version}.zip`
+- git 提交历史作为代码级备份，可随时回溯任意版本
+
 ## Chrome 扩展开发
 - 扩展使用 Manifest V3，文件位于 `public/extension/`
 - 扩展通过后端 API 获取数据，不在扩展端暴露 API 密钥
