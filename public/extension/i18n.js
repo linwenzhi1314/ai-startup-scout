@@ -181,6 +181,14 @@ function toggleLocale() {
   localStorage.setItem('aiScoutLocale', currentLocale);
   // 应用翻译到所有 DOM 元素
   applyLocale();
+  // 如果有搜索关键词，自动重新搜索以获取对应语言的结果
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput && searchInput.value.trim()) {
+    // 触发搜索（popup.js 中的 search 函数会读取最新的 currentLocale）
+    if (typeof search === 'function') {
+      search(searchInput.value.trim());
+    }
+  }
 }
 
 /**
@@ -215,9 +223,12 @@ function applyLocale() {
   // 更新 HTML 根元素的 lang 属性
   document.documentElement.lang = currentLocale === 'zh' ? 'zh-CN' : 'en';
 
-  // 更新语言切换按钮的显示文本
-  const langBtn = document.getElementById('langToggle');
-  if (langBtn) langBtn.textContent = t('langToggleTitle');
+  // 更新语言切换按钮的显示文本（只更新 lang-label，不清掉 SVG 图标）
+  const langLabel = document.querySelector('.lang-label');
+  if (langLabel) langLabel.textContent = currentLocale === 'zh' ? 'EN' : '中文';
+
+  // 更新语言切换按钮的 title 提示
+  if (langBtn) langBtn.title = currentLocale === 'zh' ? 'Switch to English' : '切换到中文';
 
   // 如果当前在收藏夹视图，重新渲染以应用翻译
   if (currentView === 'favorites') {

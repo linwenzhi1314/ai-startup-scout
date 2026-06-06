@@ -18,11 +18,11 @@ export async function GET() {
   const domain = process.env.COZE_PROJECT_DOMAIN_DEFAULT || '';
 
   // 读取扩展版本号：从 manifest.json 动态获取
-  let extensionVersion = '1.1.5'; // 默认回退值
+  let extensionVersion = '1.1.6'; // 默认回退值
   try {
     // 使用动态 import 读取 manifest.json 中的 version 字段
     const manifest = await import('../../../../public/extension/manifest.json');
-    extensionVersion = manifest.default?.version || manifest.version || '1.1.5';
+    extensionVersion = manifest.default?.version || manifest.version || '1.1.6';
   } catch {
     // 读取失败时使用默认版本号
   }
