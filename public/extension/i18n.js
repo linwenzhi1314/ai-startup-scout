@@ -228,10 +228,11 @@ function applyLocale() {
   if (langLabel) langLabel.textContent = currentLocale === 'zh' ? 'EN' : '中文';
 
   // 更新语言切换按钮的 title 提示
-  if (langBtn) langBtn.title = currentLocale === 'zh' ? 'Switch to English' : '切换到中文';
+  const langToggleBtn = document.getElementById('langToggle');
+  if (langToggleBtn) langToggleBtn.title = currentLocale === 'zh' ? 'Switch to English' : '切换到中文';
 
-  // 如果当前在收藏夹视图，重新渲染以应用翻译
-  if (currentView === 'favorites') {
+  // 如果当前在收藏夹视图，重新渲染以应用翻译（popup.js 加载后 currentView 才有定义）
+  if (typeof currentView !== 'undefined' && currentView === 'favorites' && typeof renderFavorites === 'function') {
     renderFavorites();
   }
 }
