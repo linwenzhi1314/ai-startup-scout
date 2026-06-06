@@ -105,6 +105,10 @@ export async function POST(request: NextRequest) {
     const { query, results } = body;
     // 提取语言标识，默认英文
     locale = body.locale || 'en';
+    // 智能语言检测保底：如果 locale 不是中文，但搜索词包含中文字符，自动切换为中文输出
+    if (!locale.startsWith('zh') && query && /[\u4e00-\u9fff]/.test(query)) {
+      locale = 'zh';
+    }
     // 获取当前语言对应的提示词和错误消息
     const { prompt, errors } = getMessages(locale);
 

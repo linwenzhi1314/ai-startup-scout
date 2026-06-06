@@ -428,7 +428,7 @@ body {
 .summary-section {
   border-top: 1px solid var(--border); /* 顶部分割线 */
   background: var(--bg-card);
-  max-height: 200px;                    /* 最大高度 200px */
+  max-height: 240px;                    /* 最大高度调大至 240px，展示更多内容 */
   overflow-y: auto;                     /* 超出滚动 */
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -462,8 +462,10 @@ body {
 .summary-content {
   padding: 0 16px 12px;
   font-size: 12px;
-  line-height: 1.7;
+  line-height: 1.8;                       /* 加大行高，提升可读性 */
   color: var(--text-secondary);
+  word-break: break-word;                 /* 长单词/URL 自动换行，防止溢出 */
+  overflow-wrap: break-word;              /* 兜底换行策略 */
 }
 
 /* 摘要内容中的 h2 标题 */

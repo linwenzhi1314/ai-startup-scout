@@ -65,6 +65,10 @@ export async function POST(request: NextRequest) {
     const { query, category, count, locale } = body;
     // 判断是否为中文语言环境
     isZh = locale?.startsWith('zh');
+    // 智能语言检测保底：如果 locale 不是中文，但搜索词包含中文字符，自动切换为中文环境
+    if (!isZh && query && /[\u4e00-\u9fff]/.test(query)) {
+      isZh = true;
+    }
 
     // 校验：必须提供搜索关键词
     if (!query || typeof query !== 'string') {
