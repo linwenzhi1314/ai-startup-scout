@@ -1,0 +1,418 @@
+"use strict";
+(function () {
+    'use strict';
+    const CONSOLE_LEVELS = [
+        'log',
+        'warn',
+        'error',
+        'info',
+        'debug',
+    ];
+    const PREVIEW_CONSOLE_MESSAGE_TYPE = 'PREVIEW_CONSOLE';
+    const CONSOLE_BRIDGE_LOADED_MESSAGE_TYPE = 'CONSOLE_BRIDGE_LOADED';
+    // 允许的父窗口 origins
+    const ALLOWED_ORIGINS = [
+        'https://code.bots-boe.bytedance.net',
+        'https://code.coze.cn',
+        'https://coze.cn',
+    ];
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+        info: console.info,
+        debug: console.debug,
+    };
+    /**
+     * 检测是否是已知的危险对象（window、document、DOM 节点等）
+     * @returns 危险对象的类型名称，如果不是危险对象则返回 null
+     */
+    function isDangerousObject(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return null;
+        }
+        // window 对象
+        if (typeof window !== 'undefined' && obj === window) {
+            return 'Window';
+        }
+        // document 对象
+        if (typeof document !== 'undefined' && obj === document) {
+            return 'Document';
+        }
+        // DOM 节点
+        if (typeof Node !== 'undefined' && obj instanceof Node) {
+            if (obj instanceof Element) {
+                return `HTMLElement<${obj.tagName.toLowerCase()}>`;
+            }
+            return 'Node';
+        }
+        // DOM 节点列表
+        if (typeof NodeList !== 'undefined' && obj instanceof NodeList) {
+            return `NodeList(${obj.length})`;
+        }
+        if (typeof HTMLCollection !== 'undefined' &&
+            obj instanceof HTMLCollection) {
+            return `HTMLCollection(${obj.length})`;
+        }
+        return null;
+    }
+    /**
+     * 安全的对象序列化
+     *
+     * 功能：
+     * - 检测并拒绝危险对象（window、document、DOM 节点）
+     * - 限制深度（默认 10 层，防止深层嵌套）
+     * - 限制数组长度（100）和对象属性数量（100，防止超大对象）
+     * - 检测循环引用并标记为 [Circular]
+     * - 支持 Date 对象
+     *
+     * @param obj 要序列化的对象
+     * @param maxDepth 最大深度，默认 10
+     * @returns JSON 字符串
+     *
+     * @example
+     * ```ts
+     * // 普通对象
+     * safeSerializeObject({ name: 'John', age: 30 })
+     * // → '{\n  "name": "John",\n  "age": 30\n}'
+     *
+     * // 循环引用
+     * const obj = { name: 'test' };
+     * obj.self = obj;
+     * safeSerializeObject(obj)
+     * // → '{\n  "name": "test",\n  "self": "[Circular]"\n}'
+     *
+     * // 危险对象
+     * safeSerializeObject(window)
+     * // → '[Window]'
+     * ```
+     */
+    function safeSerializeObject(obj, maxDepth = 10) {
+        // 提前检测危险对象
+        const dangerousType = isDangerousObject(obj);
+        if (dangerousType) {
+            return `[${dangerousType}]`;
+        }
+        // 使用 WeakSet 跟踪已访问的对象（防止循环引用）
+        const seen = new WeakSet();
+        /**
+         * 递归遍历对象树
+         * @param value 当前值
+         * @param depth 当前深度
+         */
+        function traverse(value, depth) {
+            // 1. 深度限制
+            if (depth > maxDepth) {
+                return '[Max depth reached]';
+            }
+            // 2. null 和 undefined 直接返回
+            if (value === null || value === undefined) {
+                return value;
+            }
+            // 3. 非对象类型直接返回
+            if (typeof value !== 'object') {
+                return value;
+            }
+            // 4. 检测危险对象
+            const dangerous = isDangerousObject(value);
+            if (dangerous) {
+                return `[${dangerous}]`;
+            }
+            // 5. Date 对象特殊处理（让 JSON.stringify 自动转为 ISO 字符串）
+            if (value instanceof Date) {
+                return value;
+            }
+            // 6. 检测循环引用
+            if (seen.has(value)) {
+                return '[Circular]';
+            }
+            seen.add(value);
+            // 7. 数组处理
+            if (Array.isArray(value)) {
+                if (value.length > 100) {
+                    return `[Array(${value.length}) - too large]`;
+                }
+                return value.map(item => traverse(item, depth + 1));
+            }
+            // 8. 对象处理
+            const result = {};
+            const valueRecord = value;
+            let count = 0;
+            for (const key in valueRecord) {
+                if (Object.prototype.hasOwnProperty.call(valueRecord, key)) {
+                    count++;
+                    if (count > 100) {
+                        result['...'] = `[${count - 100}+ more properties]`;
+                        break;
+                    }
+                    result[key] = traverse(valueRecord[key], depth + 1);
+                }
+            }
+            return result;
+        }
+        try {
+            const result = traverse(obj, 0);
+            return JSON.stringify(result, null, 2);
+        }
+        catch (error) {
+            originalConsole.error('[Console Bridge] safeSerializeObject error:', error);
+            return '[Serialization Object failed]';
+        }
+    }
+    /**
+     * 获取对象的构造函数名称和预览信息（通用方法）
+     * @param obj 要检测的对象
+     * @returns 类型信息对象，如果无法识别则返回 null
+     */
+    function getObjectTypeInfo(obj) {
+        try {
+            if (!obj || typeof obj !== 'object') {
+                return null;
+            }
+            const objRecord = obj;
+            // 安全获取构造函数名
+            let constructorName;
+            try {
+                constructorName = objRecord.constructor?.name;
+            }
+            catch (e) {
+                // constructor 访问可能抛出异常
+                return null;
+            }
+            if (!constructorName ||
+                typeof constructorName !== 'string' ||
+                constructorName === 'Object' ||
+                constructorName === 'Array') {
+                return null;
+            }
+            // 根据构造函数名生成预览
+            let preview = constructorName;
+            if (typeof objRecord.size === 'number') {
+                preview = `${constructorName}(${objRecord.size})`;
+            }
+            else if (typeof objRecord.length === 'number' &&
+                objRecord.length !== undefined) {
+                preview = `${constructorName}(${objRecord.length})`;
+            }
+            else if (typeof objRecord.byteLength === 'number') {
+                preview = `${constructorName}(${objRecord.byteLength})`;
+            }
+            return {
+                typeName: constructorName,
+                preview,
+            };
+        }
+        catch (e) {
+            return null;
+        }
+    }
+    /**
+     * 序列化参数（处理对象、数组等复杂类型）
+     */
+    function serializeArgs(args) {
+        return args.map(arg => {
+            try {
+                const type = typeof arg;
+                if (arg === null) {
+                    return { type: 'null', value: null };
+                }
+                if (arg === undefined) {
+                    return { type: 'undefined', value: undefined };
+                }
+                if (type === 'string' || type === 'number' || type === 'boolean') {
+                    return { type, value: arg };
+                }
+                if (type === 'symbol') {
+                    const str = arg.toString();
+                    return {
+                        type: 'symbol',
+                        value: str,
+                        preview: str,
+                    };
+                }
+                if (type === 'bigint') {
+                    const str = arg.toString();
+                    return {
+                        type: 'bigint',
+                        value: str,
+                        preview: `${str}n`,
+                    };
+                }
+                if (type === 'function') {
+                    return { type: 'function', value: arg.toString() };
+                }
+                if (type === 'object') {
+                    if (arg instanceof Date) {
+                        return {
+                            type: 'date',
+                            value: arg.toISOString(),
+                            preview: arg.toString(),
+                        };
+                    }
+                    if (arg instanceof RegExp) {
+                        return {
+                            type: 'regexp',
+                            value: arg.source,
+                            flags: arg.flags,
+                            preview: arg.toString(),
+                        };
+                    }
+                    // 特殊处理 Error 对象（需要提取 stack 等详细信息）
+                    if (arg instanceof Error) {
+                        return {
+                            type: 'error',
+                            value: {
+                                name: arg.name,
+                                message: arg.message,
+                                stack: arg.stack,
+                            },
+                            preview: arg.stack || `${arg.name}: ${arg.message}`,
+                        };
+                    }
+                    // 通用对象类型检测（Map, Set, Promise, TypedArray, Blob, File 等）
+                    const objectTypeInfo = getObjectTypeInfo(arg);
+                    if (objectTypeInfo) {
+                        return {
+                            type: objectTypeInfo.typeName,
+                            value: null,
+                            preview: objectTypeInfo.preview,
+                        };
+                    }
+                    try {
+                        // 使用安全的序列化方法（带深度限制、危险对象检测等）
+                        const serialized = safeSerializeObject(arg, 10);
+                        return {
+                            type: Array.isArray(arg) ? 'array' : 'object',
+                            value: serialized,
+                            preview: serialized.length > 100
+                                ? `${serialized.substring(0, 100)}...`
+                                : serialized,
+                        };
+                    }
+                    catch (e) {
+                        // 循环引用或其他错误
+                        return {
+                            type: 'object',
+                            value: Object.prototype.toString.call(arg),
+                            error: 'Cannot serialize (circular reference or too large)',
+                        };
+                    }
+                }
+            }
+            catch (e) {
+                originalConsole.error('[Console Bridge] serializeArgs error:', e);
+                return { type: 'unknown', value: '[Serialization failed]' };
+            }
+            return { type: 'unknown', value: String(arg) };
+        });
+    }
+    /**
+     * 获取并验证父窗口的 origin
+     * @returns 验证后的 origin，如果无法验证则返回 null
+     */
+    function isAllowedOrigin(origin) {
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            return true;
+        }
+        try {
+            const originUrl = new URL(origin);
+            if (!originUrl.hostname.startsWith('www.')) {
+                return false;
+            }
+            originUrl.hostname = originUrl.hostname.slice(4);
+            return ALLOWED_ORIGINS.includes(originUrl.origin);
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    function getParentOrigin() {
+        if (document.referrer) {
+            try {
+                const referrerUrl = new URL(document.referrer);
+                const referrerOrigin = referrerUrl.origin;
+                if (isAllowedOrigin(referrerOrigin)) {
+                    return referrerOrigin;
+                }
+            }
+            catch (e) {
+                // 无法解析 referrer（格式非法），记录警告后继续尝试其他方式
+                originalConsole.warn('[Console Bridge] Failed to parse document.referrer:', document.referrer, e);
+            }
+        }
+        if (window.location.ancestorOrigins &&
+            window.location.ancestorOrigins.length > 0) {
+            const ancestorOrigin = window.location.ancestorOrigins[0];
+            if (isAllowedOrigin(ancestorOrigin)) {
+                return ancestorOrigin;
+            }
+        }
+        // 3. 无法获取或验证失败，返回 null
+        return null;
+    }
+    const parentOrigin = getParentOrigin();
+    function postMessageToParent(type, payload) {
+        if (!window.parent) {
+            return;
+        }
+        // 如果无法获取有效的父窗口 origin，则不发送消息（安全考虑）
+        if (!parentOrigin) {
+            originalConsole.warn('[Console Bridge] Cannot send message: parent origin not allowed or not detected');
+            return;
+        }
+        try {
+            window.parent.postMessage({ type, payload }, parentOrigin);
+        }
+        catch (e) {
+            // 静默失败，避免影响原始代码执行
+            originalConsole.error('[Console Bridge] Failed to send message:', e);
+        }
+    }
+    function send(level, args) {
+        postMessageToParent(PREVIEW_CONSOLE_MESSAGE_TYPE, {
+            level,
+            args: serializeArgs(args),
+            timestamp: Date.now(),
+            url: window.location.href,
+        });
+    }
+    CONSOLE_LEVELS.forEach(level => {
+        console[level] = function (...args) {
+            send(level, args);
+            originalConsole[level].apply(console, args);
+        };
+    });
+    /**
+     * 捕获全局错误
+     */
+    window.addEventListener('error', function (event) {
+        // 如果有 error 对象，直接使用它（包含完整堆栈）
+        if (event.error instanceof Error) {
+            send('error', [event.error]);
+        }
+        else {
+            // 否则使用位置信息
+            send('error', [
+                event.message,
+                `at ${event.filename}:${event.lineno}:${event.colno}`,
+            ]);
+        }
+    });
+    /**
+     * 捕获未处理的 Promise 拒绝
+     */
+    window.addEventListener('unhandledrejection', function (event) {
+        const { reason } = event;
+        if (reason instanceof Error) {
+            // 如果是 Error 对象，直接发送（会保留完整堆栈）
+            send('error', ['Uncaught (in promise)', reason]);
+        }
+        else {
+            // 否则转换为字符串
+            send('error', ['Uncaught (in promise)', String(reason)]);
+        }
+    });
+    // 通知父窗口：Console Bridge 已加载
+    postMessageToParent(CONSOLE_BRIDGE_LOADED_MESSAGE_TYPE);
+})();
+//# sourceMappingURL=index.js.map
