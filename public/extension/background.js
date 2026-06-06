@@ -10,6 +10,13 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('AI Startup Scout installed');
 });
 
+// Keep-alive: ping backend every 4 minutes to prevent sandbox from sleeping
+setInterval(() => {
+  fetch(`${DEFAULT_API_BASE}/api/config`)
+    .then(() => console.log('Keep-alive ping sent'))
+    .catch(() => {});
+}, 4 * 60 * 1000);
+
 // Handle messages from popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_API_BASE') {
