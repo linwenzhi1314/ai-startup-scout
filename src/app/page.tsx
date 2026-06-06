@@ -1,30 +1,60 @@
+/**
+ * @file Landing Page（首页）
+ * @description AI Startup Scout 产品的落地页，包含：
+ *              - 动效背景（渐变光晕动画）
+ *              - 导航栏（Logo + 功能锚点 + 安装按钮）
+ *              - Hero 区域（主标题 + 产品预览弹窗 Mockup）
+ *              - 核心功能展示（智能搜索 / AI 分析 / 收藏追踪）
+ *              - 使用方式指引（三步安装流程）
+ *              - 页脚
+ * @note 使用 'use client' 因为依赖 useEffect 获取运行时域名
+ */
+
 'use client';
 
+// 导入 React Hooks：useState 管理域名状态，useEffect 在客户端挂载后获取域名
 import { useState, useEffect } from 'react';
 
+/**
+ * 首页组件
+ * 整体采用暗色主题（深空灰 #0F1117 基底），与扩展弹窗保持一致的视觉风格
+ */
 export default function Home() {
+  // 后端域名状态，用于构造下载链接
   const [domain, setDomain] = useState('');
 
+  /**
+   * useEffect: 在客户端挂载后获取后端域名
+   * 优先从 Next.js 公开环境变量读取，回退到当前页面 origin
+   */
   useEffect(() => {
     const d = process.env.NEXT_PUBLIC_COZE_PROJECT_DOMAIN_DEFAULT || window.location.origin || '';
     setDomain(d);
-  }, []);
+  }, []); // 空依赖数组，仅在挂载时执行一次
 
   return (
+    // 最外层容器：全屏暗色背景，白色文字，禁止水平滚动
     <div className="min-h-screen bg-[#0F1117] text-white overflow-x-hidden">
-      {/* Animated background */}
+
+      {/* ===== 动效背景层 ===== */}
+      {/* 使用 fixed 定位覆盖全屏，pointer-events-none 不阻挡交互 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* 靛蓝光晕 - 左上角，脉冲动画 */}
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
+        {/* 琥珀光晕 - 右下角，4 秒周期 */}
         <div
           className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-amber-500/8 blur-[100px]"
           style={{ animationDuration: '4s' }}
         />
+        {/* 靛蓝光晕 - 中央，脉冲动画 */}
         <div className="absolute top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-indigo-500/5 blur-[80px] animate-pulse" />
       </div>
 
-      {/* Navigation */}
+      {/* ===== 导航栏 ===== */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5">
+        {/* Logo + 品牌名称 */}
         <div className="flex items-center gap-3">
+          {/* Logo 图标：靛蓝渐变圆角方块 + 白色层叠图形 */}
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9" />
@@ -32,11 +62,15 @@ export default function Home() {
               <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
+          {/* 品牌名称 */}
           <span className="text-lg font-semibold tracking-tight">AI Startup Scout</span>
         </div>
+        {/* 右侧导航链接 + 安装按钮 */}
         <div className="flex items-center gap-4">
+          {/* 功能锚点链接（桌面端可见） */}
           <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">功能</a>
           <a href="#how-it-works" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">使用方式</a>
+          {/* 安装扩展按钮：链接到下载 API */}
           <a
             href={domain ? `${domain}/api/download` : '#'}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
@@ -46,34 +80,41 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* ===== Hero 区域 ===== */}
       <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+        {/* 顶部标签：Chrome 扩展标识 */}
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
           <span className="text-xs text-indigo-300">Chrome 扩展</span>
         </div>
 
+        {/* 主标题：发现下一个 AI 独角兽 */}
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl leading-tight">
           发现下一个
           <br />
+          {/* 渐变高亮文字：靛蓝 -> 靛蓝浅 -> 琥珀 */}
           <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-amber-400 bg-clip-text text-transparent">
             AI 独角兽
           </span>
         </h1>
 
+        {/* 副标题描述 */}
         <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed">
           智能搜索 AI 软件创业项目，一键获取市场洞察与投资分析。
           <br className="hidden md:block" />
           你的 AI 创业雷达，始终在线。
         </p>
 
+        {/* CTA 按钮组 */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
+          {/* 主按钮：开始使用（锚点到使用方式区） */}
           <a
             href="#how-it-works"
             className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
           >
             开始使用
           </a>
+          {/* 次按钮：了解功能（锚点到功能区） */}
           <a
             href="#features"
             className="px-8 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-medium rounded-xl transition-all text-base"
@@ -82,12 +123,14 @@ export default function Home() {
           </a>
         </div>
 
-        {/* Popup Preview */}
+        {/* ===== 弹窗预览 Mockup ===== */}
+        {/* 模拟扩展弹窗的外观，给用户直观的产品印象 */}
         <div className="mt-16 w-full max-w-sm">
           <div className="bg-[#1A1D27] border border-[#2D3348] rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
-            {/* Mini header */}
+            {/* 模拟弹窗顶栏 */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#2D3348]">
               <div className="flex items-center gap-2">
+                {/* 小 Logo */}
                 <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                     <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" opacity="0.9" />
@@ -95,11 +138,12 @@ export default function Home() {
                 </div>
                 <span className="text-xs font-semibold text-slate-200">AI Startup Scout</span>
               </div>
+              {/* 收藏图标 */}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            {/* Search bar mockup */}
+            {/* 模拟搜索栏 */}
             <div className="px-4 pt-3 pb-2">
               <div className="flex items-center gap-2 bg-[#232736] border border-[#2D3348] rounded-lg px-3 py-2">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -108,6 +152,7 @@ export default function Home() {
                 </svg>
                 <span className="text-xs text-slate-500">AI Agent 创业项目</span>
               </div>
+              {/* 模拟分类标签 */}
               <div className="flex gap-1.5 mt-2">
                 {['全部', '融资', '产品', '开源', '模型'].map((tab, i) => (
                   <span
@@ -119,7 +164,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            {/* Mock results */}
+            {/* 模拟搜索结果卡片 */}
             <div className="px-4 pb-3 space-y-2">
               {[
                 { name: 'Cognosys AI', desc: 'AI Agent 自动化平台，完成复杂工作流', tag: '融资' },
@@ -135,7 +180,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            {/* AI summary bar */}
+            {/* 模拟 AI 分析底栏 */}
             <div className="px-4 py-2 border-t border-[#2D3348] bg-amber-500/5">
               <div className="flex items-center gap-1.5">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -148,17 +193,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* ===== 核心功能区 ===== */}
       <section id="features" className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
+          {/* 区域标题 */}
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">核心功能</h2>
             <p className="mt-4 text-slate-400 text-lg">专为 AI 创业者打造的搜索工具</p>
           </div>
 
+          {/* 功能卡片网格：3 列布局 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
+                // 搜索图标
                 icon: (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" />
@@ -169,6 +217,7 @@ export default function Home() {
                 desc: '输入关键词即可搜索全球 AI 创业项目，支持按融资、产品、开源、模型等分类筛选。',
               },
               {
+                // AI 分析图标
                 icon: (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
@@ -179,6 +228,7 @@ export default function Home() {
                 desc: '一键生成市场洞察报告，重点推荐项目，投资建议，AI 为你解读行业趋势。',
               },
               {
+                // 收藏图标
                 icon: (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -188,14 +238,18 @@ export default function Home() {
                 desc: '一键收藏感兴趣的项目，建立你的 AI 创业项目关注列表，随时回顾。',
               },
             ].map((feature) => (
+              // 单个功能卡片：hover 时上移 + 边框亮起
               <div
                 key={feature.title}
                 className="group bg-[#1A1D27] border border-[#2D3348] rounded-2xl p-8 hover:border-indigo-500/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5"
               >
+                {/* 图标容器 */}
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-5 group-hover:bg-indigo-500/20 transition-colors">
                   {feature.icon}
                 </div>
+                {/* 功能标题 */}
                 <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
+                {/* 功能描述 */}
                 <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
               </div>
             ))}
@@ -203,14 +257,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* ===== 使用方式区 ===== */}
       <section id="how-it-works" className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-4xl mx-auto">
+          {/* 区域标题 */}
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">使用方式</h2>
             <p className="mt-4 text-slate-400 text-lg">三步开始发现 AI 创业机会</p>
           </div>
 
+          {/* 步骤网格：3 列布局 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: '01', title: '安装扩展', desc: '从 Chrome Web Store 安装 AI Startup Scout 扩展到浏览器' },
@@ -218,20 +274,25 @@ export default function Home() {
               { step: '03', title: '获取洞察', desc: '使用 AI 分析功能获取市场洞察和投资建议' },
             ].map((item) => (
               <div key={item.step} className="text-center">
+                {/* 步骤编号徽章 */}
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white text-xl font-bold mb-5">
                   {item.step}
                 </div>
+                {/* 步骤标题 */}
                 <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                {/* 步骤描述 */}
                 <p className="text-slate-400 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
 
+          {/* 底部安装按钮 */}
           <div className="text-center mt-14">
             <a
               href={domain ? `${domain}/api/download` : '#'}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
             >
+              {/* 下载图标 */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7L12 12L22 7L12 2Z" />
                 <path d="M2 17L12 22L22 17" />
@@ -243,9 +304,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ===== 页脚 ===== */}
       <footer className="relative z-10 border-t border-[#2D3348] px-6 md:px-12 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Logo + 品牌名 */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -254,6 +316,7 @@ export default function Home() {
             </div>
             <span className="text-sm text-slate-400">AI Startup Scout</span>
           </div>
+          {/* 版权描述 */}
           <p className="text-xs text-slate-600">AI 驱动的创业项目搜索引擎</p>
         </div>
       </footer>
