@@ -24,6 +24,8 @@ const LOCALES = {
 
     // ---- 搜索区 ----
     searchPlaceholder: 'Search AI startups...',    // 搜索输入框占位文本
+    searching: 'Searching...',                     // 搜索中提示
+    searchBtn: 'Search',                           // 搜索按钮提示
     categoryAll: 'All',                            // 全部分类标签
     categoryFunding: 'Funding',                    // 融资分类标签
     categoryProduct: 'Product',                    // 产品分类标签
@@ -78,6 +80,8 @@ const LOCALES = {
 
     // ---- 搜索区 ----
     searchPlaceholder: '搜索 AI 创业项目...',
+    searching: '搜索中...',
+    searchBtn: '搜索',
     categoryAll: '全部',
     categoryFunding: '融资',
     categoryProduct: '产品',
