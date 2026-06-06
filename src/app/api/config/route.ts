@@ -5,6 +5,6 @@ export async function GET() {
 
   return NextResponse.json({
     apiBase: domain || '',
-    extensionVersion: '1.0.0',
+    extensionVersion: '1.1.0',
   });
 }

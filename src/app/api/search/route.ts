@@ -1,13 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SearchClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
+// Locale-aware category keywords
+const categoryKeywords: Record<string, Record<string, string>> = {
+  en: {
+    funding: 'AI startup funding investment',
+    product: 'AI software product launch',
+    opensource: 'AI open source project',
+    model: 'AI model release',
+  },
+  zh: {
+    funding: 'AI创业 融资 投资',
+    product: 'AI软件 产品发布',
+    opensource: 'AI开源项目',
+    model: 'AI模型发布',
+  },
+};
+
+// Default category keywords for unsupported locales (fallback to English)
+const defaultCategoryKeywords = categoryKeywords.en;
+
+function getCategoryKeywords(locale: string): Record<string, string> {
+  const lang = locale.split('-')[0]; // e.g. "zh-CN" -> "zh"
+  return categoryKeywords[lang] || defaultCategoryKeywords;
+}
+
 export async function POST(request: NextRequest) {
+  let isZh = false;
   try {
-    const { query, category, count } = await request.json();
+    const body = await request.json();
+    const { query, category, count, locale } = body;
+    isZh = locale?.startsWith('zh');
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
-        { error: '请提供搜索关键词' },
+        { error: isZh ? '请提供搜索关键词' : 'Please provide a search query' },
         { status: 400 },
       );
     }
@@ -16,18 +43,11 @@ export async function POST(request: NextRequest) {
     const config = new Config();
     const client = new SearchClient(config, customHeaders);
 
-    // Build search query with category context
+    // Build search query with locale-aware category context
     let searchQuery = query;
-    if (category && category !== 'all') {
-      const categoryMap: Record<string, string> = {
-        funding: 'AI startup funding investment',
-        product: 'AI software product launch',
-        opensource: 'AI open source project',
-        model: 'AI model release',
-      };
-      if (categoryMap[category]) {
-        searchQuery = `${query} ${categoryMap[category]}`;
-      }
+    const keywords = getCategoryKeywords(locale || 'en');
+    if (category && category !== 'all' && keywords[category]) {
+      searchQuery = `${query} ${keywords[category]}`;
     }
 
     const response = await client.advancedSearch(searchQuery, {
@@ -55,7 +75,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[Search API Error]', error);
     return NextResponse.json(
-      { error: '搜索失败，请稍后重试' },
+      { error: isZh ? '搜索失败，请稍后重试' : 'Search failed, please try again later' },
       { status: 500 },
     );
   }

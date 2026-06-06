@@ -1,411 +1,395 @@
-/**
- * AI Startup Scout - Popup Script
- * Chrome Extension for searching AI startup projects
- */
+/* ========================================
+   AI Startup Scout - Popup Logic (v1.1.0)
+   With i18n support: auto-detect locale
+   ======================================== */
 
-// Configuration - API base URL
-// Default: placeholder that will be resolved via config API
-// When publishing, update this to your actual deployed backend URL
-let API_BASE = 'https://PLACEHOLDER.update-before-publish.com';
-
-// Resolve API base from config endpoint
-async function getApiBase() {
-  // If already resolved to a real URL, return it
-  if (API_BASE && !API_BASE.includes('PLACEHOLDER')) {
-    return API_BASE;
-  }
-  // Try known backend domains
-  const candidates = [
-    'https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site',
-  ];
-  for (const url of candidates) {
-    try {
-      const response = await fetch(`${url}/api/config`, { signal: AbortSignal.timeout(3000) });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.apiBase) {
-          API_BASE = data.apiBase;
-          return API_BASE;
-        }
-      }
-    } catch {
-      // Try next candidate
-    }
-  }
-  return API_BASE;
-}
-
-// State
+// ---- State ----
+let currentView = 'search'; // 'search' | 'favorites'
 let currentCategory = 'all';
-let currentQuery = '';
 let searchResults = [];
 let favorites = [];
-let showFavorites = false;
+let summaryVisible = false;
+let summaryContent = '';
+let isSearching = false;
+let isAnalyzing = false;
+let API_BASE = '';
 
-// DOM Elements
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const emptyState = document.getElementById('emptyState');
-const loadingState = document.getElementById('loadingState');
-const resultsList = document.getElementById('resultsList');
-const favoritesList = document.getElementById('favoritesList');
-const resultsArea = document.getElementById('resultsArea');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const resultCount = document.getElementById('resultCount');
-const summarySection = document.getElementById('summarySection');
-const summaryContent = document.getElementById('summaryContent');
-const closeSummary = document.getElementById('closeSummary');
-const favToggle = document.getElementById('favToggle');
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  loadFavorites();
-  getApiBase();
-  bindEvents();
-});
-
-function bindEvents() {
-  // Search
-  searchBtn.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSearch();
-  });
-
-  // Category tabs
-  document.querySelectorAll('.tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelector('.tab.active').classList.remove('active');
-      tab.classList.add('active');
-      currentCategory = tab.dataset.category;
-      if (currentQuery) doSearch();
-    });
-  });
-
-  // Favorites toggle
-  favToggle.addEventListener('click', toggleFavorites);
-
-  // Analyze
-  analyzeBtn.addEventListener('click', doAnalyze);
-
-  // Close summary
-  closeSummary.addEventListener('click', () => {
-    summarySection.style.display = 'none';
-  });
-}
-
-// Search
-async function doSearch() {
-  const query = searchInput.value.trim();
-  if (!query) return;
-
-  currentQuery = query;
-  showFavorites = false;
-  favToggle.classList.remove('active');
-  favoritesList.style.display = 'none';
-
-  // Show loading
-  emptyState.style.display = 'none';
-  resultsList.style.display = 'none';
-  loadingState.style.display = 'flex';
-  summarySection.style.display = 'none';
-  analyzeBtn.style.display = 'none';
-
+// ---- Config ----
+async function loadConfig() {
   try {
-    const base = await getApiBase();
-    const response = await fetch(`${base}/api/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        category: currentCategory,
-        count: 10,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      searchResults = data.results || [];
-      renderResults(searchResults, data.summary);
-      analyzeBtn.style.display = 'flex';
-      resultCount.textContent = `${searchResults.length} 条结果`;
-    } else {
-      showError(data.error || '搜索失败');
+    const resp = await fetch('https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site/api/config');
+    if (resp.ok) {
+      const config = await resp.json();
+      API_BASE = config.apiBase;
     }
-  } catch (error) {
-    console.error('Search error:', error);
-    showError('网络错误，请检查连接');
-  } finally {
-    loadingState.style.display = 'none';
+  } catch (e) {
+    console.warn('Failed to load config, using fallback');
+  }
+  if (!API_BASE) {
+    API_BASE = 'https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site';
   }
 }
 
-function renderResults(results, summary) {
-  resultsList.innerHTML = '';
-  resultsList.style.display = 'block';
-  emptyState.style.display = 'none';
-
-  if (results.length === 0) {
-    resultsList.innerHTML = `
-      <div class="empty-state">
-        <p class="empty-title">没有找到相关结果</p>
-        <p class="empty-desc">换个关键词试试？</p>
-      </div>`;
-    return;
-  }
-
-  results.forEach((item, index) => {
-    const card = document.createElement('div');
-    card.className = 'result-card';
-    card.style.animationDelay = `${index * 0.05}s`;
-
-    const isFav = favorites.some((f) => f.id === item.id);
-
-    card.innerHTML = `
-      <div class="result-card-header">
-        <div class="result-title">${escapeHtml(item.title)}</div>
-        <button class="fav-btn ${isFav ? 'favorited' : ''}" data-id="${item.id}" title="收藏">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        </button>
-      </div>
-      <div class="result-snippet">${escapeHtml(item.snippet)}</div>
-      <div class="result-meta">
-        <span class="result-source">
-          ${item.logoUrl ? `<img src="${item.logoUrl}" width="12" height="12" style="border-radius:2px;" onerror="this.style.display='none'">` : ''}
-          ${escapeHtml(item.siteName || '')}
-        </span>
-        ${item.publishTime ? `<span>${item.publishTime.slice(0, 10)}</span>` : ''}
-      </div>
-    `;
-
-    // Click to open URL
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.fav-btn')) return;
-      if (item.url) {
-        chrome.tabs.create({ url: item.url });
-      }
-    });
-
-    // Favorite button
-    const favBtn = card.querySelector('.fav-btn');
-    favBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleFavorite(item, favBtn);
-    });
-
-    resultsList.appendChild(card);
-  });
-}
-
-// AI Analysis
-async function doAnalyze() {
-  if (!currentQuery || searchResults.length === 0) return;
-
-  summarySection.style.display = 'block';
-  summaryContent.innerHTML = `
-    <div class="analyzing-indicator">
-      <span>AI 正在分析中</span>
-      <div class="analyzing-dots">
-        <span></span><span></span><span></span>
-      </div>
-    </div>`;
-
-  analyzeBtn.disabled = true;
-
-  try {
-    const base = await getApiBase();
-    const response = await fetch(`${base}/api/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: currentQuery,
-        results: searchResults,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('分析请求失败');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let accumulated = '';
-
-    summaryContent.innerHTML = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const text = decoder.decode(value, { stream: true });
-      const lines = text.split('\n');
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          if (data === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.content) {
-              accumulated += parsed.content;
-              summaryContent.innerHTML = markdownToHtml(accumulated);
-              summarySection.scrollTop = summarySection.scrollHeight;
-            }
-            if (parsed.error) {
-              summaryContent.innerHTML = `<p style="color: #EF4444;">${parsed.error}</p>`;
-            }
-          } catch {
-            // Skip invalid JSON
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Analyze error:', error);
-    summaryContent.innerHTML =
-      '<p style="color: #EF4444;">分析失败，请稍后重试</p>';
-  } finally {
-    analyzeBtn.disabled = false;
-  }
-}
-
-// Simple markdown to HTML converter
-function markdownToHtml(md) {
-  return md
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-    .replace(/\n\n/g, '<br>')
-    .replace(/\n/g, '<br>');
-}
-
-// Favorites
+// ---- Favorites ----
 function loadFavorites() {
   try {
-    const stored = localStorage.getItem('ai_scout_favorites');
-    favorites = stored ? JSON.parse(stored) : [];
-  } catch {
+    const data = localStorage.getItem('aiScoutFavorites');
+    favorites = data ? JSON.parse(data) : [];
+  } catch (e) {
     favorites = [];
   }
 }
 
 function saveFavorites() {
-  try {
-    localStorage.setItem('ai_scout_favorites', JSON.stringify(favorites));
-  } catch {
-    // Storage full or unavailable
-  }
+  localStorage.setItem('aiScoutFavorites', JSON.stringify(favorites));
 }
 
-function toggleFavorite(item, btn) {
-  const index = favorites.findIndex((f) => f.id === item.id);
-  if (index >= 0) {
-    favorites.splice(index, 1);
-    btn.classList.remove('favorited');
-    btn.querySelector('svg').setAttribute('fill', 'none');
+function isFavorite(id) {
+  return favorites.some(f => f.id === id);
+}
+
+function toggleFavorite(result) {
+  const idx = favorites.findIndex(f => f.id === result.id);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
   } else {
-    favorites.push(item);
-    btn.classList.add('favorited');
-    btn.querySelector('svg').setAttribute('fill', 'currentColor');
+    favorites.push({ ...result, favoritedAt: Date.now() });
   }
   saveFavorites();
 }
 
-function toggleFavorites() {
-  showFavorites = !showFavorites;
-  favToggle.classList.toggle('active', showFavorites);
+// ---- Search ----
+async function search(query) {
+  if (isSearching || !query.trim()) return;
+  isSearching = true;
+  summaryVisible = false;
+  summaryContent = '';
 
-  if (showFavorites) {
-    resultsList.style.display = 'none';
-    emptyState.style.display = 'none';
-    loadingState.style.display = 'none';
-    summarySection.style.display = 'none';
-    analyzeBtn.style.display = 'none';
-    favoritesList.style.display = 'block';
+  const resultsContainer = document.getElementById('results');
+  const emptyState = document.getElementById('emptyState');
+  const loadingIndicator = document.getElementById('loading');
+  const resultCount = document.getElementById('resultCount');
+
+  emptyState.style.display = 'none';
+  loadingIndicator.style.display = 'flex';
+  resultsContainer.innerHTML = '';
+
+  try {
+    const categoryKeyword = getCategoryKeyword(currentCategory);
+    const fullQuery = `${categoryKeyword} ${query}`.trim();
+
+    const resp = await fetch(`${API_BASE}/api/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: fullQuery,
+        category: currentCategory,
+        count: 8,
+        locale: currentLocale
+      })
+    });
+
+    if (!resp.ok) throw new Error('Search failed');
+
+    const data = await resp.json();
+    searchResults = data.results || [];
+
+    if (searchResults.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+          </div>
+          <p data-i18n="noResults">${t('noResults')}</p>
+          <p class="no-results-desc" data-i18n="noResultsDesc">${t('noResultsDesc')}</p>
+        </div>`;
+      resultCount.textContent = '';
+    } else {
+      resultCount.textContent = t('resultCount').replace('{count}', searchResults.length);
+      searchResults.forEach((result, index) => {
+        const card = createResultCard(result, index);
+        resultsContainer.appendChild(card);
+      });
+    }
+  } catch (error) {
+    resultsContainer.innerHTML = `
+      <div class="error-state">
+        <p data-i18n="searchError">${t('searchError')}</p>
+        <button class="retry-btn" onclick="retrySearch()" data-i18n="retryBtn">${t('retryBtn')}</button>
+      </div>`;
+    resultCount.textContent = '';
+  } finally {
+    loadingIndicator.style.display = 'none';
+    isSearching = false;
+  }
+}
+
+function retrySearch() {
+  const query = document.getElementById('searchInput').value;
+  search(query);
+}
+
+function createResultCard(result, index) {
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.style.animationDelay = `${index * 0.05}s`;
+
+  const fav = isFavorite(result.id);
+  const domain = result.url ? new URL(result.url).hostname.replace('www.', '') : '';
+  const publishTime = result.publishTime
+    ? formatDate(result.publishTime)
+    : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-title-row">
+        <h3 class="card-title">${escapeHtml(result.title)}</h3>
+        <button class="fav-btn ${fav ? 'active' : ''}" data-id="${result.id}" title="${fav ? t('removeFromFav') : t('addToFav')}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${fav ? '#F59E0B' : 'none'}" stroke="${fav ? '#F59E0B' : '#64748b'}" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <p class="card-snippet">${escapeHtml(result.snippet || '')}</p>
+    <div class="card-footer">
+      <div class="card-meta">
+        ${result.siteName ? `<span class="card-source">${escapeHtml(result.siteName)}</span>` : ''}
+        ${publishTime ? `<span class="card-time">${publishTime}</span>` : ''}
+      </div>
+      <a class="card-link" href="${result.url}" target="_blank" rel="noopener" data-i18n-title="viewSource" title="${t('viewSource')}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+    </div>`;
+
+  // Fav button click
+  card.querySelector('.fav-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleFavorite(result);
+    const btn = card.querySelector('.fav-btn');
+    const isFav = isFavorite(result.id);
+    btn.classList.toggle('active');
+    btn.querySelector('svg').setAttribute('fill', isFav ? '#F59E0B' : 'none');
+    btn.querySelector('svg').setAttribute('stroke', isFav ? '#F59E0B' : '#64748b');
+    btn.title = isFav ? t('removeFromFav') : t('addToFav');
+  });
+
+  return card;
+}
+
+function formatDate(dateStr) {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / 86400000);
+    if (currentLocale === 'zh') {
+      if (days === 0) return '今天';
+      if (days === 1) return '昨天';
+      if (days < 7) return `${days}天前`;
+      if (days < 30) return `${Math.floor(days / 7)}周前`;
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    } else {
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 7) return `${days}d ago`;
+      if (days < 30) return `${Math.floor(days / 7)}w ago`;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  } catch {
+    return '';
+  }
+}
+
+// ---- AI Analysis ----
+async function analyzeResults() {
+  if (isAnalyzing || searchResults.length === 0) return;
+  isAnalyzing = true;
+  summaryVisible = true;
+
+  const summaryPanel = document.getElementById('summaryPanel');
+  const summaryContentEl = document.getElementById('summaryContent');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+
+  summaryPanel.style.display = 'block';
+  summaryContentEl.innerHTML = `<div class="summary-loading"><div class="pulse"></div><span>${currentLocale === 'zh' ? 'AI 正在分析...' : 'AI analyzing...'}</span></div>`;
+  analyzeBtn.disabled = true;
+
+  try {
+    const resp = await fetch(`${API_BASE}/api/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: document.getElementById('searchInput').value,
+        results: searchResults.map(r => ({
+          title: r.title,
+          snippet: r.snippet,
+          url: r.url
+        })),
+        locale: currentLocale
+      })
+    });
+
+    if (!resp.ok) throw new Error('Analyze failed');
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    summaryContent = '';
+
+    summaryContentEl.innerHTML = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.content) {
+              summaryContent += data.content;
+              summaryContentEl.innerHTML = renderMarkdown(summaryContent);
+              summaryContentEl.scrollTop = summaryContentEl.scrollHeight;
+            }
+          } catch (e) {
+            // skip invalid JSON
+          }
+        }
+      }
+    }
+  } catch (error) {
+    summaryContentEl.innerHTML = `<div class="error-state"><p>${t('analyzeError')}</p></div>`;
+  } finally {
+    isAnalyzing = false;
+    analyzeBtn.disabled = false;
+  }
+}
+
+function closeSummary() {
+  summaryVisible = false;
+  document.getElementById('summaryPanel').style.display = 'none';
+}
+
+// ---- Favorites View ----
+function renderFavorites() {
+  const resultsContainer = document.getElementById('results');
+  const emptyState = document.getElementById('emptyState');
+  const resultCount = document.getElementById('resultCount');
+
+  if (favorites.length === 0) {
+    resultsContainer.innerHTML = '';
+    emptyState.style.display = 'flex';
+    emptyState.querySelector('.empty-title').textContent = t('noFavorites');
+    emptyState.querySelector('.empty-desc').textContent = t('noFavoritesDesc');
+    resultCount.textContent = '';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  resultCount.textContent = t('resultCount').replace('{count}', favorites.length);
+  resultsContainer.innerHTML = '';
+
+  favorites.forEach((result, index) => {
+    const card = createResultCard(result, index);
+    resultsContainer.appendChild(card);
+  });
+}
+
+function toggleView() {
+  currentView = currentView === 'search' ? 'favorites' : 'search';
+  const favToggle = document.getElementById('favToggle');
+  const searchContainer = document.getElementById('searchContainer');
+  const emptyState = document.getElementById('emptyState');
+
+  if (currentView === 'favorites') {
+    favToggle.classList.add('active');
+    searchContainer.style.display = 'none';
     renderFavorites();
   } else {
-    favoritesList.style.display = 'none';
-    if (searchResults.length > 0) {
-      resultsList.style.display = 'block';
-      analyzeBtn.style.display = 'flex';
-    } else {
+    favToggle.classList.remove('active');
+    searchContainer.style.display = 'block';
+    if (searchResults.length === 0) {
       emptyState.style.display = 'flex';
+      emptyState.querySelector('.empty-title').textContent = t('emptyTitle');
+      emptyState.querySelector('.empty-desc').textContent = t('emptyDesc');
+      document.getElementById('resultCount').textContent = '';
     }
   }
 }
 
-function renderFavorites() {
-  favoritesList.innerHTML = '';
+// ---- Markdown Renderer (simple) ----
+function renderMarkdown(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/### (.+)/g, '<h4>$1</h4>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/# (.+)/g, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
 
-  if (favorites.length === 0) {
-    favoritesList.innerHTML = `
-      <div class="fav-empty">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-        </svg>
-        <p>暂无收藏项目</p>
-      </div>`;
-    return;
-  }
+// ---- Utility ----
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 
-  favorites.forEach((item) => {
-    const card = document.createElement('div');
-    card.className = 'fav-card';
-
-    card.innerHTML = `
-      <div class="fav-card-content">
-        <div class="fav-card-title">${escapeHtml(item.title)}</div>
-        <div class="fav-card-snippet">${escapeHtml(item.snippet)}</div>
-      </div>
-      <button class="fav-remove-btn" data-id="${item.id}" title="移除">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
-    `;
-
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.fav-remove-btn')) return;
-      if (item.url) {
-        chrome.tabs.create({ url: item.url });
-      }
-    });
-
-    card.querySelector('.fav-remove-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      const idx = favorites.findIndex((f) => f.id === item.id);
-      if (idx >= 0) {
-        favorites.splice(idx, 1);
-        saveFavorites();
-        renderFavorites();
-      }
-    });
-
-    favoritesList.appendChild(card);
+// ---- Category Selection ----
+function selectCategory(category) {
+  currentCategory = category;
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.category === category);
   });
 }
 
-function showError(message) {
-  resultsList.style.display = 'none';
-  loadingState.style.display = 'none';
-  emptyState.style.display = 'none';
+// ---- Init ----
+async function init() {
+  await loadConfig();
+  loadFavorites();
+  applyLocale();
 
-  const errDiv = document.createElement('div');
-  errDiv.className = 'error-state';
-  errDiv.innerHTML = `
-    <p>${escapeHtml(message)}</p>
-    <button class="retry-btn">重试</button>
-  `;
-  errDiv.querySelector('.retry-btn').addEventListener('click', doSearch);
-  resultsArea.appendChild(errDiv);
+  // Search input
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+
+  searchBtn.addEventListener('click', () => search(searchInput.value));
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') search(searchInput.value);
+  });
+
+  // Category tabs
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', () => selectCategory(tab.dataset.category));
+  });
+
+  // Analyze button
+  document.getElementById('analyzeBtn').addEventListener('click', analyzeResults);
+
+  // Close summary
+  document.getElementById('closeSummary').addEventListener('click', closeSummary);
+
+  // Favorite toggle
+  document.getElementById('favToggle').addEventListener('click', toggleView);
+
+  // Language toggle
+  document.getElementById('langToggle').addEventListener('click', toggleLocale);
+
+  // Focus search
+  searchInput.focus();
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+document.addEventListener('DOMContentLoaded', init);

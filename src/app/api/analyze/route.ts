@@ -1,13 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
+// Locale-aware system prompts
+const systemPrompts: Record<string, string> = {
+  en: `You are an investment analyst specializing in the AI startup sector. The user is searching for AI software startup projects, and you need to provide in-depth analysis based on the search results.
+
+Please output in the following structure (in English):
+
+## Market Insights
+Briefly summarize the market trends and opportunities in the current search direction.
+
+## Top Picks
+Select 3-5 most noteworthy AI startup projects from the search results, each including:
+- Project name
+- Core highlight (one sentence)
+- Recommendation reason (2-3 sentences)
+
+## Investment Advice
+Provide 2-3 investment or follow-up recommendations for this direction.
+
+Stay professional and objective, prioritize data-driven insights, avoid vague statements.`,
+  zh: `你是一位专注于AI创业领域的投资分析师。用户正在搜索AI软件创业项目，你需要基于搜索结果提供深度分析。
+
+请按以下结构输出（使用中文）：
+
+## 市场洞察
+简要总结当前搜索方向的市场趋势和机会。
+
+## 重点推荐项目
+从搜索结果中挑选3-5个最值得关注的AI创业项目，每个项目包含：
+- 项目名称
+- 核心亮点（一句话）
+- 推荐理由（2-3句话）
+
+## 投资建议
+给出针对该方向的2-3条投资或关注建议。
+
+保持专业客观，数据优先，避免空洞的表述。`,
+};
+
+const errorMessage: Record<string, { badRequest: string; streamError: string; serverError: string }> = {
+  en: {
+    badRequest: 'Please provide content for analysis',
+    streamError: 'Analysis generation interrupted',
+    serverError: 'Analysis failed, please try again later',
+  },
+  zh: {
+    badRequest: '请提供分析内容',
+    streamError: '分析生成中断',
+    serverError: '分析失败，请稍后重试',
+  },
+};
+
+function getMessages(locale: string) {
+  const lang = locale?.split('-')[0] || 'en';
+  return {
+    prompt: systemPrompts[lang] || systemPrompts.en,
+    errors: errorMessage[lang] || errorMessage.en,
+  };
+}
+
 export async function POST(request: NextRequest) {
+  let locale = 'en';
   try {
-    const { query, results } = await request.json();
+    const body = await request.json();
+    const { query, results } = body;
+    locale = body.locale || 'en';
+    const { prompt, errors } = getMessages(locale);
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
-        { error: '请提供分析内容' },
+        { error: errors.badRequest },
         { status: 400 },
       );
     }
@@ -25,30 +88,13 @@ export async function POST(request: NextRequest) {
       )
       .join('\n');
 
-    const systemPrompt = `你是一位专注于AI创业领域的投资分析师。用户正在搜索AI软件创业项目，你需要基于搜索结果提供深度分析。
-
-请按以下结构输出（使用中文）：
-
-## 市场洞察
-简要总结当前搜索方向的市场趋势和机会。
-
-## 重点推荐项目
-从搜索结果中挑选3-5个最值得关注的AI创业项目，每个项目包含：
-- 项目名称
-- 核心亮点（一句话）
-- 推荐理由（2-3句话）
-
-## 投资建议
-给出针对该方向的2-3条投资或关注建议。
-
-保持专业客观，数据优先，避免空洞的表述。`;
+    const userContent = locale?.startsWith('zh')
+      ? `搜索关键词：${query}\n\n搜索结果：\n${resultsContext || '暂无搜索结果'}`
+      : `Search query: ${query}\n\nSearch results:\n${resultsContext || 'No search results available'}`;
 
     const messages = [
-      { role: 'system' as const, content: systemPrompt },
-      {
-        role: 'user' as const,
-        content: `搜索关键词：${query}\n\n搜索结果：\n${resultsContext || '暂无搜索结果'}`,
-      },
+      { role: 'system' as const, content: prompt },
+      { role: 'user' as const, content: userContent },
     ];
 
     // Use streaming for real-time response
@@ -76,12 +122,17 @@ export async function POST(request: NextRequest) {
           controller.close();
         } catch (streamError) {
           console.error('[Analyze Stream Error]', streamError);
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: '分析生成中断' })}\n\n`,
-            ),
-          );
-          controller.close();
+          try {
+            const { errors: errs } = getMessages(locale);
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ error: errs.streamError })}\n\n`,
+              ),
+            );
+            controller.close();
+          } catch (_e) {
+            // Controller already closed, ignore
+          }
         }
       },
     });
@@ -95,8 +146,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Analyze API Error]', error);
+    const { errors } = getMessages(locale);
     return NextResponse.json(
-      { error: '分析失败，请稍后重试' },
+      { error: errors.serverError },
       { status: 500 },
     );
   }
