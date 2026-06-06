@@ -64,7 +64,13 @@ AI Startup Scout - Chrome 浏览器扩展，用于搜索 AI 软件创业项目�
 - 禁止隐式 `any` 和 `as any`
 - 函数参数、返回值、解构项、事件对象应有明确类型
 
-### Chrome 扩展开发
+### 版本号规范
+- **小改**（修 bug、改文案、调样式）：patch +1（1.0.1 → 1.0.2）
+- **大改**（新功能、架构调整）：minor +1（1.0.x → 1.1.0）
+- **重大更新**（整体重构）：major +1（1.x → 2.0.0）
+- 每次代码变更必须同步更新 manifest.json 中的 version 字段并重新打包 ZIP
+
+## Chrome 扩展开发
 - 扩展使用 Manifest V3，文件位于 `public/extension/`
 - 扩展通过后端 API 获取数据，不在扩展端暴露 API 密钥
 - 扩展的 API_BASE 配置需与部署域名一致
