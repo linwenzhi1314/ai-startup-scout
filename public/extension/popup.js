@@ -96,6 +96,7 @@ async function search(query) {
   // 重置 AI 分析状态
   summaryVisible = false;
   summaryContent = '';
+  document.getElementById('summaryPanel').style.display = 'none'; // 隐藏分析面板
 
   // 获取 DOM 元素引用
   const resultsContainer = document.getElementById('results');     // 结果容器
@@ -107,6 +108,7 @@ async function search(query) {
   emptyState.style.display = 'none';
   loadingIndicator.style.display = 'flex';
   resultsContainer.innerHTML = ''; // 清空旧结果
+  document.getElementById('analyzeBtn').disabled = true; // 搜索中禁用分析按钮
 
   try {
     // 根据当前分类获取补充关键词
@@ -146,6 +148,8 @@ async function search(query) {
           <p class="no-results-desc" data-i18n="noResultsDesc">${t('noResultsDesc')}</p>
         </div>`;
       resultCount.textContent = '';
+      // 无结果时禁用 AI 分析按钮
+      document.getElementById('analyzeBtn').disabled = true;
     } else {
       // 有结果：更新计数并渲染结果卡片
       resultCount.textContent = t('resultCount').replace('{count}', searchResults.length);
@@ -153,6 +157,8 @@ async function search(query) {
         const card = createResultCard(result, index); // 创建卡片 DOM
         resultsContainer.appendChild(card);             // 追加到容器
       });
+      // 搜索有结果时启用 AI 分析按钮
+      document.getElementById('analyzeBtn').disabled = false;
     }
   } catch (error) {
     // 搜索失败：显示错误状态
