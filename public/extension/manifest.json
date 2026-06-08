@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Startup Scout - AI创业项目搜索",
-  "version": "1.2.4",
+  "version": "1.2.3",
   "description": "智能搜索AI软件创业项目，获取市场洞察与投资分析。一站式发现AI创业机会。",
   "permissions": ["storage"],
   "action": {
