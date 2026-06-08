@@ -1,7 +1,8 @@
 /**
  * @file 搜索 API 路由
- * @description 接收前端搜索请求，使用 coze-coding-dev-sdk 的 SearchClient 进行 Web 搜索，
+ * @description 接收前端搜索请求，使用 Tavily Search API 进行 Web 搜索，
  *              支持按分类（融资/产品/开源/模型）和语言（中/英）构建本地化搜索词。
+ *              不依赖 coze-coding-dev-sdk，可部署到任何平台（Vercel/Railway 等）。
  * @endpoint POST /api/search
  * @requestBody { query: string, category?: string, count?: number, locale?: string }
  * @response { success: boolean, summary: string, results: Array<SearchResult> }
@@ -9,8 +10,6 @@
 
 // 导入 Next.js 请求/响应类型
 import { NextRequest, NextResponse } from 'next/server';
-// 导入搜索客户端、配置工具、请求头转发工具
-import { SearchClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 /**
  * 按语言区分的分类关键词映射
@@ -52,7 +51,7 @@ function getCategoryKeywords(locale: string): Record<string, string> {
  * POST 处理函数：执行 AI 创业项目搜索
  * 1. 解析请求体中的 query、category、count、locale 参数
  * 2. 根据语言和分类构建增强搜索词
- * 3. 调用 SearchClient 执行 Web 搜索
+ * 3. 调用 Tavily Search API 执行 Web 搜索
  * 4. 格式化并返回搜索结果
  */
 export async function POST(request: NextRequest) {
@@ -79,12 +78,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 提取需要转发的请求头（SDK 鉴权需要）
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    // 初始化 SDK 配置（自动从环境变量读取 API 凭据）
-    const config = new Config();
-    // 创建搜索客户端实例
-    const client = new SearchClient(config, customHeaders);
+    // 从环境变量读取 Tavily API Key
+    const tavilyApiKey = process.env.TAVILY_API_KEY;
+    // 校验 API Key 是否已配置
+    if (!tavilyApiKey) {
+      console.error('[Search API Error] TAVILY_API_KEY not configured');
+      return NextResponse.json(
+        { error: isZh ? '搜索服务未配置' : 'Search service not configured' },
+        { status: 500 },
+      );
+    }
 
     // 构建搜索查询词：默认使用用户原始查询
     let searchQuery = query;
@@ -93,10 +96,8 @@ export async function POST(request: NextRequest) {
     const keywords = getCategoryKeywords(locale || 'en');
 
     // 英文模式下的语言优化策略：
-    // 1. 如果用户输入的是中文但 locale 为英文，提示搜索引擎优先返回英文源
-    // 2. 添加英文语境引导词，让搜索引擎倾向于返回英文内容
+    // 拼接语言引导词，帮助搜索引擎理解期望结果语言
     if (lang === 'en') {
-      // 拼接语言引导词，帮助搜索引擎理解期望结果语言
       searchQuery = `${query} in English`;
     }
 
@@ -105,30 +106,59 @@ export async function POST(request: NextRequest) {
       searchQuery = `${searchQuery} ${keywords[category]}`;
     }
 
-    // 调用 SDK 高级搜索接口
-    const response = await client.advancedSearch(searchQuery, {
-      searchType: 'web',           // Web 搜索类型
-      count: count || 10,          // 返回结果数量，默认 10
-      needSummary: true,           // 需要搜索摘要
-      needUrl: true,               // 需要结果 URL
+    // 调用 Tavily Search API
+    const tavilyResponse = await fetch('https://api.tavily.com/search', {
+      method: 'POST',  // Tavily 使用 POST 请求
+      headers: {
+        'Content-Type': 'application/json',           // JSON 请求体
+        'Authorization': `Bearer ${tavilyApiKey}`,     // API Key 认证
+      },
+      body: JSON.stringify({
+        query: searchQuery,         // 搜索查询词
+        max_results: count || 10,   // 返回结果数量，默认 10
+        include_answer: true,       // 包含 AI 生成的摘要回答
+        include_raw_content: false, // 不包含原始网页内容（节省 token）
+        search_depth: 'advanced',   // 高级搜索模式，结果更精准
+      }),
     });
 
-    // 格式化搜索结果：提取关键字段，补充默认值
-    const results = (response.web_items || []).map((item) => ({
-      id: item.id,                           // 结果唯一标识
-      title: item.title || '',               // 标题
-      snippet: item.snippet || '',           // 摘要片段
-      url: item.url || '',                   // 来源链接
-      siteName: item.site_name || '',        // 站点名称
-      logoUrl: item.logo_url || '',          // 站点 Logo URL
-      publishTime: item.publish_time || '',  // 发布时间
-    }));
+    // 检查 Tavily API 响应状态
+    if (!tavilyResponse.ok) {
+      const errorText = await tavilyResponse.text();
+      console.error('[Tavily API Error]', tavilyResponse.status, errorText);
+      return NextResponse.json(
+        { error: isZh ? '搜索服务暂时不可用' : 'Search service temporarily unavailable' },
+        { status: 502 }, // 502 Bad Gateway
+      );
+    }
 
-    // 返回成功响应：包含搜索摘要和格式化后的结果列表
+    // 解析 Tavily API 响应
+    const tavilyData = await tavilyResponse.json();
+
+    // 格式化搜索结果：提取关键字段，补充默认值
+    const results = (tavilyData.results || []).map(
+      (item: {
+        title?: string;      // 结果标题
+        content?: string;    // 结果内容摘要
+        url?: string;        // 来源链接
+        source?: string;     // 来源域名
+        published_date?: string; // 发布日期
+      }, index: number) => ({
+        id: `tavily-${index}`,                      // 生成唯一标识
+        title: item.title || '',                     // 标题
+        snippet: item.content || '',                 // 摘要片段（Tavily 用 content 字段）
+        url: item.url || '',                         // 来源链接
+        siteName: item.source || '',                 // 站点名称（Tavily 用 source 字段）
+        logoUrl: '',                                 // Tavily 不提供 Logo，留空
+        publishTime: item.published_date || '',      // 发布时间
+      }),
+    );
+
+    // 返回成功响应：包含 AI 摘要和格式化后的结果列表
     return NextResponse.json({
       success: true,
-      summary: response.summary || '',  // 搜索结果总摘要
-      results,                          // 格式化后的结果数组
+      summary: tavilyData.answer || '',  // Tavily AI 生成的搜索摘要
+      results,                           // 格式化后的结果数组
     });
   } catch (error) {
     // 捕获异常，记录错误日志

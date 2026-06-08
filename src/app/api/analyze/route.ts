@@ -1,7 +1,8 @@
 /**
  * @file AI 分析 API 路由
- * @description 接收搜索结果，使用 coze-coding-dev-sdk 的 LLMClient 进行流式 AI 分析，
+ * @description 接收搜索结果，使用 DeepSeek API 进行流式 AI 分析，
  *              通过 SSE (Server-Sent Events) 协议实时推送生成内容到前端。
+ *              不依赖 coze-coding-dev-sdk，可部署到任何平台（Vercel/Railway 等）。
  * @endpoint POST /api/analyze
  * @requestBody { query: string, results: Array<{ title, snippet, url }>, locale?: string }
  * @response SSE stream: data: { content: string } | data: [DONE]
@@ -9,8 +10,6 @@
 
 // 导入 Next.js 请求/响应类型
 import { NextRequest, NextResponse } from 'next/server';
-// 导入 LLM 客户端、配置工具、请求头转发工具
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 /**
  * 按语言区分的 AI 系统提示词
@@ -92,7 +91,7 @@ function getMessages(locale: string) {
  * POST 处理函数：执行 AI 流式分析
  * 1. 解析请求体中的 query、results、locale 参数
  * 2. 根据语言构建系统提示词和用户消息
- * 3. 通过 LLMClient 流式调用大模型
+ * 3. 通过 DeepSeek API 流式调用大模型
  * 4. 以 SSE 格式逐块推送生成内容
  */
 export async function POST(request: NextRequest) {
@@ -120,12 +119,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 提取需要转发的请求头（SDK 鉴权需要）
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    // 初始化 SDK 配置（自动从环境变量读取 API 凭据）
-    const config = new Config();
-    // 创建 LLM 客户端实例
-    const client = new LLMClient(config, customHeaders);
+    // 从环境变量读取 DeepSeek API Key
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+    // 校验 API Key 是否已配置
+    if (!deepseekApiKey) {
+      console.error('[Analyze API Error] DEEPSEEK_API_KEY not configured');
+      return NextResponse.json(
+        { error: errors.serverError },
+        { status: 500 },
+      );
+    }
 
     // 将搜索结果格式化为文本上下文，最多取前 8 条
     const resultsContext = (results || [])
@@ -142,46 +145,136 @@ export async function POST(request: NextRequest) {
       ? `搜索关键词：${query}\n\n搜索结果：\n${resultsContext || '暂无搜索结果'}`
       : `Search query: ${query}\n\nSearch results:\n${resultsContext || 'No search results available'}`;
 
-    // 构建对话消息列表
-    const messages = [
-      { role: 'system' as const, content: prompt },   // 系统提示词：定义 AI 角色和输出格式
-      { role: 'user' as const, content: userContent }, // 用户消息：搜索关键词 + 搜索结果上下文
-    ];
-
     // 创建文本编码器，用于将字符串转为 Uint8Array
     const encoder = new TextEncoder();
 
     // 创建可读流，用于 SSE 流式输出
     const stream = new ReadableStream({
       /**
-       * 流启动回调：连接 LLM 并逐块转发内容
+       * 流启动回调：调用 DeepSeek API 并逐块转发内容
        * @param controller - 流控制器，用于向客户端发送数据
        */
       async start(controller) {
         try {
-          // 调用 LLM 客户端的流式接口
-          const llmStream = client.stream(messages, {
-            model: 'doubao-seed-2-0-lite-260215', // 使用豆包轻量模型，平衡速度和质量
-            temperature: 0.7,                      // 适度创造性，避免过于保守或发散
+          // 调用 DeepSeek Chat Completions API（兼容 OpenAI 格式）
+          const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',                 // JSON 请求体
+              'Authorization': `Bearer ${deepseekApiKey}`,        // API Key 认证
+            },
+            body: JSON.stringify({
+              model: 'deepseek-chat',    // DeepSeek 对话模型
+              messages: [
+                { role: 'system', content: prompt },       // 系统提示词：定义 AI 角色和输出格式
+                { role: 'user', content: userContent },    // 用户消息：搜索关键词 + 搜索结果上下文
+              ],
+              stream: true,            // 启用流式输出
+              temperature: 0.7,        // 适度创造性，避免过于保守或发散
+              max_tokens: 2000,        // 限制最大输出长度，控制成本
+            }),
           });
 
-          // 逐块读取 LLM 生成的内容
-          for await (const chunk of llmStream) {
-            // 过滤掉空内容块
-            if (chunk.content) {
-              // 确保内容为字符串类型
-              const text =
-                typeof chunk.content === 'string'
-                  ? chunk.content
-                  : String(chunk.content);
-              // 以 SSE 格式发送：data: {json}\n\n
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`),
-              );
+          // 检查 DeepSeek API 响应状态
+          if (!deepseekResponse.ok) {
+            const errorText = await deepseekResponse.text();
+            console.error('[DeepSeek API Error]', deepseekResponse.status, errorText);
+            // 向客户端发送错误信息
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ error: errors.streamError })}\n\n`),
+            );
+            controller.close();
+            return;
+          }
+
+          // 获取响应体的 Reader，用于逐块读取 SSE 数据
+          const reader = deepseekResponse.body?.getReader();
+          // 如果无法获取 Reader，报错退出
+          if (!reader) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ error: errors.streamError })}\n\n`),
+            );
+            controller.close();
+            return;
+          }
+
+          // 用于累积未完成的 SSE 数据行（可能跨 chunk 分割）
+          let buffer = '';
+
+          // 循环读取 DeepSeek 的 SSE 响应流
+          while (true) {
+            // 读取下一个数据块
+            const { done, value } = await reader.read();
+            // 流结束，退出循环
+            if (done) break;
+
+            // 将二进制数据块解码为文本
+            buffer += new TextDecoder().decode(value, { stream: true });
+
+            // 按换行符分割 SSE 数据行
+            const lines = buffer.split('\n');
+            // 最后一行可能不完整，保留到下次处理
+            buffer = lines.pop() || '';
+
+            // 逐行处理 SSE 数据
+            for (const line of lines) {
+              // 去除首尾空白
+              const trimmedLine = line.trim();
+              // 跳过空行和非 data 行
+              if (!trimmedLine || !trimmedLine.startsWith('data: ')) continue;
+
+              // 提取 data: 后面的 JSON 内容
+              const data = trimmedLine.slice(6); // 去掉 "data: " 前缀
+
+              // DeepSeek 流结束标记
+              if (data === '[DONE]') {
+                // 向客户端发送结束标记
+                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+                continue;
+              }
+
+              try {
+                // 解析 DeepSeek 的 SSE JSON 数据
+                const parsed = JSON.parse(data);
+                // 提取生成的内容片段
+                const content = parsed.choices?.[0]?.delta?.content;
+                // 过滤掉空内容块
+                if (content) {
+                  // 以统一的 SSE 格式转发给客户端
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify({ content })}\n\n`),
+                  );
+                }
+              } catch {
+                // JSON 解析失败，跳过该行（可能是格式异常的 SSE 行）
+                continue;
+              }
             }
           }
-          // 流结束：发送 [DONE] 标记
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+
+          // 处理 buffer 中剩余的未处理数据
+          if (buffer.trim()) {
+            const trimmedLine = buffer.trim();
+            if (trimmedLine.startsWith('data: ')) {
+              const data = trimmedLine.slice(6);
+              if (data === '[DONE]') {
+                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              } else {
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    controller.enqueue(
+                      encoder.encode(`data: ${JSON.stringify({ content })}\n\n`),
+                    );
+                  }
+                } catch {
+                  // 忽略解析错误
+                }
+              }
+            }
+          }
+
           // 关闭流
           controller.close();
         } catch (streamError) {
