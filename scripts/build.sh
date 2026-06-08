@@ -11,7 +11,10 @@ pnpm install --prefer-frozen-lockfile --prefer-offline --loglevel debug --report
 echo "Building the Next.js project..."
 pnpm next build
 
-echo "Bundling server with tsup..."
-pnpm tsup src/server.ts --format cjs --platform node --target node20 --outDir dist --no-splitting --no-minify
+# 仅在沙箱环境打包 server（Vercel 不需要）
+if [ -z "${VERCEL}" ]; then
+  echo "Bundling server with tsup..."
+  pnpm tsup src/server.ts --format cjs --platform node --target node20 --outDir dist --no-splitting --no-minify
+fi
 
 echo "Build completed successfully!"
