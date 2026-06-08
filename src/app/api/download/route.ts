@@ -35,7 +35,7 @@ export async function GET() {
       return NextResponse.redirect(`${baseUrl}/ai-startup-scout.zip?t=${cacheBuster}`, 302);
     }
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/zip',
