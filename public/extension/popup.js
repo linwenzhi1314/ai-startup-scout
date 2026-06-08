@@ -25,11 +25,6 @@ async function loadConfig() {
     if (resp.ok) {
       const config = await resp.json();
       API_BASE = config.apiBase; // 从后端获取动态域名
-      // 显示版本号
-      const versionBadge = document.getElementById('versionBadge');
-      if (versionBadge && config.extensionVersion) {
-        versionBadge.textContent = 'v' + config.extensionVersion;
-      }
     }
   } catch (e) {
     // 配置接口请求失败，使用回退地址
@@ -245,22 +240,6 @@ function createResultCard(result, index) {
     btn.querySelector('svg').setAttribute('stroke', isFav ? '#F59E0B' : '#64748b'); // 更新描边色
     btn.title = isFav ? t('removeFromFav') : t('addToFav'); // 更新悬停提示
   });
-
-  // 标题和描述点击事件：点击后在新标签页打开链接
-  if (result.url) {
-    const titleEl = card.querySelector('.card-title');
-    const snippetEl = card.querySelector('.card-snippet');
-    titleEl.style.cursor = 'pointer';
-    snippetEl.style.cursor = 'pointer';
-    titleEl.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.open(result.url, '_blank', 'noopener');
-    });
-    snippetEl.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.open(result.url, '_blank', 'noopener');
-    });
-  }
 
   return card;
 }

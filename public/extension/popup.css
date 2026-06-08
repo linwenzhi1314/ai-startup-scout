@@ -87,17 +87,6 @@ body {
   letter-spacing: -0.01em;            /* 微调字间距 */
 }
 
-.version-badge {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg-card);
-  padding: 1px 6px;
-  border-radius: 8px;
-  margin-left: 6px;
-  border: 1px solid var(--border);
-}
-
 /* 顶栏右侧（语言切换 + 收藏按钮） */
 .header-right {
   display: flex;
@@ -400,16 +389,11 @@ body {
   font-weight: 600;                   /* 半粗体 */
   color: var(--text-primary);
   line-height: 1.4;
-  cursor: pointer;                    /* 可点击 */
   /* 标题过长时截断显示省略号 */
   display: -webkit-box;
   -webkit-line-clamp: 2;              /* 最多 2 行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.15s ease;
-}
-.card-title:hover {
-  color: var(--accent);               /* hover 变为强调色 */
 }
 
 /* 收藏按钮 */
@@ -445,16 +429,11 @@ body {
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 8px;
-  cursor: pointer;                    /* 可点击 */
   /* 摘要过长时截断 */
   display: -webkit-box;
   -webkit-line-clamp: 3;              /* 最多 3 行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.15s ease;
-}
-.card-snippet:hover {
-  color: var(--text-primary);         /* hover 变亮 */
 }
 
 /* 卡片底部：来源 + 链接 */
