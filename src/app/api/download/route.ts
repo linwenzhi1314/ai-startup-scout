@@ -11,6 +11,6 @@ export async function GET() {
   const manifestUrl = `${process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || 'ai-startup-scout.vercel.app'}`;
   const baseUrl = manifestUrl.startsWith('http') ? manifestUrl : `https://${manifestUrl}`;
   
-  // 使用版本化文件名绕过 CDN 缓存
-  return NextResponse.redirect(`${baseUrl}/ai-startup-scout-1.2.3.zip`, 302);
+  // 直接重定向到主 ZIP 文件
+  return NextResponse.redirect(`${baseUrl}/ai-startup-scout.zip`, 302);
 }
