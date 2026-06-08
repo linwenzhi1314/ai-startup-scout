@@ -241,6 +241,22 @@ function createResultCard(result, index) {
     btn.title = isFav ? t('removeFromFav') : t('addToFav'); // 更新悬停提示
   });
 
+  // 标题和描述点击事件：点击后在新标签页打开链接
+  if (result.url) {
+    const titleEl = card.querySelector('.card-title');
+    const snippetEl = card.querySelector('.card-snippet');
+    titleEl.style.cursor = 'pointer';
+    snippetEl.style.cursor = 'pointer';
+    titleEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(result.url, '_blank', 'noopener');
+    });
+    snippetEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(result.url, '_blank', 'noopener');
+    });
+  }
+
   return card;
 }
 
