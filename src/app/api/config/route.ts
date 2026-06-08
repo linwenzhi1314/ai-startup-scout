@@ -14,12 +14,19 @@ import { NextResponse } from 'next/server';
  * - extensionVersion: 扩展当前版本号，从 manifest.json 动态读取
  */
 export async function GET() {
-  // 优先读取 Vercel 环境变量，其次读取沙箱环境变量，最后使用硬编码域名
+  // 域名优先级：
+  // 1. 用户自定义 NEXT_PUBLIC_API_BASE_URL（最高优先）
+  // 2. Vercel 生产域名 VERCEL_PROJECT_PRODUCTION_URL（自动注入，不含哈希）
+  // 3. 沙箱环境 COZE_PROJECT_DOMAIN_DEFAULT
+  // 4. 硬编码回退
+  // 注意：VERCEL_URL 是带部署哈希的临时域名，不用于 apiBase
   const domain =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||                    // Vercel 自定义环境变量
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||  // Vercel 自动注入
-    process.env.COZE_PROJECT_DOMAIN_DEFAULT ||                 // 沙箱环境变量
-    'https://ai-startup-scout.vercel.app';                     // 硬编码回退
+    process.env.NEXT_PUBLIC_API_BASE_URL ||                              // 用户手动设定
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL                           // Vercel 生产域名
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : '') ||
+    process.env.COZE_PROJECT_DOMAIN_DEFAULT ||                           // 沙箱环境
+    'https://ai-startup-scout.vercel.app';                               // 硬编码回退
 
   // 读取扩展版本号：从 manifest.json 动态获取
   let extensionVersion = '1.2.1'; // 默认回退值
