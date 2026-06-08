@@ -21,7 +21,7 @@ let API_BASE = '';            // 后端 API 基地址，启动时从配置接口
  */
 async function loadConfig() {
   try {
-    const resp = await fetch('https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site/api/config');
+    const resp = await fetch('https://ai-startup-scout.vercel.app/api/config');
     if (resp.ok) {
       const config = await resp.json();
       API_BASE = config.apiBase; // 从后端获取动态域名
@@ -32,7 +32,7 @@ async function loadConfig() {
   }
   // 如果未能获取到配置，使用硬编码的回退地址
   if (!API_BASE) {
-    API_BASE = 'https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site';
+    API_BASE = 'https://ai-startup-scout.vercel.app';
   }
 }
 

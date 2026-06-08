@@ -7,8 +7,8 @@
  *              3. 响应来自 popup 的消息，返回 API 基地址
  */
 
-// 后端 API 默认地址 - 部署时需要更新为实际域名
-const DEFAULT_API_BASE = 'https://c4d0bc61-90f7-4fae-b79e-2daab43d84fe.dev.coze.site';
+// 后端 API 默认地址 - Vercel 生产域名
+const DEFAULT_API_BASE = 'https://ai-startup-scout.vercel.app';
 
 // 监听扩展安装事件：首次安装或更新时触发
 chrome.runtime.onInstalled.addListener(() => {
