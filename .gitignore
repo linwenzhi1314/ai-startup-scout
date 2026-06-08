@@ -73,7 +73,7 @@ logs/
 *.iso
 *.dmg
 *.rar
-*.zip
+# *.zip  # 注释掉，扩展 ZIP 需要提交到仓库供 Vercel 部署
 *.gz
 
 # 文档类也默认加入
