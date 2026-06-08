@@ -244,9 +244,10 @@ function createResultCard(result, index) {
   // 卡片点击事件：点击标题和描述区域打开链接
   const cardHeader = card.querySelector('.card-header');
   const cardSnippet = card.querySelector('.card-snippet');
-  const openUrl = () => {
+  const openUrl = function(e) {
+    e.stopPropagation();
     if (result.url) {
-      window.open(result.url, '_blank', 'noopener');
+      chrome.tabs.create({ url: result.url });
     }
   };
   if (cardHeader) {
