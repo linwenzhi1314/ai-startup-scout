@@ -1,47 +1,23 @@
 /**
  * @file 扩展下载 API 路由
- * @description 返回预打包的 Chrome 扩展 ZIP 文件供用户下载。
- *              ZIP 文件在构建前已存在于 public/ 目录，Vercel 会自动部署静态资源。
+ * @description 重定向到预打包的 Chrome 扩展 ZIP 静态文件。
+ *              ZIP 文件位于 public/ 目录，Vercel 自动作为静态资源部署。
+ *              无法在 Vercel Serverless 中通过 fs 读取 public/，因此直接重定向。
  * @endpoint GET /api/download
- * @response application/zip 文件流
+ * @response 302 重定向到 /ai-startup-scout.zip
  */
 
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 /**
- * GET 处理函数：下载 Chrome 扩展 ZIP
- * 直接读取 public/ai-startup-scout.zip 静态文件返回
- * （Vercel 是只读文件系统，无法运行时执行 zip 命令）
+ * GET 处理函数：重定向到扩展 ZIP 静态文件
  */
 export async function GET() {
-  try {
-    const zipPath = path.join(process.cwd(), 'public', 'ai-startup-scout.zip');
-
-    // 校验：ZIP 文件必须存在
-    if (!fs.existsSync(zipPath)) {
-      return NextResponse.json(
-        { error: 'Extension ZIP not found' },
-        { status: 404 },
-      );
-    }
-
-    // 读取 ZIP 文件
-    const zipBuffer = fs.readFileSync(zipPath);
-
-    // 返回 ZIP 文件流
-    return new NextResponse(zipBuffer, {
-      headers: {
-        'Content-Type': 'application/zip',
-        'Content-Disposition': 'attachment; filename="ai-startup-scout.zip"',
-      },
-    });
-  } catch (error) {
-    console.error('[Download Error]', error);
-    return NextResponse.json(
-      { error: 'Failed to download extension' },
-      { status: 500 },
-    );
-  }
+  // Vercel 会自动将 public/ 目录下的文件作为静态资源托管
+  // /ai-startup-scout.zip 对应 public/ai-startup-scout.zip
+  return NextResponse.redirect(
+    new URL('/ai-startup-scout.zip', process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL}`
+      : 'https://ai-startup-scout.vercel.app'),
+  );
 }
