@@ -181,7 +181,7 @@ export default function SupportPage() {
             className="mt-6 p-4 rounded-lg text-sm"
             style={{ background: '#7F1D1D', color: '#FCA5A5', border: '1px solid #991B1B' }}
           >
-            提交失败，请稍后重试。您也可以发送邮件至 support@aistartupscout.com
+            提交失败，请稍后重试。
           </div>
         )}
 

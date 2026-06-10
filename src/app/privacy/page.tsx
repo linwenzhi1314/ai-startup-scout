@@ -114,16 +114,18 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-[#6366F1] mb-3">8. Contact / 联系方式</h2>
           <p className="text-slate-300 leading-relaxed">
-            If you have questions about this Privacy Policy, please contact us at:{' '}
-            <a href="mailto:privacy@aistartupscout.com" className="text-[#6366F1] hover:underline">
-              privacy@aistartupscout.com
-            </a>
+            If you have questions about this Privacy Policy, please contact us through our{' '}
+            <a href="/support" className="text-[#6366F1] hover:underline">
+              Support &amp; Feedback
+            </a>{' '}
+            page.
           </p>
           <p className="text-slate-300 leading-relaxed mt-3">
-            如果您对本隐私政策有疑问，请通过以下邮箱联系我们：{' '}
-            <a href="mailto:privacy@aistartupscout.com" className="text-[#6366F1] hover:underline">
-              privacy@aistartupscout.com
-            </a>
+            如果您对本隐私政策有疑问，请通过我们的{' '}
+            <a href="/support" className="text-[#6366F1] hover:underline">
+              支持与反馈
+            </a>{' '}
+            页面联系我们。
           </p>
         </section>
       </div>
