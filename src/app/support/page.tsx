@@ -204,7 +204,7 @@ export default function SupportPage() {
               },
               {
                 q: '搜索数据来源是什么？',
-                a: '我们使用 Tavily 搜索引擎聚合全网 AI 创业项目信息，并通过 AI 进行深度分析和整理。',
+                a: '我们使用最先进的搜索引擎聚合全网 AI 创业项目信息，并通过 AI 进行深度分析和整理。',
               },
             ].map((faq, i) => (
               <div
