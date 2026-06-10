@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         source?: string;     // 来源域名
         published_date?: string; // 发布日期
       }, index: number) => ({
-        id: `tavily-${index}`,                      // 生成唯一标识
+        id: item.url || `tavily-${index}`,              // 使用 URL 作为唯一标识（URL 天然不重复），无 URL 时回退到索引
         title: item.title || '',                     // 标题
         snippet: item.content || '',                 // 摘要片段（Tavily 用 content 字段）
         url: item.url || '',                         // 来源链接
