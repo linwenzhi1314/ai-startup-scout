@@ -316,6 +316,11 @@ export default function Home() {
             </div>
             <span className="text-sm text-slate-400">AI Startup Scout</span>
           </div>
+          {/* 导航链接 */}
+          <div className="flex items-center gap-6">
+            <a href="/support" className="text-sm text-slate-400 hover:text-white transition-colors">支持与反馈</a>
+            <a href="/privacy" className="text-sm text-slate-400 hover:text-white transition-colors">隐私政策</a>
+          </div>
           {/* 版权描述 */}
           <p className="text-xs text-slate-600">AI 驱动的创业项目搜索引擎</p>
         </div>
