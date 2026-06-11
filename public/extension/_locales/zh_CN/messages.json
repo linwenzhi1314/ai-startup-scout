@@ -1,10 +1,10 @@
 {
   "appName": {
-    "message": "AI Startup Scout - AI创业项目搜索",
+    "message": "AI Startup Scout - AI创业项目智能分析师",
     "description": "Extension name"
   },
   "appDesc": {
-    "message": "智能搜索AI软件创业项目，获取市场洞察与投资分析。一站式发现AI创业机会。",
+    "message": "不只是搜索AI创业项目，AI帮你分析值不值得关注",
     "description": "Extension description"
   }
 }
