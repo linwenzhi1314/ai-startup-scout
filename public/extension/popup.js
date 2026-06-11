@@ -538,6 +538,12 @@ async function init() {
   // 语言切换按钮
   document.getElementById('langToggle').addEventListener('click', toggleLocale);
 
+  // 反馈按钮：跳转支持与反馈页面
+  document.getElementById('feedbackBtn').addEventListener('click', () => {
+    const supportUrl = `${API_BASE}/support`;
+    chrome.tabs.create({ url: supportUrl });
+  });
+
   // 自动聚焦搜索输入框
   searchInput.focus();
 }

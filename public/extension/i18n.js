@@ -40,6 +40,8 @@ const LOCALES = {
     aiInsight: 'AI Insight',          // AI 洞察面板标题
     aiAnalyze: 'AI Analyze',          // AI 分析按钮文本
     closeSummary: 'Close',            // 关闭分析面板按钮
+    feedback: 'Feedback',             // 反馈按钮文本
+    feedbackBtn: 'Feedback',          // 反馈按钮提示
 
     // ---- 搜索结果 ----
     resultCount: '{count} results',                                     // 结果计数文本
@@ -96,6 +98,8 @@ const LOCALES = {
     aiInsight: 'AI 洞察',
     aiAnalyze: 'AI 分析',
     closeSummary: '关闭',
+    feedback: '反馈',
+    feedbackBtn: '支持与反馈',
 
     // ---- 搜索结果 ----
     resultCount: '{count} 条结果',

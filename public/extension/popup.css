@@ -593,6 +593,9 @@ body {
    底部操作栏
    ==================== */
 .bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 16px 12px;             /* 上 左右 下 */
   border-top: 1px solid var(--border);
   background: var(--bg-base);
@@ -600,11 +603,11 @@ body {
 
 /* AI 分析按钮 */
 .analyze-btn {
+  flex: 1;                            /* 撑满剩余空间 */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;                           /* 图标与文字间距 */
-  width: 100%;                        /* 撑满宽度 */
   padding: 8px 0;                     /* 上下内边距 */
   border: 1px solid var(--border);
   border-radius: var(--radius);       /* 8px 圆角 */
@@ -613,6 +616,30 @@ body {
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+/* 反馈按钮 */
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+/* 反馈按钮悬停态 */
+.feedback-btn:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+  background: var(--bg-elevated);
 }
 
 /* 分析按钮悬停态 */
