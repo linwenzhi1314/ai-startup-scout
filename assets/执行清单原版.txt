@@ -1,0 +1,79 @@
+根据商业化行动手册，按时间顺序整理如下：
+
+---
+
+## AI Startup Scout 商业化执行清单
+
+### 第1-2周：MVP验证期
+
+**1. 插件内加反馈入口**（优先级最高）
+- [ ] 在 popup 底部栏加"反馈"按钮，跳转到支持页
+- [ ] 更新截图，突出 AI 分析面板
+
+**2. Chrome商店页面优化**
+- [ ] 重写短描述：突出"AI分析"差异化
+- [ ] 更新详细描述（用文档中的模板）
+- [ ] 添加英文版商品详情
+
+**3. GA4接入**
+- [ ] 在 GA4 后台创建 Property，获取衡量ID（G-XXXXXXXXXX）
+- [ ] 在数据流中生成 API Secret
+- [ ] 创建 `analytics.js`，实现 Measurement Protocol
+- [ ] 在 popup.js 中埋入核心事件：
+  - `extension_opened`（插件打开）
+  - `search_performed`（搜索行为）
+  - `search_completed`（搜索完成）
+  - `ai_analyze_clicked`（AI分析点击）
+  - `ai_analyze_completed`（AI分析完成）
+
+**4. 邮件订阅落地页**
+- [ ] 创建 `https://ai-startup-scout.vercel.app/subscribe` 页面
+- [ ] 字段：邮箱 + 兴趣标签（投资人/创业者/打工人）
+- [ ] 接入邮件发送服务（Resend/Mailchimp）
+
+**5. 日报系统**
+- [ ] 开发日报生成脚本（调用搜索API + AI分析API）
+- [ ] 设计日报模板
+- [ ] 配置定时发送（每日早8点）
+
+---
+
+### 第3-4周：种子用户期
+
+**6. 社区推广**
+- [ ] 即刻App发帖
+- [ ] V2EX发帖
+- [ ] 少数派投稿
+- [ ] Product Hunt上线（英文版）
+- [ ] 小红书图文
+
+**7. 用户访谈**
+- [ ] 收集10个深度访谈用户
+- [ ] 整理访谈结论，驱动产品迭代
+
+---
+
+### 第5-8周：产品迭代期
+
+**8. 付费体系搭建**
+- [ ] 确定免费/付费功能边界
+- [ ] 接入 Chrome Web Store Payments 或 Stripe
+
+**9. 功能加固**
+- [ ] 基于 GA4 数据 + 用户反馈迭代功能
+
+---
+
+### 第9-12周：变现验证期
+
+**10. 付费上线**
+- [ ] 启动付费功能
+- [ ] 转化率优化
+- [ ] 规模化方向判断
+
+---
+
+后续按这个顺序执行，每完成一项我来帮你做对应的开发工作。你先从第1步"插件内加反馈入口"开始吗？
+
+The user wants me to create a prioritized task list based on the commercial roadmap documents they shared. Let me outline the 12-week roadmap with specific tasks, organized in order of execution.
+我希望你根据这里面的内容路径，你知道 顺序吧，后续安排我进行对应的跟进和执行
