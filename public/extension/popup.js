@@ -125,7 +125,10 @@ async function search(query) {
     // 拼接完整搜索词：分类关键词 + 用户输入
     const fullQuery = `${categoryKeyword} ${query}`.trim();
 
-    // 发送搜索请求到后端 API
+    // 发送搜索请求到后端 API（设置 10 秒超时，防止国内网络慢时无限等待）
+    const searchController = new AbortController();
+    const searchTimeoutId = setTimeout(() => searchController.abort(), 10000);
+    
     const resp = await fetch(`${API_BASE}/api/search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -134,8 +137,10 @@ async function search(query) {
         category: currentCategory,       // 当前分类
         count: 8,                        // 请求结果数量
         locale: currentLocale            // 当前语言
-      })
+      }),
+      signal: searchController.signal    // 绑定超时信号
     });
+    clearTimeout(searchTimeoutId);       // 请求成功，清除超时定时器
 
     // 检查 HTTP 响应状态
     if (!resp.ok) throw new Error('Search failed');
@@ -174,9 +179,17 @@ async function search(query) {
     resultsContainer.innerHTML = `
       <div class="error-state">
         <p data-i18n="searchError">${t('searchError')}</p>
-        <button class="retry-btn" onclick="retrySearch()" data-i18n="retryBtn">${t('retryBtn')}</button>
+        <button class="retry-btn" data-i18n="retryBtn">${t('retryBtn')}</button>
       </div>`;
     resultCount.textContent = '';
+    // 绑定重试按钮事件（内联 onclick 在某些情况下不可靠）
+    const retryBtn = resultsContainer.querySelector('.retry-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        const query = document.getElementById('searchInput').value;
+        search(query);
+      });
+    }
   } finally {
     // 无论成功或失败，隐藏加载指示器
     loadingIndicator.style.display = 'none';
