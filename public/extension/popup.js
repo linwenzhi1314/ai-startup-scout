@@ -17,18 +17,27 @@ let API_BASE = '';            // 后端 API 基地址，启动时从配置接口
 // ---- 配置加载 ----
 /**
  * 从后端 /api/config 接口加载 API 基地址
- * 如果配置接口不可用，使用硬编码的回退地址
+ * 设置 3 秒超时，防止国内网络慢时阻塞整个 UI
+ * 如果配置接口不可用或超时，使用硬编码的回退地址
  */
 async function loadConfig() {
+  // 创建 AbortController 用于超时控制
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 秒超时
+  
   try {
-    const resp = await fetch('https://ai-startup-scout.vercel.app/api/config');
+    const resp = await fetch('https://ai-startup-scout.vercel.app/api/config', {
+      signal: controller.signal // 绑定 abort 信号
+    });
+    clearTimeout(timeoutId); // 请求成功，清除超时定时器
     if (resp.ok) {
       const config = await resp.json();
       API_BASE = config.apiBase; // 从后端获取动态域名
     }
   } catch (e) {
-    // 配置接口请求失败，使用回退地址
-    console.warn('Failed to load config, using fallback');
+    // 配置接口请求失败或超时，使用回退地址
+    clearTimeout(timeoutId);
+    console.warn('Config load failed or timeout, using fallback:', e.message);
   }
   // 如果未能获取到配置，使用硬编码的回退地址
   if (!API_BASE) {

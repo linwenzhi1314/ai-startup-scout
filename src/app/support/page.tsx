@@ -10,6 +10,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import Link from 'next/link';
 
 type FeedbackType = 'bug' | 'feature' | 'other';
 
@@ -71,13 +72,13 @@ export default function SupportPage() {
             AI
           </div>
           <span className="font-semibold text-base">AI Startup Scout</span>
-          <a
+          <Link
             href="/"
             className="ml-auto text-sm hover:underline"
             style={{ color: '#94A3B8' }}
           >
             ← 返回首页
-          </a>
+          </Link>
         </div>
       </header>
 
