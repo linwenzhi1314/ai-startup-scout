@@ -102,31 +102,8 @@
       <p class="empty-desc" data-i18n="emptyDesc">Search for the latest AI startup projects, funding, and trends</p>
     </div>
 
-    <!-- 搜索结果容器：动态填充结果卡片 + AI分析面板 -->
-    <div id="results" class="results">
-      <!-- ===== AI 分析面板（放在 results 内部，作为搜索结果的延续） ===== -->
-      <!-- 默认隐藏，点击分析按钮后显示 -->
-      <div id="summaryPanel" class="summary-panel" style="display:none;">
-        <div class="summary-header">
-          <!-- 面板标题 -->
-          <div class="summary-title">
-            <!-- AI 图标（琥珀色） -->
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-            </svg>
-            <span data-i18n="aiInsight">AI Insight</span>
-          </div>
-          <!-- 关闭按钮 -->
-          <button id="closeSummary" class="close-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <!-- AI 分析内容区域（Markdown 渲染后填充） -->
-        <div id="summaryContent" class="summary-content"></div>
-      </div>
-    </div>
+    <!-- 搜索结果容器：动态填充结果卡片 -->
+    <div id="results" class="results"></div>
 
     <!-- ===== 底部操作栏：AI 分析 + 反馈按钮 ===== -->
     <div class="bottom-bar">
@@ -147,6 +124,29 @@
         </svg>
         <span data-i18n="feedback">Feedback</span>
       </button>
+    </div>
+
+    <!-- ===== AI 分析面板（放在底部按钮下方，独立展开） ===== -->
+    <!-- 默认隐藏，点击分析按钮后从底部展开 -->
+    <div id="summaryPanel" class="summary-panel" style="display:none;">
+      <div class="summary-header">
+        <!-- 面板标题 -->
+        <div class="summary-title">
+          <!-- AI 图标（琥珀色） -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span data-i18n="aiInsight">AI Insight</span>
+        </div>
+        <!-- 关闭按钮 -->
+        <button id="closeSummary" class="close-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <!-- AI 分析内容区域（Markdown 渲染后填充） -->
+      <div id="summaryContent" class="summary-content"></div>
     </div>
   </div>
 
