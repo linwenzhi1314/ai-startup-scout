@@ -22,14 +22,13 @@ body {
   overflow: hidden;
 }
 
-/* ===== 左侧面板：AI分析 ===== */
+/* ===== 左侧面板：搜索区域 ===== */
 .left-panel {
-  width: 280px;
+  width: 420px;
   height: 100%;
-  background: #1A1D27;
+  background: #0F1117;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #2D3348;
 }
 
 .panel-header {
@@ -120,13 +119,14 @@ body {
   background: linear-gradient(to bottom, transparent, #6366F1, transparent);
 }
 
-/* ===== 右侧面板：搜索 ===== */
+/* ===== 右侧面板：AI分析 ===== */
 .right-panel {
-  width: 420px;
+  width: 280px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: #1A1D27;
+  border-left: 1px solid #2D3348;
 }
 
 /*顶栏 */

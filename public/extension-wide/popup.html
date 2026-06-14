@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   AI Startup Scout - 宽屏版弹窗 UI (测试版)
-  左右分栏布局：左侧AI分析 + 右侧搜索
+  左右分栏布局：左侧搜索 + 右侧AI分析
   宽度：700px，高度：520px
   
   使用方法：将 manifest.json 中的 default_popup 改为 popup-wide.html 即可测试
@@ -15,36 +15,9 @@
 </head>
 <body>
   <div class="app-wide">
-    <!-- ===== 左侧：AI 分析面板 ===== -->
+    <!-- ===== 左侧：搜索区域 ===== -->
     <div class="left-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-          <span>AI Insight</span>
-        </div>
-        <!-- 面板状态指示 -->
-        <div id="panelStatus" class="panel-status">等待分析</div>
-      </div>
-      <!-- AI分析内容区域 -->
-      <div id="summaryContent" class="summary-content">
-        <div class="summary-placeholder">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-          <p>搜索后点击"AI分析"</p>
-          <p class="hint">获取深度洞察报告</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== 分隔线 ===== -->
-    <div class="divider"></div>
-
-    <!-- ===== 右侧：搜索区域 ===== -->
-    <div class="right-panel">
-      <!--顶栏：Logo + 语言切换 -->
+      <!-- 顶栏：Logo + 语言切换 -->
       <header class="header">
         <div class="header-left">
           <img src="icons/icon48.png" alt="Logo" class="logo">
@@ -121,9 +94,36 @@
         </button>
       </div>
     </div>
+
+    <!-- ===== 分隔线 ===== -->
+    <div class="divider"></div>
+
+    <!-- ===== 右侧：AI 分析面板 ===== -->
+    <div class="right-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>AI Insight</span>
+        </div>
+        <!-- 面板状态指示 -->
+        <div id="panelStatus" class="panel-status">等待分析</div>
+      </div>
+      <!-- AI分析内容区域 -->
+      <div id="summaryContent" class="summary-content">
+        <div class="summary-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <p>搜索后点击"AI分析"</p>
+          <p class="hint">获取深度洞察报告</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="i18n.js"></script>
-  <script src="popup-wide.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
