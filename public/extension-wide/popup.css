@@ -16,7 +16,7 @@ body {
 /* 主容器：左右分栏 */
 .app-wide {
   width: 700px;
-  height: 800px;  /* 从520px增加到800px */
+  height: 1000px;  /* 从800px增加到1000px */
   display: flex;
   background: #0F1117;
   overflow: hidden;
@@ -24,11 +24,12 @@ body {
 
 /* ===== 左侧面板：搜索区域 ===== */
 .left-panel {
-  width: 420px;
+  width: 340px;
   height: 100%;
   background: #0F1117;
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* 允许滚动，让sticky生效 */
 }
 
 .panel-header {
