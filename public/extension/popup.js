@@ -116,7 +116,15 @@ async function search(query) {
   // 切换 UI 状态：隐藏空状态，显示加载中
   emptyState.style.display = 'none';
   loadingIndicator.style.display = 'flex';
-  resultsContainer.innerHTML = ''; // 清空旧结果
+  
+  // 清空旧结果，但保留 summaryPanel（AI分析面板）
+  const summaryPanel = document.getElementById('summaryPanel');
+  resultsContainer.innerHTML = '';
+  if (summaryPanel) {
+    resultsContainer.appendChild(summaryPanel); // 重新添加分析面板
+    summaryPanel.style.display = 'none'; // 隐藏分析面板
+  }
+  
   document.getElementById('analyzeBtn').disabled = true; // 搜索中禁用分析按钮
 
   try {
