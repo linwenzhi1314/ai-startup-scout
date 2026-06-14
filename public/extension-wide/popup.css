@@ -1,120 +1,142 @@
-/*宽屏版样式 - 左右分栏布局 */
+/* 宽屏版样式 - 左右分栏布局 */
 /* 总宽度780px，左侧420px，右侧360px，高度1000px */
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 1000px;
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  width: 780px;
+  height: 1000px;
   background: #0F1117;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #F1F5F9;
-  width: 780px !important;
-  height: 1000px !important;
-  min-height: 1000px !important;
-  max-height: 1000px !important;
   overflow: hidden;
 }
 
-/* 主容器：左右分栏 */
+/* ===== 主容器 ===== */
 .app-wide {
   width: 780px;
   height: 1000px;
-  min-height: 1000px;
   display: flex;
   background: #0F1117;
+}
+
+/* ===== 分隔线 ===== */
+.divider {
+  width: 1px;
+  height: 100%;
+  background: #2D3348;
 }
 
 /* ===== 左侧面板：搜索区域 ===== */
 .left-panel {
   width: 420px;
   height: 100%;
-  background: #0F1117;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding-bottom: 60px; /* 为底部按钮留出空间 */
 }
 
-.panel-header {
+/* ===== Header ===== */
+.header {
   padding: 12px 16px;
   border-bottom: 1px solid #2D3348;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 48px;
 }
 
-.panel-title {
+.header-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
 }
 
-.logo-icon {
+.logo {
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.header-actions {
+.app-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #F1F5F9;
+}
+
+.header-right {
   display: flex;
   gap: 8px;
 }
 
-.lang-btn, .fav-btn {
+.icon-btn {
   background: transparent;
   border: 1px solid #2D3348;
   border-radius: 4px;
   padding: 4px 8px;
   color: #94A3B8;
   cursor: pointer;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
 }
 
-.lang-btn:hover, .fav-btn:hover {
+.icon-btn:hover {
   border-color: #6366F1;
   color: #F1F5F9;
 }
 
-/* ===== 搜索区域 ===== */
-.search-area {
+.lang-label {
+  font-size: 12px;
+}
+
+/* ===== 搜索容器 ===== */
+#searchContainer {
   padding: 16px;
 }
 
 .search-box {
   display: flex;
+  align-items: center;
   gap: 8px;
+  background: #1A1D27;
+  border: 1px solid #2D3348;
+  border-radius: 8px;
+  padding: 8px 12px;
   margin-bottom: 12px;
+}
+
+.search-icon {
+  flex-shrink: 0;
 }
 
 .search-input {
   flex: 1;
-  background: #1A1D27;
-  border: 1px solid #2D3348;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: transparent;
+  border: none;
   color: #F1F5F9;
   font-size: 14px;
+  outline: none;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #6366F1;
+.search-input::placeholder {
+  color: #64748b;
 }
 
 .search-btn {
   background: #6366F1;
   border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
+  border-radius: 6px;
+  padding: 6px 12px;
   color: white;
   cursor: pointer;
   transition: background 0.2s;
@@ -157,18 +179,41 @@ body {
   color: white;
 }
 
+/* ===== 结果计数 ===== */
+.result-count {
+  padding: 8px 16px;
+  color: #94A3B8;
+  font-size: 12px;
+}
+
+/* ===== 加载状态 ===== */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #6366F1;
+}
+
+.pulse {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6366F1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
 /* ===== 搜索结果区域 ===== */
 .results {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
-  max-height: calc(1000px - 200px); /* 留出顶部和底部空间 */
-}
-
-.result-count {
-  color: #94A3B8;
-  font-size: 12px;
-  margin-bottom: 12px;
+  padding-bottom: 80px; /* 为底部按钮留出空间 */
 }
 
 .result-card {
@@ -197,12 +242,18 @@ body {
   font-size: 13px;
   color: #94A3B8;
   line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.result-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .result-tags {
   display: flex;
   gap: 4px;
-  margin-top: 8px;
 }
 
 .result-tag {
@@ -213,32 +264,31 @@ body {
   color: #6366F1;
 }
 
+.result-link {
+  color: #6366F1;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.result-link:hover {
+  text-decoration: underline;
+}
+
 /* ===== 空状态 ===== */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   text-align: center;
 }
 
-.empty-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
 .empty-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #F1F5F9;
-  margin-bottom: 8px;
+  margin: 16px 0 8px;
 }
 
 .empty-desc {
@@ -246,7 +296,7 @@ body {
   color: #94A3B8;
 }
 
-/* ===== 底部按钮栏 - 固定在左侧面板底部 ===== */
+/* ===== 底部按钮栏 - 固定在底部 ===== */
 .bottom-bar {
   position: absolute;
   bottom: 0;
@@ -312,20 +362,20 @@ body {
   width: 360px;
   height: 100%;
   background: #1A1D27;
-  border-left: 1px solid #2D3348;
   display: flex;
   flex-direction: column;
 }
 
-.insight-header {
+.panel-header {
   padding: 12px 16px;
   border-bottom: 1px solid #2D3348;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 48px;
 }
 
-.insight-title {
+.panel-title {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -333,40 +383,19 @@ body {
   font-weight: 600;
 }
 
-.insight-icon {
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  border-radius: 4px;
-}
-
-.status-badge {
-  background: #F59E0B;
-  color: #0F1117;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.status-badge.waiting {
-  background: #2D3348;
+.panel-status {
   color: #94A3B8;
-}
-
-.status-badge.analyzing {
-  background: #6366F1;
-  color: white;
+  font-size: 12px;
 }
 
 /* ===== AI分析内容区域 ===== */
-.insight-content {
+.summary-content {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
 }
 
-.insight-empty {
+.summary-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -375,26 +404,15 @@ body {
   text-align: center;
 }
 
-.insight-empty-icon {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #2D3348;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.insight-empty-title {
-  font-size: 14px;
-  color: #F1F5F9;
-  margin-bottom: 8px;
-}
-
-.insight-empty-desc {
-  font-size: 12px;
+.summary-placeholder p {
   color: #94A3B8;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.summary-placeholder .hint {
+  color: #64748b;
+  font-size: 12px;
 }
 
 /* ===== 分析结果样式 ===== */
@@ -415,78 +433,6 @@ body {
   font-size: 13px;
   color: #F1F5F9;
   line-height: 1.6;
-}
-
-.section-list {
-  list-style: none;
-  padding: 0;
-}
-
-.section-list li {
-  padding: 8px 0;
-  border-bottom: 1px solid #2D3348;
-  color: #94A3B8;
-}
-
-.section-list li:last-child {
-  border-bottom: none;
-}
-
-/* ===== 加载状态 ===== */
-.loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #6366F1;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #2D3348;
-  border-top-color: #6366F1;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===== 关闭按钮 ===== */
-.close-btn {
-  background: transparent;
-  border: none;
-  color: #94A3B8;
-  cursor: pointer;
-  padding: 4px;
-  font-size: 18px;
-}
-
-.close-btn:hover {
-  color: #F1F5F9;
-}
-
-/* ===== 错误状态 ===== */
-.error-state {
-  padding: 16px;
-  background: #1A1D27;
-  border: 1px solid #EF4444;
-  border-radius: 8px;
-  color: #EF4444;
-}
-
-.retry-btn {
-  background: #EF4444;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  color: white;
-  cursor: pointer;
-  margin-top: 12px;
 }
 
 /* ===== 滚动条样式 ===== */
