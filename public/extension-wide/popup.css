@@ -11,16 +11,17 @@ body {
   background: #0F1117;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #F1F5F9;
+  width: 780px;
+  height: 1000px;
+  overflow: hidden;
 }
 
 /* 主容器：左右分栏 */
 .app-wide {
-  width: 700px;
+  width: 780px;
   height: 1000px;
-  width: 780px; /* 420px左侧 + 360px右侧 */  /* 从800px增加到1000px */
   display: flex;
   background: #0F1117;
-  overflow: hidden;
 }
 
 /* ===== 左侧面板：搜索区域 ===== */
