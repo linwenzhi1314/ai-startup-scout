@@ -16,7 +16,7 @@ body {
 /* 主容器：左右分栏 */
 .app-wide {
   width: 700px;
-  height: 520px;
+  height: 750px;  /* 从520px增加到750px */
   display: flex;
   background: #0F1117;
   overflow: hidden;
