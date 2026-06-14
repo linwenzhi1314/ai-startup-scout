@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宽屏版测试 - 模拟Chrome扩展弹窗</title>
+  <link rel="stylesheet" href="/extension-wide/popup.css">
+</head>
+<body>
+  <!-- 模拟Chrome扩展弹窗容器 -->
+  <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0a0a0a;">
+    <div class="app-wide">
+      <!-- ===== 左侧：搜索区域 ===== -->
+      <div class="left-panel">
+        <!-- 顶栏：Logo + 语言切换 -->
+        <header class="header">
+          <div class="header-left">
+            <img src="/extension-wide/icons/icon48.png" alt="Logo" class="logo">
+            <h1 class="app-title">AI Startup Scout</h1>
+          </div>
+          <div class="header-right">
+            <button class="icon-btn lang-btn" title="Switch Language">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              </svg>
+              <span class="lang-label">EN</span>
+            </button>
+            <button class="icon-btn" title="Favorites">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- 搜索区 -->
+        <div id="searchContainer">
+          <div class="search-box">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" class="search-input" placeholder="搜索AI创业项目...">
+            <button class="search-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+          <div class="category-tabs">
+            <button class="category-tab active">全部</button>
+            <button class="category-tab">融资</button>
+            <button class="category-tab">产品</button>
+            <button class="category-tab">开源</button>
+            <button class="category-tab">模型</button>
+          </div>
+        </div>
+
+        <div class="result-count">找到 5 个结果</div>
+
+        <!-- 搜索结果 -模拟多条结果 -->
+        <div id="results" class="results">
+          <div class="result-card">
+            <div class="result-title">
+              <a href="#">Perplexity AI</a>
+            </div>
+            <div class="result-snippet">AI驱动的搜索引擎，提供即时答案和引用来源...</div>
+            <div class="result-tags">
+              <span class="result-tag">搜索</span>
+              <span class="result-tag">AI</span>
+            </div>
+          </div>
+          <div class="result-card">
+            <div class="result-title">
+              <a href="#">Anthropic</a>
+            </div>
+            <div class="result-snippet">专注于AI安全和研究的公司，开发了Claude系列大模型...</div>
+            <div class="result-tags">
+              <span class="result-tag">模型</span>
+              <span class="result-tag">融资</span>
+            </div>
+          </div>
+          <div class="result-card">
+            <div class="result-title">
+              <a href="#">OpenAI</a>
+            </div>
+            <div class="result-snippet">ChatGPT开发者，GPT系列大模型的创造者...</div>
+            <div class="result-tags">
+              <span class="result-tag">模型</span>
+              <span class="result-tag">产品</span>
+            </div>
+          </div>
+          <div class="result-card">
+            <div class="result-title">
+              <a href="#">Cursor</a>
+            </div>
+            <div class="result-snippet">AI代码编辑器，帮助开发者更高效地编写代码...</div>
+            <div class="result-tags">
+              <span class="result-tag">产品</span>
+              <span class="result-tag">开源</span>
+            </div>
+          </div>
+          <div class="result-card">
+            <div class="result-title">
+              <a href="#">Mistral AI</a>
+            </div>
+            <div class="result-snippet">欧洲AI公司，开源大模型Mistral的开发者...</div>
+            <div class="result-tags">
+              <span class="result-tag">模型</span>
+              <span class="result-tag">开源</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="bottom-bar">
+          <button class="analyze-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>AI分析</span>
+          </button>
+          <button class="feedback-btn" title="反馈">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>反馈</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== 分隔线 ===== -->
+      <div class="divider"></div>
+
+      <!-- ===== 右侧：AI 分析面板 ===== -->
+      <div class="right-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>AI Insight</span>
+          </div>
+          <div class="panel-status">等待分析</div>
+        </div>
+        <div class="summary-content">
+          <div class="summary-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+            <p>搜索后点击"AI分析"</p>
+            <p class="hint">获取深度洞察报告</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
