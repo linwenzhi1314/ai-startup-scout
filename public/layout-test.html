@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/*模拟Chrome扩展弹窗环境 */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;  /* Chrome扩展弹窗特性 */
+}
+
+/* 测试容器 - 模拟520px高度限制 */
+.test-container {
+  width: 420px;
+  height: 520px;
+  background: #0F1117;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;  /* 关键：防止内容撑开 */
+  border: 2px solid red; /* 可视化边界 */
+}
+
+.header {
+  height: 48px;
+  background: #1A1D27;
+  border-bottom: 1px solid #2D3348;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;  /* 内容区域滚动 */
+  background: #0F1117;
+  padding: 10px;
+}
+
+.result-card {
+  background: #1A1D27;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.bottom-bar {
+  height: 50px;
+  background: #0F1117;
+  border-top: 1px solid #2D3348;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;  /*防止被压缩 */
+}
+
+.btn {
+  background: #6366F1;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  margin: 0 8px;
+}
+</style>
+</head>
+<body>
+<div class="test-container" style="margin: 20px;">
+  <div class="header">Header (固定48px)</div>
+  <div class="content">
+    <div class="result-card">结果1 - 这是一条搜索结果</div>
+    <div class="result-card">结果2 - 这是一条搜索结果</div>
+    <div class="result-card">结果3 - 这是一条搜索结果</div>
+    <div class="result-card">结果4 - 这是一条搜索结果</div>
+    <div class="result-card">结果5 - 这是一条搜索结果</div>
+    <div class="result-card">结果6 - 这是一条搜索结果</div>
+    <div class="result-card">结果7 - 这是一条搜索结果</div>
+    <div class="result-card">结果8 - 这是一条搜索结果</div>
+    <div class="result-card">结果9 - 这是一条搜索结果</div>
+    <div class="result-card">结果10 - 这是一条搜索结果</div>
+  </div>
+  <div class="bottom-bar">
+    <span class="btn">AI分析</span>
+    <span class="btn" style="background:#1A1D27;border:1px solid #2D3348;">反馈</span>
+  </div>
+</div>
+
+<div class="test-container" style="margin: 20px; position: absolute; left: 460px; top: 20px; height: 600px;">
+  <div class="header">Header (600px高度测试)</div>
+  <div class="content">
+    <div class="result-card">结果1</div>
+    <div class="result-card">结果2</div>
+    <div class="result-card">结果3</div>
+    <div class="result-card">结果4</div>
+    <div class="result-card">结果5</div>
+    <div class="result-card">结果6</div>
+    <div class="result-card">结果7</div>
+    <div class="result-card">结果8</div>
+  </div>
+  <div class="bottom-bar">
+    <span class="btn">AI分析</span>
+    <span class="btn" style="background:#1A1D27;border:1px solid #2D3348;">反馈</span>
+  </div>
+</div>
+
+<script>
+// 输出布局信息
+console.log('布局测试完成');
+</script>
+</body>
+</html>
