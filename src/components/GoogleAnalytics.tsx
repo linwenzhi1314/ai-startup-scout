@@ -19,12 +19,17 @@ const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-2GN9Y1
  * @returns Script标签用于加载 gtag.js，以及内联脚本用于初始化
  */
 export function GoogleAnalytics() {
-  // 判断是否为生产环境（只在生产环境启用 GA4）
-  const isProduction = process.env.COZE_PROJECT_ENV === 'PROD';
-  // 或者根据是否有 GA衡量ID来判断
+  // 判断是否为生产环境
+  // - 沙箱环境：COZE_PROJECT_ENV === 'PROD'
+  // - Vercel/其他环境：NODE_ENV === 'production'
+  const isSandboxProd = process.env.COZE_PROJECT_ENV === 'PROD';
+  const isVercelProd = process.env.NODE_ENV === 'production';
+  const isProduction = isSandboxProd || isVercelProd;
+
+  // 有 GA衡量ID 且是生产环境时才加载
   const shouldLoad = GA_MEASUREMENT_ID && isProduction;
 
-  // 开发环境不加载 GA4
+  // 非生产环境不加载 GA4（避免污染测试数据）
   if (!shouldLoad) {
     return null;
   }
