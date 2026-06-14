@@ -1,5 +1,5 @@
 /*宽屏版样式 - 左右分栏布局 */
-/*总宽度700px，左侧280px，右侧420px */
+/*总宽度700px，左侧340px，右侧360px */
 
 * {
   box-sizing: border-box;
@@ -16,7 +16,7 @@ body {
 /* 主容器：左右分栏 */
 .app-wide {
   width: 700px;
-  height: 750px;  /* 从520px增加到750px */
+  height: 800px;  /* 从520px增加到800px */
   display: flex;
   background: #0F1117;
   overflow: hidden;
@@ -121,7 +121,7 @@ body {
 
 /* ===== 右侧面板：AI分析 ===== */
 .right-panel {
-  width: 280px;
+  width: 360px;  /* 从280px增加到360px */
   height: 100%;
   display: flex;
   flex-direction: column;
