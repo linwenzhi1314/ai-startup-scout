@@ -8,6 +8,8 @@
 import type { Metadata } from 'next';
 // 导入 React 开发检查器（仅开发环境使用）
 import { Inspector } from 'react-dev-inspector';
+// 导入 GA4 Google Analytics 组件
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 // 导入全局样式
 import './globals.css';
 
@@ -55,6 +57,8 @@ export default function RootLayout({
     <html lang="en">
       {/* body: 抗锯齿字体渲染 */}
       <body className={`antialiased`}>
+        {/* GA4 Google Analytics 跟踪（仅生产环境加载）*/}
+        <GoogleAnalytics />
         {/* 开发环境加载 React Inspector，用于点击页面元素定位源码 */}
         {isDev && <Inspector />}
         {/* 子页面内容插槽 */}

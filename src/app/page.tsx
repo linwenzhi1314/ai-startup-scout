@@ -16,6 +16,17 @@
 import { useState, useEffect } from 'react';
 
 /**
+ * GA4 事件跟踪函数
+ * @param eventName 事件名称（如 'click_download', 'click_cta'）
+ * @param eventParams 事件参数（可选，如 { button_location: 'nav' }）
+ */
+const trackEvent = (eventName: string, eventParams?: Record<string, string>) => {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', eventName, eventParams || {});
+  }
+};
+
+/**
  * 首页组件
  * 整体采用暗色主题（深空灰 #0F1117 基底），与扩展弹窗保持一致的视觉风格
  */
@@ -70,9 +81,10 @@ export default function Home() {
           {/* 功能锚点链接（桌面端可见） */}
           <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">功能</a>
           <a href="#how-it-works" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">使用方式</a>
-          {/* 安装扩展按钮：链接到下载 API */}
+          {/* 安装扩展按钮：链接到下载 API，点击时触发 GA4 事件 */}
           <a
             href={domain ? `${domain}/api/download` : '#'}
+            onClick={() => trackEvent('click_download', { button_location: 'nav' })}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
           >
             安装扩展
@@ -107,16 +119,18 @@ export default function Home() {
 
         {/* CTA 按钮组 */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
-          {/* 主按钮：开始使用（锚点到使用方式区） */}
+          {/* 主按钮：开始使用（锚点到使用方式区），点击时触发 GA4 事件 */}
           <a
             href="#how-it-works"
+            onClick={() => trackEvent('click_cta', { button_name: 'start', button_location: 'hero' })}
             className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
           >
             开始使用
           </a>
-          {/* 次按钮：了解功能（锚点到功能区） */}
+          {/* 次按钮：了解功能（锚点到功能区），点击时触发 GA4 事件 */}
           <a
             href="#features"
+            onClick={() => trackEvent('click_cta', { button_name: 'learn', button_location: 'hero' })}
             className="px-8 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-medium rounded-xl transition-all text-base"
           >
             了解功能
@@ -286,10 +300,11 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 底部安装按钮 */}
+          {/* 底部安装按钮，点击时触发 GA4 事件 */}
           <div className="text-center mt-14">
             <a
               href={domain ? `${domain}/api/download` : '#'}
+              onClick={() => trackEvent('click_download', { button_location: 'how_it_works' })}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
             >
               {/* 下载图标 */}
