@@ -50,12 +50,21 @@ export function GoogleAnalytics() {
         gtag 初始化内联脚本
         - 定义 window.dataLayer 数组用于存储事件
         - 定义 gtag 函数用于发送事件
+        - 初始化意见征求模式：默认拒绝，等待用户同意后更新
         - 初始化配置：发送 page_view 事件
       */}
       <Script id="ga4-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
+          // 初始化意见征求模式：默认拒绝，等待 CookieConsent 组件更新
+          gtag('consent', 'default', {
+            analytics_storage: 'denied',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+            wait_for_update: 500// 等待500ms 让 CookieConsent 更新状态
+          });
           gtag('js', new Date());
           gtag('config', '${GA_MEASUREMENT_ID}', {
             page_title: document.title,
