@@ -16,7 +16,8 @@ body {
 /* 主容器：左右分栏 */
 .app-wide {
   width: 700px;
-  height: 1000px;  /* 从800px增加到1000px */
+  height: 1000px;
+  width: 780px; /* 420px左侧 + 360px右侧 */  /* 从800px增加到1000px */
   display: flex;
   background: #0F1117;
   overflow: hidden;
@@ -24,7 +25,7 @@ body {
 
 /* ===== 左侧面板：搜索区域 ===== */
 .left-panel {
-  width: 340px;
+  width: 420px;
   height: 100%;
   background: #0F1117;
   display: flex;
