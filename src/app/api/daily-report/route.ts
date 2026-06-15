@@ -1,110 +1,121 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { SearchClient, Config, LLMClient } from 'coze-coding-dev-sdk';
+/**
+ * @file 日报生成 API 路由
+ * @description 自动搜索最新AI创业项目，生成日报内容
+ * @endpoint POST /api/daily-report
+ * @response { success: boolean, report: string, results: Array }
+ */
 
-//日报生成API
+import { NextRequest, NextResponse } from 'next/server';
+
+// 日报系统提示词
+const DAILY_REPORT_PROMPT = `你是一位AI创业领域的研究员。请根据今天的搜索结果，生成一份简洁的日报。
+
+请按以下结构输出（使用中文）：
+
+## 今日AI创业热点
+总结今天搜索结果中的3-5个热点话题或项目。
+
+## 重点项目推荐
+挑选2-3个最值得关注的项目，每个包含：
+- 项目名称
+- 一句话亮点
+- 为什么值得关注
+
+## 行业动态
+简述当前AI创业领域的整体趋势。
+
+保持简洁，总字数控制在500字以内。`;
+
+/**
+ * POST 处理函数：生成日报
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic = 'AI创业', days = 1 } = body;
+    const { locale = 'zh' } = body;
 
-    // 1. 搜索最新AI创业项目
-    const config = new Config();
-    const searchClient = new SearchClient(config);
+    // 从环境变量读取 API Keys
+    const tavilyApiKey = process.env.TAVILY_API_KEY;
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
 
-    const searchResults = await searchClient.webSearch(
-      `${topic} 最新融资 创业项目`,
-      10,
-      false
+    if (!tavilyApiKey) {
+      return NextResponse.json({ error: '搜索服务未配置' }, { status: 500 });
+    }
+    if (!deepseekApiKey) {
+      return NextResponse.json({ error: 'AI服务未配置' }, { status: 500 });
+    }
+
+    // 搜索最新AI创业项目
+    const searchQuery = 'AI创业项目 最新融资 今日';
+    const tavilyResponse = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tavilyApiKey}`,
+      },
+      body: JSON.stringify({
+        query: searchQuery,
+        max_results: 10,
+        include_answer: true,
+        search_depth: 'advanced',
+      }),
+    });
+
+    if (!tavilyResponse.ok) {
+      return NextResponse.json({ error: '搜索失败' }, { status: 502 });
+    }
+
+    const tavilyData = await tavilyResponse.json();
+
+    // 格式化搜索结果
+    const results = (tavilyData.results || []).map(
+      (item: { title?: string; content?: string; url?: string }, index: number) => ({
+        id: item.url || `daily-${index}`,
+        title: item.title || '',
+        snippet: item.content || '',
+        url: item.url || '',
+      }),
     );
 
-    if (!searchResults.web_items || searchResults.web_items.length === 0) {
-      return NextResponse.json({
-        error: '未找到相关内容'
-      }, { status: 404 });
+    // 构建搜索结果上下文
+    const resultsContext = results
+      .slice(0, 8)
+      .map((r: { title: string; snippet: string }, i: number) => `${i + 1}. ${r.title}: ${r.snippet}`)
+      .join('\n');
+
+    // 调用 DeepSeek 生成日报
+    const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${deepseekApiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: DAILY_REPORT_PROMPT },
+          { role: 'user', content: `今日搜索关键词：${searchQuery}\n\n搜索结果：\n${resultsContext}` },
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!deepseekResponse.ok) {
+      return NextResponse.json({ error: '日报生成失败' }, { status: 502 });
     }
 
-    // 2. 使用AI生成日报内容
-    const llmClient = new LLMClient(config);
+    const deepseekData = await deepseekResponse.json();
+    const report = deepseekData.choices?.[0]?.message?.content || '';
 
-    const projectsSummary = searchResults.web_items.map((item, i) => 
-      `${i + 1}. ${item.title}\n   摘要: ${item.snippet}\n   来源: ${item.url}`
-    ).join('\n\n');
-
-    const dailyReportPrompt = `你是一位专业的AI创投分析师。请根据以下搜索结果，生成一份简洁的AI创业日报。
-
-今日搜索到的AI创业项目信息：
-${projectsSummary}
-
-请生成日报内容，包含：
-1. 今日头条（1-2个最值得关注的项目）
-2. 融资动态（近期融资项目简报）
-3. 市场趋势分析（一句话总结当前AI创业热点）
-4. 推荐关注（值得持续跟踪的领域）
-
-格式要求：
-- 每个板块控制在50-100字
-- 使用简洁的新闻风格
-- 突出关键数据（融资金额、赛道、团队背景等）`;
-
-    // 流式生成日报
-    const stream = await llmClient.stream([
-      { role: 'user', content: dailyReportPrompt }
-    ], { model: 'doubao-seed-2-0-lite-260215' });
-
-    // 收集流式输出
-    let reportContent = '';
-    for await (const chunk of stream) {
-      if (chunk.content) {
-        reportContent += chunk.content;
-      }
-    }
-
-    // 3. 返回日报内容
     return NextResponse.json({
       success: true,
+      report,
+      results,
       date: new Date().toISOString().split('T')[0],
-      topic,
-      sources: searchResults.web_items.map((item) => ({
-        title: item.title,
-        url: item.url
-      })),
-      content: reportContent
     });
-
   } catch (error) {
-    console.error('Daily report generation error:', error);
-    return NextResponse.json({
-      error: '日报生成失败'
-    }, { status: 500 });
-  }
-}
-
-// GET: 获取日报（简化版）
-export async function GET() {
-  try {
-    // 使用预设话题生成日报
-    const config = new Config();
-    const searchClient = new SearchClient(config);
-
-    const searchResults = await searchClient.webSearch(
-      'AI创业 最新融资 今日',
-      5,
-      false
-    );
-
-    return NextResponse.json({
-      date: new Date().toISOString().split('T')[0],
-      projects: searchResults.web_items?.map((item) => ({
-        title: item.title,
-        snippet: item.snippet,
-        url: item.url
-      })) || []
-    });
-
-  } catch (error) {
-    console.error('Daily report fetch error:', error);
-    return NextResponse.json({
-      error: '获取日报失败'
-    }, { status: 500 });
+    console.error('[Daily Report API Error]', error);
+    return NextResponse.json({ error: '日报生成失败' }, { status: 500 });
   }
 }
