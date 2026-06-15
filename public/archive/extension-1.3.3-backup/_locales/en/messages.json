@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "AI Startup Scout - AI Startup Intelligence Analyst",
+    "description": "Extension name"
+  },
+  "appDesc": {
+    "message": "Not just searching AI startups — AI tells you which ones are worth following",
+    "description": "Extension description"
+  }
+}
