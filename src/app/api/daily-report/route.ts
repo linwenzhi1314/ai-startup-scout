@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
     const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
 
     if (!tavilyApiKey) {
-      return NextResponse.json({ error: '搜索服务未配置' }, { status: 500 });
+      return NextResponse.json({ success: false, error: '搜索服务未配置' }, { status: 500 });
     }
     if (!deepseekApiKey) {
-      return NextResponse.json({ error: 'AI服务未配置' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'AI服务未配置' }, { status: 500 });
     }
 
     // 搜索最新AI创业项目
@@ -116,6 +116,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Daily Report API Error]', error);
-    return NextResponse.json({ error: '日报生成失败' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false,
+      error: '日报生成失败',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

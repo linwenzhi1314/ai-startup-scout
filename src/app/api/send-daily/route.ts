@@ -15,11 +15,16 @@ interface Subscriber {
 export async function POST(request: NextRequest) {
   try {
     // 1. 获取日报内容（调用daily-report API）
-    const baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT || `http://localhost:${process.env.DEPLOY_RUN_PORT || 5000}`;
+    // 使用请求的 origin 或环境变量构建 URL
+    const requestUrl = new URL(request.url);
+    const baseUrl = requestUrl.origin;
+    
+    console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
+    
     const reportResponse = await fetch(`${baseUrl}/api/daily-report`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: 'AI创业', days: 1 })
+      body: JSON.stringify({ locale: 'zh' })
     });
 
     const reportData = await reportResponse.json();
@@ -76,7 +81,7 @@ export async function POST(request: NextRequest) {
             from: 'AI Startup Scout <onboarding@resend.dev>',
             to: subscriber.email,
             subject: `AI创业日报 - ${reportData.date}`,
-            html: generateEmailHtml(reportData.content, reportData.date, subscriber.email)
+            html: generateEmailHtml(reportData.report, reportData.date, subscriber.email)
           })
         });
 
