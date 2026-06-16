@@ -380,10 +380,10 @@ export default function Home() {
                 />
                 <button
                   type="submit"
-                  disabled={submitting || !email}
+                  disabled={submitting || !email || !role}
                   className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all whitespace-nowrap"
                 >
-                  {submitting ? '提交中...' : '订阅'}
+                  {submitting ? '提交中...' : role ? '订阅' : '请先选择身份'}
                 </button>
               </div>
               
