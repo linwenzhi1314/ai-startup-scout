@@ -111,12 +111,23 @@ export async function POST(request: NextRequest) {
         });
 
         const emailData = await emailResponse.json();
-        emailResults.push({
-          email: subscriber.email,
-          success: emailResponse.ok,
-          id: emailData.id,
-          error: emailResponse.ok ? undefined : (emailData.error || JSON.stringify(emailData))
-        });
+        console.log('Resend API response:', JSON.stringify(emailData));
+        console.log('Resend API status:', emailResponse.status);
+        
+        if (!emailResponse.ok) {
+          emailResults.push({
+            email: subscriber.email,
+            success: false,
+            error: emailData.message || emailData.error?.message || JSON.stringify(emailData),
+            statusCode: emailResponse.status
+          });
+        } else {
+          emailResults.push({
+            email: subscriber.email,
+            success: true,
+            id: emailData.id
+          });
+        }
 
       } catch (emailError) {
         console.error(`Send email to ${subscriber.email} failed:`, emailError);
