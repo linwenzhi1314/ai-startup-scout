@@ -105,7 +105,7 @@ export default function Home() {
       {/* ===== 导航栏 ===== */}
       <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5">
         {/* Logo + 品牌名称 */}
-        <div className="flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           {/* Logo 图标：靛蓝渐变圆角方块 + 白色层叠图形 */}
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +116,7 @@ export default function Home() {
           </div>
           {/* 品牌名称 */}
           <span className="text-lg font-semibold tracking-tight">AI Startup Scout</span>
-        </div>
+        </a>
         {/* 右侧导航链接 + 安装按钮 */}
         <div className="flex items-center gap-4">
           {/* 功能锚点链接（桌面端可见） */}
