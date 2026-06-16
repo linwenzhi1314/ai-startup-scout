@@ -355,8 +355,13 @@ export default function Home() {
             </a>
           </div>
           
+          {/* 分隔线 */}
+          <div className="mt-16 max-w-lg mx-auto">
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+          </div>
+          
           {/* ===== 订阅区域 - 开放式风格 ===== */}
-          <div className="mt-16 max-w-lg mx-auto text-center">
+          <div className="mt-12 max-w-lg mx-auto text-center">
             {/* 标题 */}
             <h3 className="text-2xl font-bold mb-2">订阅 AI 创业日报</h3>
             
