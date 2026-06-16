@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'AI Startup Scout <daily@ai-startup-scout.vercel.app>',
+            from: 'AI Startup Scout <onboarding@resend.dev>',
             to: subscriber.email,
             subject: `AI创业日报 - ${reportData.date}`,
             html: generateEmailHtml(reportData.content, reportData.date, subscriber.email)
