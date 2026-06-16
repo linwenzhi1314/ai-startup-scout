@@ -22,11 +22,19 @@ export async function POST(request: NextRequest) {
     const isTestMode = requestUrl.searchParams.get('test') === 'true';
     
     // 1. 获取日报内容（调用daily-report API）
-    // 使用请求的 origin 或环境变量构建 URL
-    const baseUrl = requestUrl.origin;
+    // 在 Vercel 环境中使用 VERCEL_URL 或 COZE_PROJECT_DOMAIN_DEFAULT
+    let baseUrl: string;
+    if (process.env.VERCEL_URL) {
+      baseUrl = `https://${process.env.VERCEL_URL}`;
+    } else if (process.env.COZE_PROJECT_DOMAIN_DEFAULT) {
+      baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT;
+    } else {
+      baseUrl = requestUrl.origin;
+    }
     
     console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
     console.log('Mode:', isTestMode ? 'TEST (only send to test email)' : 'PRODUCTION (send to all subscribers)');
+    console.log('Base URL:', baseUrl);
     
     const reportResponse = await fetch(`${baseUrl}/api/daily-report`, {
       method: 'POST',
