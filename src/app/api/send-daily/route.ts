@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const { data: subscribers, error: subError } = await supabase
       .from('subscribers')
       .select('email, tags')
-      .eq('is_active', 'true');
+      .eq('is_active', true);
 
     if (subError) {
       console.error('Fetch subscribers error:', subError);
