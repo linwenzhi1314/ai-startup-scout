@@ -22,23 +22,14 @@ export async function POST(request: NextRequest) {
     const isTestMode = requestUrl.searchParams.get('test') === 'true';
     
     // 1. 获取日报内容（调用daily-report API）
-    // 在 Vercel 环境中使用 VERCEL_URL 或 COZE_PROJECT_DOMAIN_DEFAULT
-    let baseUrl: string;
-    const vercelUrl = process.env.VERCEL_URL;
+    // Cron Jobs 在生产环境触发，应使用生产域名
+    // VERCEL_URL 在预览部署时是预览域名，不适合用于 Cron
     const cozeDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT;
     
-    if (vercelUrl) {
-      baseUrl = `https://${vercelUrl}`;
-      console.log('Using VERCEL_URL:', vercelUrl);
-    } else if (cozeDomain) {
-      baseUrl = cozeDomain;
-      console.log('Using COZE_PROJECT_DOMAIN_DEFAULT:', cozeDomain);
-    } else {
-      // Fallback: 使用硬编码的生产域名
-      baseUrl = 'https://ai-startup-scout.vercel.app';
-      console.log('Using fallback URL:', baseUrl);
-    }
+    // 优先使用 COZE_PROJECT_DOMAIN_DEFAULT 或硬编码生产域名
+    const baseUrl = cozeDomain || 'https://ai-startup-scout.vercel.app';
     
+    console.log('Using baseUrl:', baseUrl);
     console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
     console.log('Mode:', isTestMode ? 'TEST (only send to test email)' : 'PRODUCTION (send to all subscribers)');
     
