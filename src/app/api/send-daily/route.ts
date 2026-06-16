@@ -6,6 +6,9 @@ const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const resendApiKey = process.env.RESEND_API_KEY;
 
+// 测试邮箱 - 只在测试模式下使用
+const TEST_EMAIL = 'linwenzhi1314@gmail.com';
+
 interface Subscriber {
   email: string;
   tags: string | null;
@@ -14,12 +17,16 @@ interface Subscriber {
 // 发送日报邮件给所有订阅者
 export async function POST(request: NextRequest) {
   try {
+    // 检查是否是测试模式
+    const requestUrl = new URL(request.url);
+    const isTestMode = requestUrl.searchParams.get('test') === 'true';
+    
     // 1. 获取日报内容（调用daily-report API）
     // 使用请求的 origin 或环境变量构建 URL
-    const requestUrl = new URL(request.url);
     const baseUrl = requestUrl.origin;
     
     console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
+    console.log('Mode:', isTestMode ? 'TEST (only send to test email)' : 'PRODUCTION (send to all subscribers)');
     
     const reportResponse = await fetch(`${baseUrl}/api/daily-report`, {
       method: 'POST',
@@ -36,21 +43,34 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // 2. 获取所有活跃订阅者
+    // 2. 获取订阅者列表
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: subscribers, error: subError } = await supabase
-      .from('subscribers')
-      .select('email, tags')
-      .eq('is_active', true);
+    
+    let subscribers: Subscriber[];
+    
+    if (isTestMode) {
+      // 测试模式：只发送到测试邮箱
+      subscribers = [{ email: TEST_EMAIL, tags: 'test' }];
+      console.log('Test mode: sending only to', TEST_EMAIL);
+    } else {
+      // 正式模式：获取所有活跃订阅者
+      const { data, error: subError } = await supabase
+        .from('subscribers')
+        .select('email, tags')
+        .eq('is_active', true);
 
-    if (subError) {
-      console.error('Fetch subscribers error:', subError);
-      return NextResponse.json({
-        error: '获取订阅者失败'
-      }, { status: 500 });
+      if (subError) {
+        console.error('Fetch subscribers error:', subError);
+        return NextResponse.json({
+          error: '获取订阅者失败'
+        }, { status: 500 });
+      }
+
+      subscribers = data || [];
+      console.log('Production mode: found', subscribers.length, 'subscribers');
     }
 
-    if (!subscribers || subscribers.length === 0) {
+    if (subscribers.length === 0) {
       return NextResponse.json({
         message: '暂无活跃订阅者'
       });
