@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
         emailResults.push({
           email: subscriber.email,
           success: emailResponse.ok,
-          id: emailData.id
+          id: emailData.id,
+          error: emailResponse.ok ? undefined : (emailData.error || JSON.stringify(emailData))
         });
 
       } catch (emailError) {
