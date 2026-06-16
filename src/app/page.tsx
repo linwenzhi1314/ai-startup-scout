@@ -354,19 +354,16 @@ export default function Home() {
               立即安装
             </a>
           </div>
-          
-          {/* 分隔线 */}
-          <div className="mt-16 max-w-lg mx-auto">
-            <div className="h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
-          </div>
-          
-          {/* ===== 订阅区域 - 开放式风格 ===== */}
-          <div className="mt-12 max-w-lg mx-auto text-center">
-            {/* 标题 */}
-            <h3 className="text-2xl font-bold mb-2">订阅 AI 创业日报</h3>
-            
+        </div>
+      </section>
+
+      {/* ===== 订阅区域 ===== */}
+      <section className="relative z-10 px-6 md:px-12 py-20">
+        <div className="max-w-lg mx-auto text-center">
+          {/* 标题 */}
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">订阅 AI 创业日报</h2>
             {/* 说明文字 */}
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="mt-4 text-slate-400 text-lg mb-8">
               每天早8点，精选AI创业动态直达你的邮箱
             </p>
             
@@ -431,7 +428,6 @@ export default function Home() {
             <p className="text-xs text-slate-500 mt-4">
               我们尊重你的隐私，不会将邮箱用于其他用途。可随时取消订阅。
             </p>
-          </div>
         </div>
       </section>
 
