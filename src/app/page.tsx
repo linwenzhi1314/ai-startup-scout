@@ -250,8 +250,19 @@ export default function Home() {
         <div className="max-w-md mx-auto">
           {/* 订阅表单卡片 */}
           <div className="bg-[#1A1D27] border border-[#2D3348] rounded-2xl p-6">
+            {/* 顶部标签 */}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-lg">📩</span>
+              <span className="text-sm text-amber-400 font-medium">每日推送</span>
+            </div>
+            
             {/* 标题 */}
-            <h3 className="text-lg font-semibold text-center mb-6">订阅 AI 创业日报</h3>
+            <h3 className="text-xl font-bold text-center mb-2">订阅 AI 创业日报</h3>
+            
+            {/* 说明文字 */}
+            <p className="text-sm text-slate-400 text-center mb-6">
+              每天早8点，精选AI创业动态直达你的邮箱
+            </p>
             
             <form onSubmit={handleSubscribe}>
               {/* 邮箱输入 */}
