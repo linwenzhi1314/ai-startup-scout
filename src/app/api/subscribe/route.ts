@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Insert subscriber error:', error);
       return NextResponse.json(
-        { error: '订阅失败' },
+        { error: `订阅失败: ${error.message || JSON.stringify(error)}` },
         { status: 500 }
       );
     }
