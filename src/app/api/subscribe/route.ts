@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: '订阅已重新激活'
+        message: '该邮箱已订阅，无需重复订阅'
       });
     }
 
