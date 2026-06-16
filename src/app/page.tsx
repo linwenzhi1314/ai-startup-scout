@@ -245,114 +245,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== 订阅区域 ===== */}
-      <section id="subscribe" className="relative z-10 px-6 md:px-12 py-16">
-        <div className="max-w-md mx-auto">
-          {/* 订阅表单卡片 */}
-          <div className="bg-[#1A1D27] border border-[#2D3348] rounded-2xl p-6">
-            {/* 顶部标签 */}
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-lg">📩</span>
-              <span className="text-sm text-amber-400 font-medium">每日推送</span>
-            </div>
-            
-            {/* 标题 */}
-            <h3 className="text-xl font-bold text-center mb-2">订阅 AI 创业日报</h3>
-            
-            {/* 说明文字 */}
-            <p className="text-sm text-slate-400 text-center mb-6">
-              每天早8点，精选AI创业动态直达你的邮箱
-            </p>
-            
-            <form onSubmit={handleSubscribe}>
-              {/* 邮箱输入 */}
-              <div className="mb-4">
-                <label className="text-sm text-slate-300 mb-2 block">邮箱地址</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full px-4 py-3 bg-[#232736] border border-[#2D3348] rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-              </div>
-              
-              {/* 身份选择 */}
-              <div className="mb-4">
-                <label className="text-sm text-slate-300 mb-2 block">你的身份</label>
-                <div className="space-y-2">
-                  {[
-                    { value: 'investor', label: '投资人', desc: '关注投资机会和市场趋势' },
-                    { value: 'entrepreneur', label: '创业者', desc: '寻找创业灵感和竞品动态' },
-                    { value: 'worker', label: '打工人', desc: '了解行业机会和职业发展' },
-                  ].map((item) => (
-                    <label
-                      key={item.value}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
-                        role === item.value
-                          ? 'bg-indigo-500/15 border-indigo-500/40'
-                          : 'bg-[#232736] border-[#2D3348] hover:border-slate-500'
-                      }`}
-                    >
-                      {/* 单选圆点 */}
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        role === item.value
-                          ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-slate-500'
-                      }`}>
-                        {role === item.value && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                      {/* 文字 */}
-                      <div>
-                        <span className="text-sm text-white">{item.label}</span>
-                        <span className="text-xs text-slate-400 ml-2">{item.desc}</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* 成功提示 */}
-              {subscribeStatus === 'success' && (
-                <div className="mb-4 px-4 py-3 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-emerald-400 text-sm text-center">
-                  订阅成功! 我们会在每天早8点发送日报到你的邮箱。
-                </div>
-              )}
-              
-              {/* 错误提示 */}
-              {subscribeStatus === 'error' && (
-                <div className="mb-4 px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
-                  订阅失败，请稍后重试
-                </div>
-              )}
-              
-              {/* 订阅按钮 */}
-              <button
-                type="submit"
-                disabled={submitting || !email || !role}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <span>提交中...</span>
-                ) : (
-                  <>
-                    <span>📩</span>
-                    <span>立即订阅</span>
-                  </>
-                )}
-              </button>
-              
-              {/* 隐私声明 */}
-              <p className="text-xs text-slate-500 text-center mt-4">
-                我们尊重你的隐私，不会将邮箱用于其他用途。可随时取消订阅。
-              </p>
-            </form>
-          </div>
-        </div>
-      </section>
+      {/* ===== 核心功能区 ===== */}
       <section id="features" className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           {/* 区域标题 */}
@@ -460,6 +353,113 @@ export default function Home() {
               </svg>
               立即安装
             </a>
+          </div>
+          
+          {/* ===== 订阅区域 ===== */}
+          <div className="mt-16 max-w-md mx-auto">
+            {/* 订阅表单卡片 */}
+            <div className="bg-[#1A1D27] border border-[#2D3348] rounded-2xl p-6">
+              {/* 顶部标签 */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <span className="text-lg">📩</span>
+                <span className="text-sm text-amber-400 font-medium">每日推送</span>
+              </div>
+              
+              {/* 标题 */}
+              <h3 className="text-xl font-bold text-center mb-2">订阅 AI 创业日报</h3>
+              
+              {/* 说明文字 */}
+              <p className="text-sm text-slate-400 text-center mb-6">
+                每天早8点，精选AI创业动态直达你的邮箱
+              </p>
+              
+              <form onSubmit={handleSubscribe}>
+                {/* 邮箱输入 */}
+                <div className="mb-4">
+                  <label className="text-sm text-slate-300 mb-2 block">邮箱地址</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="w-full px-4 py-3 bg-[#232736] border border-[#2D3348] rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+                
+                {/* 身份选择 */}
+                <div className="mb-4">
+                  <label className="text-sm text-slate-300 mb-2 block">你的身份</label>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'investor', label: '投资人', desc: '关注投资机会和市场趋势' },
+                      { value: 'entrepreneur', label: '创业者', desc: '寻找创业灵感和竞品动态' },
+                      { value: 'worker', label: '打工人', desc: '了解行业机会和职业发展' },
+                    ].map((item) => (
+                      <label
+                        key={item.value}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
+                          role === item.value
+                            ? 'bg-indigo-500/15 border-indigo-500/40'
+                            : 'bg-[#232736] border-[#2D3348] hover:border-slate-500'
+                        }`}
+                      >
+                        {/* 单选圆点 */}
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          role === item.value
+                            ? 'border-indigo-500 bg-indigo-500'
+                            : 'border-slate-500'
+                        }`}>
+                          {role === item.value && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                          )}
+                        </div>
+                        {/* 文字 */}
+                        <div>
+                          <span className="text-sm text-white">{item.label}</span>
+                          <span className="text-xs text-slate-400 ml-2">{item.desc}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* 成功提示 */}
+                {subscribeStatus === 'success' && (
+                  <div className="mb-4 px-4 py-3 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-emerald-400 text-sm text-center">
+                    订阅成功! 我们会在每天早8点发送日报到你的邮箱。
+                  </div>
+                )}
+                
+                {/* 错误提示 */}
+                {subscribeStatus === 'error' && (
+                  <div className="mb-4 px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                    订阅失败，请稍后重试
+                  </div>
+                )}
+                
+                {/* 订阅按钮 */}
+                <button
+                  type="submit"
+                  disabled={submitting || !email || !role}
+                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <span>提交中...</span>
+                  ) : (
+                    <>
+                      <span>📩</span>
+                      <span>立即订阅</span>
+                    </>
+                  )}
+                </button>
+                
+                {/* 隐私声明 */}
+                <p className="text-xs text-slate-500 text-center mt-4">
+                  我们尊重你的隐私，不会将邮箱用于其他用途。可随时取消订阅。
+                </p>
+              </form>
+            </div>
           </div>
         </div>
       </section>
