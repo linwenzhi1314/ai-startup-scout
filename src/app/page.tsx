@@ -39,6 +39,7 @@ export default function Home() {
   const [role, setRole] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [subscribeMessage, setSubscribeMessage] = useState('');
 
   /**
    * useEffect: 在客户端挂载后获取后端域名
@@ -68,11 +69,13 @@ export default function Home() {
       
       if (data.success) {
         setSubscribeStatus('success');
+        setSubscribeMessage(data.message || '订阅成功！');
         setEmail('');
         setRole('');
         trackEvent('subscribe_success', { role });
       } else {
         setSubscribeStatus('error');
+        setSubscribeMessage(data.error || '订阅失败，请稍后重试');
       }
     } catch {
       setSubscribeStatus('error');
@@ -412,14 +415,14 @@ export default function Home() {
               {/* 成功提示 */}
               {subscribeStatus === 'success' && (
                 <div className="px-4 py-3 bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-emerald-400 text-sm">
-                  订阅成功! 我们会在每天早8点发送日报到你的邮箱。
+                  {subscribeMessage}
                 </div>
               )}
               
               {/* 错误提示 */}
               {subscribeStatus === 'error' && (
                 <div className="px-4 py-3 bg-red-500/15 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                  订阅失败，请稍后重试
+                  {subscribeMessage}
                 </div>
               )}
             </form>
