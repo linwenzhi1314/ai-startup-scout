@@ -123,3 +123,13 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// GET: 测试日报生成（用于浏览器直接访问）
+export async function GET() {
+  const mockRequest = new NextRequest('http://localhost:5000/api/daily-report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ locale: 'zh' })
+  });
+  return POST(mockRequest);
+}
