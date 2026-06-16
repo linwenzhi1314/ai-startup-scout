@@ -383,7 +383,7 @@ export default function Home() {
                   disabled={submitting || !email || !role}
                   className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all whitespace-nowrap"
                 >
-                  {submitting ? '提交中...' : role ? '订阅' : '请先选择身份'}
+                  {submitting ? '提交中...' : email && !role ? '请先选择身份' : '订阅'}
                 </button>
               </div>
               
