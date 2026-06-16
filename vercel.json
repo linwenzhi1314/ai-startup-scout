@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/send-daily?test=true",
-      "schedule": "0 3 * * *"
+      "schedule": "0 0 1 1 *"
     }
   ]
 }
