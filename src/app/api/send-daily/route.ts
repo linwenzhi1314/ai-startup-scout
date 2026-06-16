@@ -125,32 +125,32 @@ export async function POST(request: NextRequest) {
 function generateEmailHtml(content: string, date: string, email: string): string {
   const unsubscribeUrl = `https://ai-startup-scout.vercel.app/api/subscribe?email=${encodeURIComponent(email)}`;
   
+  // 简单的 Markdown 转 HTML
+  const htmlContent = content
+    .replace(/## (.*)/g, '<h2 style="color: #6366F1; font-size: 18px; margin: 20px 0 10px 0;">$1</h2>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #6366F1;">$1</strong>')
+    .replace(/\n\n/g, '</p><p style="margin: 10px 0; line-height: 1.6;">')
+    .replace(/^\d+\. /g, '<br/><span style="color: #F59E0B;">•</span> ')
+    .replace(/"/g, '"');
+  
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1A1A1F; color: #F1F5F9; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; background: #252530; border-radius: 12px; padding: 30px; }
-    .header { text-align: center; margin-bottom: 30px; }
-    .header h1 { color: #6366F1; font-size: 24px; margin: 0; }
-    .header .date { color: #94A3B8; font-size: 14px; margin-top: 8px; }
-    .content { line-height: 1.8; white-space: pre-wrap; }
-    .footer { margin-top: 30px; text-align: center; color: #94A3B8; font-size: 12px; }
-    .footer a { color: #6366F1; text-decoration: none; }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🚀 AI创业日报</h1>
-      <div class="date">${date}</div>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #ffffff; color: #333333; padding: 20px; margin: 0;">
+  <div style="max-width: 600px; margin: 0 auto; background: #f8f9fa; border-radius: 8px; padding: 20px; border: 1px solid #e5e7eb;">
+    <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #6366F1;">
+      <h1 style="color: #6366F1; font-size: 24px; margin: 0;">🚀 AI创业日报</h1>
+      <p style="color: #94a3b8; font-size: 14px; margin: 8px 0 0 0;">${date}</p>
     </div>
-    <div class="content">${content}</div>
-    <div class="footer">
-      <p>由 AI Startup Scout 提供</p>
-      <p><a href="${unsubscribeUrl}">取消订阅</a></p>
+    <div style="line-height: 1.6; color: #333333;">
+      <p style="margin: 10px 0; line-height: 1.6;">${htmlContent}</p>
+    </div>
+    <div style="margin-top: 30px; text-align: center; color: #94a3b8; font-size: 12px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="margin: 5px 0;">由 AI Startup Scout 提供</p>
+      <p style="margin: 5px 0;"><a href="${unsubscribeUrl}" style="color: #6366F1; text-decoration: none;">取消订阅</a></p>
     </div>
   </div>
 </body>
