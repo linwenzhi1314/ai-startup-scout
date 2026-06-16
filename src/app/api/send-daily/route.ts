@@ -150,3 +150,14 @@ function generateEmailHtml(content: string, date: string, email: string): string
 </body>
 </html>`;
 }
+
+// GET: 测试发送日报（用于浏览器直接访问测试）
+export async function GET() {
+  // 调用 POST 方法进行测试
+  const mockRequest = new NextRequest('http://localhost:5000/api/send-daily', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+  return POST(mockRequest);
+}
