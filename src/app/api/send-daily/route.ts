@@ -24,17 +24,23 @@ export async function POST(request: NextRequest) {
     // 1. 获取日报内容（调用daily-report API）
     // 在 Vercel 环境中使用 VERCEL_URL 或 COZE_PROJECT_DOMAIN_DEFAULT
     let baseUrl: string;
-    if (process.env.VERCEL_URL) {
-      baseUrl = `https://${process.env.VERCEL_URL}`;
-    } else if (process.env.COZE_PROJECT_DOMAIN_DEFAULT) {
-      baseUrl = process.env.COZE_PROJECT_DOMAIN_DEFAULT;
+    const vercelUrl = process.env.VERCEL_URL;
+    const cozeDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT;
+    
+    if (vercelUrl) {
+      baseUrl = `https://${vercelUrl}`;
+      console.log('Using VERCEL_URL:', vercelUrl);
+    } else if (cozeDomain) {
+      baseUrl = cozeDomain;
+      console.log('Using COZE_PROJECT_DOMAIN_DEFAULT:', cozeDomain);
     } else {
-      baseUrl = requestUrl.origin;
+      // Fallback: 使用硬编码的生产域名
+      baseUrl = 'https://ai-startup-scout.vercel.app';
+      console.log('Using fallback URL:', baseUrl);
     }
     
     console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
     console.log('Mode:', isTestMode ? 'TEST (only send to test email)' : 'PRODUCTION (send to all subscribers)');
-    console.log('Base URL:', baseUrl);
     
     const reportResponse = await fetch(`${baseUrl}/api/daily-report`, {
       method: 'POST',
