@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "__MSG_appName__",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "permissions": ["storage"],
+  "host_permissions": ["https://www.google-analytics.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
