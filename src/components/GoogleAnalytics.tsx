@@ -12,7 +12,7 @@
 import Script from 'next/script';
 
 // GA4 衡量ID，从环境变量读取（生产环境设置）
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-2GN9Y1HJZG';
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-7KS6RH463Y';
 
 /**
  * GA4 组件

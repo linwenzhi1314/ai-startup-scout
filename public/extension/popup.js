@@ -77,6 +77,9 @@ function getCategoryKeyword(category) {
 async function search(query) {
   if (isSearching || !query.trim()) return;
   isSearching = true;
+  
+  // GA4 埋点：搜索行为开始
+  trackSearchPerformed(query);
 
   // 更新面板状态
   updatePanelStatus('等待分析');
@@ -131,6 +134,8 @@ async function search(query) {
       });
       document.getElementById('analyzeBtn').disabled = false;
       updatePanelStatus('可分析');
+      // GA4 埋点：搜索完成（成功）
+      trackSearchCompleted(searchResults.length);
     }
   } catch (error) {
     resultsContainer.innerHTML = `
@@ -189,6 +194,9 @@ async function analyzeResults() {
   if (isAnalyzing || searchResults.length === 0) return;
   isAnalyzing = true;
 
+  // GA4 埋点：AI 分析点击
+  trackAiAnalyzeClicked();
+
   const summaryContentEl = document.getElementById('summaryContent');
   const analyzeBtn = document.getElementById('analyzeBtn');
 
@@ -243,6 +251,8 @@ async function analyzeResults() {
     }
 
     updatePanelStatus('分析完成', 'active');
+    // GA4 埋点：AI 分析完成
+    trackAiAnalyzeCompleted();
   } catch (error) {
     summaryContentEl.innerHTML = `<div class="error-state"><p>${t('analyzeError')}</p></div>`;
     updatePanelStatus('分析失败');
@@ -293,6 +303,9 @@ function selectCategory(category) {
 
 // ---- 初始化 ----
 async function init() {
+  // GA4 埋点：插件打开
+  trackExtensionOpened();
+  
   await loadConfig();
   loadFavorites();
   applyLocale();
