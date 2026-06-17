@@ -68,10 +68,7 @@ AI Startup Scout - Chrome 浏览器扩展，用于搜索 AI 软件创业项目�
 - **小改**（修 bug、改文案、调样式）：patch +1（1.0.1 → 1.0.2）
 - **大改**（新功能、架构调整）：minor +1（1.0.x → 1.1.0）
 - **重大更新**（整体重构）：major +1（1.x → 2.0.0）
-- 每次代码变更必须同步更新以下位置：
-  1. `manifest.json` 中的 `version` 字段
-  2. `src/app/page.tsx` 中的 `EXTENSION_VERSION` 常量（首页下载按钮版本号显示）
-  3. 重新打包 ZIP
+- 每次代码变更必须同步更新 `manifest.json` 中的 `version` 字段并重新打包 ZIP
 
 ### 版本备份规范
 - 每次更新版本后，将当前 ZIP 备份到 `public/archive/ai-startup-scout-{version}.zip`
