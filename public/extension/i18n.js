@@ -42,6 +42,9 @@ const LOCALES = {
     closeSummary: 'Close',            // 关闭分析面板按钮
     feedback: 'Feedback',             // 反馈按钮文本
     feedbackBtn: 'Feedback',          // 反馈按钮提示
+    panelStatusWaiting: 'Waiting for analysis',  // 面板状态：等待分析
+    summaryPlaceholder: 'Search and click "AI Analyze"',  // 分析提示
+    summaryHint: 'Get deep insights report',     // 分析副提示
 
     // ---- 搜索结果 ----
     resultCount: '{count} results',                                     // 结果计数文本
@@ -100,6 +103,9 @@ const LOCALES = {
     closeSummary: '关闭',
     feedback: '反馈',
     feedbackBtn: '支持与反馈',
+    panelStatusWaiting: '等待分析',
+    summaryPlaceholder: '搜索后点击"AI分析"',
+    summaryHint: '获取深度洞察报告',
 
     // ---- 搜索结果 ----
     resultCount: '{count} 条结果',
