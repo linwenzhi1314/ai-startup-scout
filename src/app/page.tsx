@@ -15,6 +15,9 @@
 // 导入 React Hooks：useState 管理域名状态，useEffect 在客户端挂载后获取域名
 import { useState, useEffect } from 'react';
 
+// 扩展版本号（每次更新扩展代码时需同步更新此常量）
+const EXTENSION_VERSION = '1.4.1';
+
 /**
  * GA4 事件跟踪函数
  * @param eventName 事件名称（如 'click_download', 'click_cta'）
@@ -126,9 +129,10 @@ export default function Home() {
           <a
             href={domain ? `${domain}/api/download` : '#'}
             onClick={() => trackEvent('click_download', { button_location: 'nav' })}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
           >
             安装扩展
+            <span className="text-xs text-indigo-200 bg-indigo-700/50 px-1.5 py-0.5 rounded">v{EXTENSION_VERSION}</span>
           </a>
         </div>
       </nav>
@@ -346,7 +350,7 @@ export default function Home() {
             <a
               href={domain ? `${domain}/api/download` : '#'}
               onClick={() => trackEvent('click_download', { button_location: 'how_it_works' })}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
             >
               {/* 下载图标 */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -355,6 +359,7 @@ export default function Home() {
                 <path d="M2 12L12 17L22 12" />
               </svg>
               立即安装
+              <span className="text-xs text-indigo-200 bg-indigo-700/50 px-2 py-0.5 rounded-md">v{EXTENSION_VERSION}</span>
             </a>
           </div>
         </div>
