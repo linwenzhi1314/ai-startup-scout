@@ -106,7 +106,11 @@ export async function POST(request: NextRequest) {
             from: 'AI Startup Scout <daily@aistartupscout.com>',
             to: subscriber.email,
             subject: `AI创业日报 - ${reportData.date}`,
-            html: generateEmailHtml(reportData.report, reportData.date, subscriber.email)
+            html: generateEmailHtml(reportData.report, reportData.date, subscriber.email),
+            headers: {
+              'List-Unsubscribe': `<https://aistartupscout.com/subscribe?unsubscribe=${encodeURIComponent(subscriber.email)}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+            }
           })
         });
 
