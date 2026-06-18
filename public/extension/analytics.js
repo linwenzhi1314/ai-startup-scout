@@ -56,6 +56,7 @@ async function getClientId() {
 async function trackEvent(eventName, eventParams = {}) {
   try {
     const clientId = await getClientId();
+    const sessionId = await getSessionId();
     
     // 构建请求体
     const requestBody = {
@@ -65,14 +66,23 @@ async function trackEvent(eventName, eventParams = {}) {
         params: {
           ...eventParams,
           // 添加会话相关信息
-          session_id: await getSessionId(),
+          session_id: sessionId,
           engagement_time_msec: eventParams.engagement_time_msec || 100
         }
       }]
     };
     
-    // 发送请求到 GA4
-    const url = `${GA_CONFIG.endpoint}?measurement_id=${GA_CONFIG.measurementId}&api_secret=${GA_CONFIG.apiSecret}`;
+    // GA4 Measurement Protocol 端点
+    // 生产端点：https://www.google-analytics.com/mp/collect
+    // 调试端点：https://www.google-analytics.com/debug/mp/collect（返回详细错误信息）
+    const useDebug = true; // 开启调试模式
+    const endpoint = useDebug 
+      ? 'https://www.google-analytics.com/debug/mp/collect'
+      : 'https://www.google-analytics.com/mp/collect';
+    
+    const url = `${endpoint}?measurement_id=${GA_CONFIG.measurementId}&api_secret=${GA_CONFIG.apiSecret}`;
+    
+    console.log('GA4 Debug: 发送请求', { url, requestBody });
     
     // 使用 fetch 发送（Chrome 扩展 Manifest V3 支持 fetch）
     const response = await fetch(url, {
@@ -83,11 +93,28 @@ async function trackEvent(eventName, eventParams = {}) {
       body: JSON.stringify(requestBody)
     });
     
+    const responseText = await response.text();
+    console.log('GA4 Debug: 响应状态', response.status, '响应内容', responseText);
+    
     if (response.ok) {
-      console.log(`GA4: 事件 "${eventName}" 发送成功`);
+      // 调试端点返回 JSON 包含验证结果
+      if (useDebug && responseText) {
+        try {
+          const debugResult = JSON.parse(responseText);
+          if (debugResult.validationMessages && debugResult.validationMessages.length > 0) {
+            console.warn('GA4: 验证警告', debugResult.validationMessages);
+          } else {
+            console.log(`GA4: 事件 "${eventName}" 发送成功，验证通过`);
+          }
+        } catch {
+          console.log(`GA4: 事件 "${eventName}" 发送成功`);
+        }
+      } else {
+        console.log(`GA4: 事件 "${eventName}" 发送成功`);
+      }
       return true;
     } else {
-      console.warn(`GA4: 事件 "${eventName}" 发送失败，状态码: ${response.status}`);
+      console.warn(`GA4: 事件 "${eventName}" 发送失败，状态码: ${response.status}`, responseText);
       return false;
     }
   } catch (error) {
