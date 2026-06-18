@@ -79,7 +79,7 @@ async function search(query) {
   isSearching = true;
   
   // GA4 埋点：搜索行为开始
-  trackSearchPerformed(query);
+  if (window.GA4Analytics) window.GA4Analytics.trackSearchPerformed(query);
 
   // 更新面板状态
   updatePanelStatus('等待分析');
@@ -135,7 +135,7 @@ async function search(query) {
       document.getElementById('analyzeBtn').disabled = false;
       updatePanelStatus('可分析');
       // GA4 埋点：搜索完成（成功）
-      trackSearchCompleted(searchResults.length);
+      if (window.GA4Analytics) window.GA4Analytics.trackSearchCompleted(query, searchResults.length);
     }
   } catch (error) {
     resultsContainer.innerHTML = `
@@ -195,7 +195,7 @@ async function analyzeResults() {
   isAnalyzing = true;
 
   // GA4 埋点：AI 分析点击
-  trackAiAnalyzeClicked();
+  if (window.GA4Analytics) window.GA4Analytics.trackAiAnalyzeClicked();
 
   const summaryContentEl = document.getElementById('summaryContent');
   const analyzeBtn = document.getElementById('analyzeBtn');
@@ -252,7 +252,7 @@ async function analyzeResults() {
 
     updatePanelStatus('分析完成', 'active');
     // GA4 埋点：AI 分析完成
-    trackAiAnalyzeCompleted();
+    if (window.GA4Analytics) window.GA4Analytics.trackAiAnalyzeCompleted();
   } catch (error) {
     summaryContentEl.innerHTML = `<div class="error-state"><p>${t('analyzeError')}</p></div>`;
     updatePanelStatus('分析失败');
@@ -304,7 +304,7 @@ function selectCategory(category) {
 // ---- 初始化 ----
 async function init() {
   // GA4 埋点：插件打开
-  trackExtensionOpened();
+  if (window.GA4Analytics) window.GA4Analytics.trackExtensionOpened();
   
   await loadConfig();
   loadFavorites();
