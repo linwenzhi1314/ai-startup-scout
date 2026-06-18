@@ -162,17 +162,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 生成邮件HTML内容（合规版：添加来源声明）
+// 生成邮件HTML内容
 function generateEmailHtml(content: string, date: string, email: string): string {
   const unsubscribeUrl = `https://aistartupscout.com/api/subscribe?email=${encodeURIComponent(email)}`;
   
-  // 简单的 Markdown 转 HTML（支持链接格式）
+  // 简单的 Markdown 转 HTML
   const htmlContent = content
     .replace(/## (.*)/g, '<h2 style="color: #6366F1; font-size: 18px; margin: 20px 0 10px 0;">$1</h2>')
     .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #6366F1;">$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #6366F1; text-decoration: underline;">$1</a>')
-    .replace(/【来源：([^\]]+)】/g, '<span style="color: #94a3b8; font-size: 12px;">【来源：$1】</span>')
-    .replace(/链接：([^\s<]+)/g, '<a href="$1" style="color: #6366F1; font-size: 12px;">查看原文</a>')
     .replace(/\n\n/g, '</p><p style="margin: 10px 0; line-height: 1.6;">')
     .replace(/^\d+\. /g, '<br/><span style="color: #F59E0B;">•</span> ')
     .replace(/"/g, '"');
@@ -191,9 +188,6 @@ function generateEmailHtml(content: string, date: string, email: string): string
     </div>
     <div style="line-height: 1.6; color: #333333;">
       <p style="margin: 10px 0; line-height: 1.6;">${htmlContent}</p>
-    </div>
-    <div style="margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 6px; font-size: 12px; color: #64748b;">
-      <p style="margin: 5px 0;">📌 <strong>声明</strong>：本日报内容为 AI 原创分析，资讯来源均已标注。如需转载请注明出处。</p>
     </div>
     <div style="margin-top: 30px; text-align: center; color: #94a3b8; font-size: 12px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
       <p style="margin: 5px 0;">由 AI Startup Scout 提供</p>

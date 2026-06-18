@@ -7,31 +7,24 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-// 日报系统提示词（合规版：原创分析 + 来源标注）
-const DAILY_REPORT_PROMPT = `你是一位AI创业领域的分析师。请根据搜索结果，生成一份原创的日报分析。
-
-重要规则：
-1. 不要直接复制原文内容，要用你自己的语言重新表述和分析
-2. 每条资讯末尾必须标注来源格式：【来源：网站名】
-3. 重点关注趋势分析和价值解读，而非简单罗列信息
+// 日报系统提示词
+const DAILY_REPORT_PROMPT = `你是一位AI创业领域的研究员。请根据今天的搜索结果，生成一份简洁的日报。
 
 请按以下结构输出（使用中文）：
 
 ## 今日AI创业热点
-原创分析3-5个热点话题，每个包含：
-- 一句话原创解读（为什么重要、有什么影响）
-- 来源标注：【来源：xxx】
+总结今天搜索结果中的3-5个热点话题或项目。
 
 ## 重点项目推荐
-挑选2-3个值得关注的项目，每个包含：
-- 项目名称 + 一句话原创点评
-- 为什么值得关注的原创分析
-- 来源标注：【来源：xxx】
+挑选2-3个最值得关注的项目，每个包含：
+- 项目名称
+- 一句话亮点
+- 为什么值得关注
 
-## 行业趋势（原创观点）
-基于搜索结果，给出你对当前AI创业趋势的原创判断和分析。
+## 行业动态
+简述当前AI创业领域的整体趋势。
 
-总字数控制在500字以内。记住：你是分析师，不是搬运工。`;
+保持简洁，总字数控制在500字以内。`;
 
 /**
  * POST 处理函数：生成日报
@@ -74,51 +67,21 @@ export async function POST(request: NextRequest) {
 
     const tavilyData = await tavilyResponse.json();
 
-    // 格式化搜索结果（合规版：只传标题+来源+链接，减少原文传入）
+    // 格式化搜索结果
     const results = (tavilyData.results || []).map(
-      (item: { title?: string; content?: string; url?: string }, index: number) => {
-        // 从 URL 提取来源网站名
-        let sourceName = '网络';
-        if (item.url) {
-          try {
-            const hostname = new URL(item.url).hostname;
-            // 常见网站名映射
-            const siteMap: Record<string, string> = {
-              '36kr.com': '36氪',
-              'techcrunch.com': 'TechCrunch',
-              'venturebeat.com': 'VentureBeat',
-              'www.infoq.cn': 'InfoQ',
-              'www.pingwest.com': 'PingWest',
-              'www.huxiu.com': '虎嗅',
-              'www.ifanr.com': '爱范儿',
-              'www.leiphone.com': '雷锋网',
-              'www.jiqizhixin.com': '机器之心',
-              'www.oschina.net': '开源中国',
-              'github.com': 'GitHub',
-              'www.producthunt.com': 'ProductHunt',
-            };
-            sourceName = siteMap[hostname] || hostname.replace('www.', '').split('.')[0];
-          } catch {
-            sourceName = '网络';
-          }
-        }
-        return {
-          id: item.url || `daily-${index}`,
-          title: item.title || '',
-          snippet: item.content?.slice(0, 100) || '', // 只取前100字符作为简要信息
-          url: item.url || '',
-          source: sourceName,
-        };
-      },
+      (item: { title?: string; content?: string; url?: string }, index: number) => ({
+        id: item.url || `daily-${index}`,
+        title: item.title || '',
+        snippet: item.content || '',
+        url: item.url || '',
+      }),
     );
 
-    // 构建搜索结果上下文（合规版：标题+来源+链接，不含全文）
+    // 构建搜索结果上下文
     const resultsContext = results
       .slice(0, 8)
-      .map((r: { title: string; source: string; url: string; snippet: string }, i: number) => 
-        `${i + 1}. 【${r.source}】${r.title}\n   链接：${r.url}\n   简要信息：${r.snippet}`
-      )
-      .join('\n\n');
+      .map((r: { title: string; snippet: string }, i: number) => `${i + 1}. ${r.title}: ${r.snippet}`)
+      .join('\n');
 
     // 调用 DeepSeek 生成日报
     const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
