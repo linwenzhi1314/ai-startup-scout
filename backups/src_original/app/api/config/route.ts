@@ -1,0 +1,45 @@
+/**
+ * @file 配置 API 路由
+ * @description 返回后端服务的域名和扩展版本号，供 Chrome 扩展动态获取 API 地址。
+ *              扩展启动时调用此接口，避免在后端域名变更时需要手动更新扩展代码。
+ * @endpoint GET /api/config
+ * @response { apiBase: string, extensionVersion: string }
+ */
+
+import { NextResponse } from 'next/server';
+
+/**
+ * GET 处理函数：返回后端配置信息
+ * - apiBase: 后端服务的完整域名（含协议），从环境变量 COZE_PROJECT_DOMAIN_DEFAULT 读取
+ * - extensionVersion: 扩展当前版本号，从 manifest.json 动态读取
+ */
+export async function GET() {
+  // 域名优先级：
+  // 1. 用户自定义 NEXT_PUBLIC_API_BASE_URL（最高优先）
+  // 2. Vercel 生产域名 VERCEL_PROJECT_PRODUCTION_URL（自动注入，不含哈希）
+  // 3. 沙箱环境 COZE_PROJECT_DOMAIN_DEFAULT
+  // 4. 硬编码回退
+  // 注意：VERCEL_URL 是带部署哈希的临时域名，不用于 apiBase
+  const domain =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||                              // 用户手动设定
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL                           // Vercel 生产域名
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : '') ||
+    process.env.COZE_PROJECT_DOMAIN_DEFAULT ||                           // 沙箱环境
+    'https://aistartupscout.com';                                      // 硬编码回退
+
+  // 读取扩展版本号：从 manifest.json 动态获取
+  let extensionVersion = '1.2.1'; // 默认回退值
+  try {
+    // 使用动态 import 读取 manifest.json 中的 version 字段
+    const manifest = await import('../../../../public/extension/manifest.json');
+    extensionVersion = manifest.default?.version || manifest.version || '1.2.1';
+  } catch {
+    // 读取失败时使用默认版本号
+  }
+
+  return NextResponse.json({
+    apiBase: domain,                 // 后端 API 基地址
+    extensionVersion,                // 扩展版本号
+  });
+}

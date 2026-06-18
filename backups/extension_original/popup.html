@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+  AI Startup Scout - 宽屏版弹窗 UI (测试版)
+  左右分栏布局：左侧搜索 + 右侧AI分析
+  宽度：700px，高度：520px
+  
+  使用方法：将 manifest.json 中的 default_popup 改为 popup-wide.html 即可测试
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Startup Scout</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-wide">
+    <!-- ===== 左侧：搜索区域 ===== -->
+    <div class="left-panel">
+      <!-- 顶栏：Logo + 语言切换 -->
+      <header class="header">
+        <div class="header-left">
+          <img src="icons/icon48.png" alt="Logo" class="logo">
+          <h1 class="app-title">AI Startup Scout</h1>
+        </div>
+        <div class="header-right">
+          <button id="langToggle" class="icon-btn lang-btn" title="Switch Language">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+            </svg>
+            <span class="lang-label">EN</span>
+          </button>
+          <button id="favToggle" class="icon-btn" title="Favorites">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- 搜索区 -->
+      <div id="searchContainer">
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" data-i18n-placeholder="searchPlaceholder">
+          <button id="searchBtn" class="search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        <div class="category-tabs">
+          <button class="category-tab active" data-category="all" data-i18n="categoryAll">全部</button>
+          <button class="category-tab" data-category="funding" data-i18n="categoryFunding">融资</button>
+          <button class="category-tab" data-category="product" data-i18n="categoryProduct">产品</button>
+          <button class="category-tab" data-category="opensource" data-i18n="categoryOpensource">开源</button>
+          <button class="category-tab" data-category="model" data-i18n="categoryModel">模型</button>
+        </div>
+      </div>
+
+      <div id="resultCount" class="result-count"></div>
+      <div id="loading" class="loading" style="display:none;">
+        <div class="pulse"></div>
+        <span data-i18n="searching">搜索中...</span>
+      </div>
+
+      <!-- 搜索结果 -->
+      <div id="results" class="results"></div>
+
+      <!-- 空状态 -->
+      <div id="emptyState" class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <p class="empty-title" data-i18n="emptyTitle">发现下一个AI独角兽</p>
+        <p class="empty-desc" data-i18n="emptyDesc">输入关键词搜索AI创业项目</p>
+      </div>
+
+      <!-- 底部按钮 -->
+      <div class="bottom-bar">
+        <button id="analyzeBtn" class="analyze-btn" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span data-i18n="aiAnalyze">AI分析</span>
+        </button>
+        <button id="feedbackBtn" class="feedback-btn" title="反馈">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span data-i18n="feedback">反馈</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== 分隔线 ===== -->
+    <div class="divider"></div>
+
+    <!-- ===== 右侧：AI 分析面板 ===== -->
+    <div class="right-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span data-i18n="aiInsight">AI Insight</span>
+        </div>
+        <!-- 面板状态指示 -->
+        <div id="panelStatus" class="panel-status" data-i18n="panelStatusWaiting">等待分析</div>
+      </div>
+      <!-- AI分析内容区域 -->
+      <div id="summaryContent" class="summary-content">
+        <div class="summary-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <p data-i18n="summaryPlaceholder">搜索后点击"AI分析"</p>
+          <p class="hint" data-i18n="summaryHint">获取深度洞察报告</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="analytics.js"></script>
+  <script src="i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
