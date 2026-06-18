@@ -26,7 +26,7 @@ export async function GET() {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : '') ||
     process.env.COZE_PROJECT_DOMAIN_DEFAULT ||                           // 沙箱环境
-    'https://ai-startup-scout.vercel.app';                               // 硬编码回退
+    'https://aistartupscout.com';                                      // 硬编码回退
 
   // 读取扩展版本号：从 manifest.json 动态获取
   let extensionVersion = '1.2.1'; // 默认回退值

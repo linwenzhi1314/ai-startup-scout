@@ -29,7 +29,7 @@ export async function GET() {
 
     if (!zipBuffer) {
       // 如果文件系统读取失败，重定向到静态文件并加缓存破坏参数
-      const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || 'ai-startup-scout.vercel.app';
+      const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || 'aistartupscout.com';
       const baseUrl = host.startsWith('http') ? host : `https://${host}`;
       const cacheBuster = Date.now();
       return NextResponse.redirect(`${baseUrl}/ai-startup-scout.zip?t=${cacheBuster}`, 302);

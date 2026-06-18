@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const cozeDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT;
     
     // 优先使用 COZE_PROJECT_DOMAIN_DEFAULT 或硬编码生产域名
-    const baseUrl = cozeDomain || 'https://ai-startup-scout.vercel.app';
+    const baseUrl = cozeDomain || 'https://aistartupscout.com';
     
     console.log('Using baseUrl:', baseUrl);
     console.log('Calling daily-report API:', `${baseUrl}/api/daily-report`);
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
 
 // 生成邮件HTML内容
 function generateEmailHtml(content: string, date: string, email: string): string {
-  const unsubscribeUrl = `https://ai-startup-scout.vercel.app/api/subscribe?email=${encodeURIComponent(email)}`;
+  const unsubscribeUrl = `https://aistartupscout.com/api/subscribe?email=${encodeURIComponent(email)}`;
   
   // 简单的 Markdown 转 HTML
   const htmlContent = content
