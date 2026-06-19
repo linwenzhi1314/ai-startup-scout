@@ -28,11 +28,13 @@ export function LanguageSwitcher() {
     
     // 替换语言前缀
     if (currentLocale === 'zh-Hans') {
-      // 中文路径，切换到英文
-      return `/en${currentPath}`;
+      // 中文路径，切换到英文：去掉 /zh-Hans 前缀，添加 /en
+      const pathWithoutLocale = currentPath.replace(/^\/zh-Hans/, '') || '/';
+      return `/en${pathWithoutLocale === '/' ? '' : pathWithoutLocale}`;
     } else {
-      // 英文路径，切换到中文
-      return currentPath.replace(/^\/en/, '/zh-Hans');
+      // 英文路径，切换到中文：去掉 /en 前缀，添加 /zh-Hans
+      const pathWithoutLocale = currentPath.replace(/^\/en/, '') || '/';
+      return `/zh-Hans${pathWithoutLocale === '/' ? '' : pathWithoutLocale}`;
     }
   }, [getCurrentLocale]);
 
