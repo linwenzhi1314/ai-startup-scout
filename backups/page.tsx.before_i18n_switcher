@@ -14,8 +14,6 @@
 
 // 导入 React Hooks：useState 管理域名状态，useEffect 在客户端挂载后获取域名
 import { useState, useEffect } from 'react';
-// 导入语言切换组件
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 /**
  * GA4 事件跟踪函数
@@ -132,8 +130,6 @@ export default function Home() {
           >
             安装扩展
           </a>
-          {/* 语言切换按钮 */}
-          <LanguageSwitcher />
         </div>
       </nav>
 
