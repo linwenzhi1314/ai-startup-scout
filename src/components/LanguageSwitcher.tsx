@@ -1,55 +1,61 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useCallback } from 'react';
 
-// 根据路径判断当前语言
-function getCurrentLocale(pathname: string): 'zh' | 'en' {
-  if (pathname.startsWith('/en')) {
-    return 'en';
-  }
-  return 'zh'; // 根目录 / 及其他路径视为中文
-}
-
-// 获取切换后的目标路径
-function getTargetPath(pathname: string, targetLocale: 'zh' | 'en'): string {
-  const currentLocale = getCurrentLocale(pathname);
-  
-  if (currentLocale === 'en') {
-    // 从 /en/xxx 切换到 /xxx（根路径）
-    const path = pathname.replace(/^\/en/, '') || '/';
-    return path;
-  } else {
-    // 从 /xxx 切换到 /en/xxx
-    if (pathname === '/') {
-      return '/en';
-    }
-    return `/en${pathname}`;
-  }
-}
-
+/**
+ * 语言切换组件
+ * 支持中英文切换，并存储用户偏好到 Cookie
+ */
 export function LanguageSwitcher() {
-  const pathname = usePathname();
   const router = useRouter();
-  
-  const currentLocale = getCurrentLocale(pathname);
-  
-  const handleSwitch = () => {
-    const targetLocale = currentLocale === 'zh' ? 'en' : 'zh';
+  const pathname = usePathname();
+
+  // 获取当前语言
+  const getCurrentLocale = useCallback(() => {
+    if (pathname.startsWith('/en')) return 'en';
+    return 'zh-Hans';
+  }, [pathname]);
+
+  // 计算目标语言路径
+  const getTargetPath = useCallback((currentPath: string, targetLocale: string) => {
+    const currentLocale = getCurrentLocale();
+    
+    // 如果当前在根路径，直接跳转到目标语言路径
+    if (currentPath === '/' || currentPath === '') {
+      return `/${targetLocale}`;
+    }
+    
+    // 替换语言前缀
+    if (currentLocale === 'zh-Hans') {
+      // 中文路径，切换到英文
+      return `/en${currentPath}`;
+    } else {
+      // 英文路径，切换到中文
+      return currentPath.replace(/^\/en/, '/zh-Hans');
+    }
+  }, [getCurrentLocale]);
+
+  const currentLocale = getCurrentLocale();
+
+  const handleSwitch = useCallback(() => {
+    const targetLocale = currentLocale === 'zh-Hans' ? 'en' : 'zh-Hans';
     const targetPath = getTargetPath(pathname, targetLocale);
+    
+    // 存储 Cookie（有效期 1 年）
+    document.cookie = `locale=${targetLocale}; path=/; max-age=31536000; SameSite=Lax`;
+    
+    // 跳转到目标路径
     router.push(targetPath);
-  };
+  }, [currentLocale, pathname, getTargetPath, router]);
 
   return (
     <button
       onClick={handleSwitch}
       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors"
-      aria-label="Switch language"
+      aria-label="切换语言"
     >
-      {currentLocale === 'zh' ? (
-        <span>EN</span>
-      ) : (
-        <span>中文</span>
-      )}
+      <span>{currentLocale === 'zh-Hans' ? 'EN' : '中文'}</span>
     </button>
   );
 }

@@ -1,66 +1,80 @@
-/**
- * @file Next.js 中间件
- * @description 统一处理 API 路由的 CORS 响应头，允许 Chrome 扩展跨域请求。
- *              Chrome 扩展的 popup.html 发起 fetch 请求时，origin 为扩展自身，
- *              需要后端显式允许跨域访问。
- */
+import { NextRequest, NextResponse } from 'next/server';
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// 支持的语言列表
+const locales = ['zh-Hans', 'en'];
+const defaultLocale = 'zh-Hans';
 
-/**
- * 允许跨域访问的来源列表
- * - chrome-extension://：允许所有 Chrome 扩展
- * - null：扩展 popup 在某些情况下 origin 为 null
- * - 开发环境 localhost
- */
-const ALLOWED_ORIGINS = [
-  'chrome-extension://',
-  'null',
-  'http://localhost:5000',
-  'http://localhost:3000',
-];
+// 获取用户偏好语言
+function getLocaleFromRequest(request: NextRequest): string {
+  // 1. 检查 Cookie 中是否有用户手动设置的语言偏好
+  const cookieLocale = request.cookies.get('locale')?.value;
+  if (cookieLocale && locales.includes(cookieLocale)) {
+    return cookieLocale;
+  }
+
+  // 2. 检查浏览器 Accept-Language 头
+  const acceptLanguage = request.headers.get('accept-language');
+  if (acceptLanguage) {
+    // 解析 Accept-Language 头，按优先级排序
+    // 格式: "zh-CN,zh;q=0.9,en;q=0.8"
+    const languages = acceptLanguage
+      .split(',')
+      .map(lang => {
+        const [code, q] = lang.split(';q=');
+        return { code: code.trim().toLowerCase(), q: q ? parseFloat(q) : 1 };
+      })
+      .sort((a, b) => b.q - a.q);
+
+    // 匹配支持的语言
+    for (const lang of languages) {
+      if (lang.code.startsWith('zh')) {
+        return 'zh-Hans';
+      }
+      if (lang.code.startsWith('en')) {
+        return 'en';
+      }
+    }
+  }
+
+  // 3. 默认语言
+  return defaultLocale;
+}
 
 export function middleware(request: NextRequest) {
-  // 只处理 API 路由
-  if (!request.nextUrl.pathname.startsWith('/api/')) {
+  const pathname = request.nextUrl.pathname;
+
+  // 静态资源、API、_next 等路径不处理
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/favicon') ||
+    pathname.includes('.') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml'
+  ) {
     return NextResponse.next();
   }
 
-  // 处理 OPTIONS 预检请求
-  if (request.method === 'OPTIONS') {
-    const response = new NextResponse(null, { status: 204 });
-    setCorsHeaders(response, request);
-    return response;
-  }
-
-  // 处理正常请求：先执行后续逻辑，再添加 CORS 头
-  const response = NextResponse.next();
-  setCorsHeaders(response, request);
-  return response;
-}
-
-/**
- * 为响应添加 CORS 头
- * @param response - Next.js 响应对象
- * @param request - Next.js 请求对象（用于获取 origin）
- */
-function setCorsHeaders(response: NextResponse, request: NextRequest) {
-  const origin = request.headers.get('origin') || '';
-
-  // 判断来源是否允许：扩展 origin 或开发环境
-  const isAllowed = ALLOWED_ORIGINS.some(
-    (allowed) => origin.startsWith(allowed) || (!origin && allowed === 'null'),
+  // 如果已经是语言路径，不重定向
+  const isLocalePath = locales.some(
+    locale => pathname.startsWith(`/${locale}`) || pathname === `/${locale}`
   );
 
-  // 允许的来源：匹配则返回具体 origin，否则返回 *（兼容无 origin 的请求）
-  response.headers.set('Access-Control-Allow-Origin', isAllowed ? origin : '*');
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-session');
-  response.headers.set('Access-Control-Max-Age', '86400'); // 预检缓存 24 小时
+  if (isLocalePath) {
+    return NextResponse.next();
+  }
+
+  // 根路径或非语言路径，重定向到对应语言版本
+  const locale = getLocaleFromRequest(request);
+  const url = request.nextUrl.clone();
+  
+  // 重定向到语言路径
+  url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`;
+  
+  return NextResponse.redirect(url);
 }
 
-// 匹配所有 API 路由
 export const config = {
-  matcher: '/api/:path*',
+  // 匹配所有路径，排除静态资源和 API
+  matcher: ['/((?!_next|api|favicon|.*\\..*).*)'],
 };
