@@ -11,6 +11,8 @@ export interface Translation {
     features: string;
     howItWorks: string;
     installExtension: string;
+    dashboard: string;
+    signup: string;
   };
   
   // Hero 区域
@@ -340,6 +342,8 @@ export const translations: Record<Locale, Translation> = {
       features: '功能',
       howItWorks: '使用方式',
       installExtension: '安装扩展',
+      dashboard: '仪表盘',
+      signup: '注册',
     },
     hero: {
       badge: 'Chrome 扩展',
@@ -768,6 +772,8 @@ export const translations: Record<Locale, Translation> = {
       features: 'Features',
       howItWorks: 'How it Works',
       installExtension: 'Install Extension',
+      dashboard: 'Dashboard',
+      signup: 'Sign Up',
     },
     hero: {
       badge: 'Chrome Extension',

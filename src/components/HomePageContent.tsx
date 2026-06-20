@@ -97,6 +97,19 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
         <div className="flex items-center gap-4">
           <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">{t.nav.features}</a>
           <a href="#how-it-works" className="text-sm text-slate-400 hover:text-white transition-colors hidden md:block">{t.nav.howItWorks}</a>
+          {/* Dashboard 和 Sign Up 按钮 */}
+          <a
+            href={`${basePath}/dashboard`}
+            className="text-sm text-slate-300 hover:text-white transition-colors hidden md:block"
+          >
+            {t.nav.dashboard}
+          </a>
+          <a
+            href={`${basePath}/signup`}
+            className="px-4 py-2 border border-indigo-500/50 hover:border-indigo-400 text-indigo-300 hover:text-white text-sm font-medium rounded-lg transition-all hidden md:block"
+          >
+            {t.nav.signup}
+          </a>
           <a
             href={domain ? `${domain}/api/download` : '#'}
             onClick={() => trackEvent('click_download', { button_location: 'nav' })}
