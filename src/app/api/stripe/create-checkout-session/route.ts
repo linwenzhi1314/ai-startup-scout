@@ -21,7 +21,7 @@ const getStripeClient = (): Stripe => {
 const PRICING_PLANS: Record<string, { priceId: string; name: string }> = {
   // 专业版 - 月付 $9
   'pro_monthly': {
-    priceId: 'price_1TkNOCMMBAjcEo2mzUBAr9U',
+    priceId: 'price_1TkN0OCMMBAjcEo2mzUBAr9U',
     name: '专业版 (月付)',
   },
   // 投资版 - 月付 $49
