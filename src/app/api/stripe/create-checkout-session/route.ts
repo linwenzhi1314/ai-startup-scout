@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// 从环境变量获取 Stripe 密钥
-const getStripeSecretKey = (): string => {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
-  }
-  return key;
-};
+// 懒加载 Stripe 客户端（避免构建时检查环境变量）
+let stripeClient: Stripe | null = null;
 
-const stripe = new Stripe(getStripeSecretKey(), {
-  apiVersion: '2026-05-27.dahlia',
-});
+const getStripeClient = (): Stripe => {
+  if (!stripeClient) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    stripeClient = new Stripe(key, {
+      apiVersion: '2026-05-27.dahlia',
+    });
+  }
+  return stripeClient;
+};
 
 // 定价方案配置
 const PRICING_PLANS: Record<string, { priceId: string; name: string }> = {
@@ -50,6 +53,7 @@ export async function POST(request: NextRequest) {
     const userId = 'mock_user_id';
 
     // 创建 Checkout Session
+    const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'alipay'], // 支持信用卡和支付宝
       line_items: [

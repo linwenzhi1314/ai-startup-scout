@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// 从环境变量获取 Stripe 密钥
-const getStripeSecretKey = (): string => {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+// 懒加载 Stripe 客户端
+let stripeClient: Stripe | null = null;
+
+const getStripeClient = (): Stripe => {
+  if (!stripeClient) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    stripeClient = new Stripe(key, {
+      apiVersion: '2026-05-27.dahlia',
+    });
   }
-  return key;
+  return stripeClient;
 };
 
 const getWebhookSecret = (): string => {
   return process.env.STRIPE_WEBHOOK_SECRET || '';
 };
-
-const stripe = new Stripe(getStripeSecretKey(), {
-  apiVersion: '2026-05-27.dahlia',
-});
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    event = getStripeClient().webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err);
     return NextResponse.json(
