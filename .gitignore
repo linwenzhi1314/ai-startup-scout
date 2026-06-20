@@ -17,6 +17,9 @@ __pycache__/
 # Vercel API config (contains sensitive token)
 .vercel-config
 
+# Stripe API config (contains sensitive keys)
+.stripe-config
+
 # JS/TS bundlers & build outputs
 .next
 .nuxt

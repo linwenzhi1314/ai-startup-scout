@@ -70,6 +70,78 @@ export interface Translation {
     privacy: string;
     tagline: string;
   };
+  
+  // 定价页
+  pricing: {
+    title: string;
+    subtitle: string;
+    plans: Array<{
+      name: string;
+      price: string;
+      period: string;
+      description: string;
+      features: string[];
+      buttonText: string;
+      popular?: boolean;
+    }>;
+    faqTitle: string;
+    faqItems: Array<{
+      question: string;
+      answer: string;
+    }>;
+  };
+
+  // 登录页
+  login: {
+    title: string;
+    subtitle: string;
+    error: string;
+    email: string;
+    password: string;
+    emailPlaceholder: string;
+    passwordPlaceholder: string;
+    submitButton: string;
+    submittingButton: string;
+    forgotPassword: string;
+    noAccount: string;
+    signupLink: string;
+    loginSuccess: string;
+    loginError: string;
+    oauthGoogle: string;
+    oauthGithub: string;
+  };
+
+  // 注册页
+  signup: {
+    title: string;
+    subtitle: string;
+    email: string;
+    emailPlaceholder: string;
+    password: string;
+    passwordPlaceholder: string;
+    confirmPassword: string;
+    confirmPasswordPlaceholder: string;
+    submitButton: string;
+    submittingButton: string;
+    hasAccount: string;
+    loginLink: string;
+    successTitle: string;
+    successMessage: string;
+    backToLogin: string;
+    signupError: string;
+    termsNote: string;
+    error: string;
+  };
+
+  // 服务条款页
+  terms: {
+    title: string;
+    lastUpdated: string;
+    sections: Array<{
+      title: string;
+      content: string[];
+    }>;
+  };
 }
 
 export const translations: Record<Locale, Translation> = {
@@ -136,6 +208,164 @@ export const translations: Record<Locale, Translation> = {
       privacy: '隐私政策',
       tagline: 'AI 驱动的创业项目搜索引擎',
     },
+    pricing: {
+      title: '选择适合你的方案',
+      subtitle: '从免费版开始，随时升级获取更多功能',
+      plans: [
+        {
+          name: '免费版',
+          price: '¥0',
+          period: '永久免费',
+          description: '适合想要了解 AI 创业动态的用户',
+          features: [
+            '每日 AI 创业日报',
+            '基础搜索功能',
+            '最多收藏 10 个项目',
+            '社区支持',
+          ],
+          buttonText: '免费开始',
+        },
+        {
+          name: '专业版',
+          price: '¥29',
+          period: '/月',
+          description: '适合创业者和从业者深度研究',
+          features: [
+            '深度 AI 分析报告',
+            '无限收藏项目',
+            '项目对比功能',
+            '趋势预测分析',
+            '邮件优先支持',
+          ],
+          buttonText: '开始试用',
+          popular: true,
+        },
+        {
+          name: '投资版',
+          price: '¥199',
+          period: '/月',
+          description: '适合投资人进行项目筛选',
+          features: [
+            '精选项目推荐',
+            '投资价值评估',
+            '团队背景分析',
+            '竞品对比矩阵',
+            '专属客服支持',
+            'API 接口访问',
+          ],
+          buttonText: '联系咨询',
+        },
+        {
+          name: '企业版',
+          price: '¥999',
+          period: '/次',
+          description: '项目对接服务，适合机构投资者',
+          features: [
+            '一对一项目对接',
+            '定制化筛选方案',
+            '路演安排服务',
+            '投资意向书模板',
+            '法律合规咨询',
+            '专属顾问全程跟进',
+          ],
+          buttonText: '预约咨询',
+        },
+      ],
+      faqTitle: '常见问题',
+      faqItems: [
+        { question: '免费版和专业版有什么区别？', answer: '免费版提供每日日报和基础搜索，专业版提供深度 AI 分析、无限收藏等高级功能。' },
+        { question: '可以随时取消订阅吗？', answer: '是的，你可以随时取消订阅，取消后当月仍可使用功能，下月不再收费。' },
+        { question: '企业版服务如何进行？', answer: '企业版为一次性服务，预约后我们的专属顾问会与你联系，安排项目对接流程。' },
+      ],
+    },
+    login: {
+      title: '登录',
+      subtitle: '登录你的 AI Startup Scout 账户',
+      email: '邮箱',
+      emailPlaceholder: '请输入邮箱',
+      password: '密码',
+      passwordPlaceholder: '请输入密码',
+      submitButton: '登录',
+      submittingButton: '登录中...',
+      forgotPassword: '忘记密码？',
+      noAccount: '还没有账户？',
+      signupLink: '立即注册',
+      error: '配置加载失败',
+      loginSuccess: '登录成功',
+      loginError: '登录失败',
+      oauthGoogle: '使用 Google 登录',
+      oauthGithub: '使用 GitHub 登录',
+    },
+    signup: {
+      title: '注册',
+      subtitle: '创建你的 AI Startup Scout 账户',
+      email: '邮箱',
+      emailPlaceholder: '请输入邮箱',
+      password: '密码',
+      passwordPlaceholder: '请输入密码（至少6位）',
+      confirmPassword: '确认密码',
+      confirmPasswordPlaceholder: '请再次输入密码',
+      submitButton: '注册',
+      submittingButton: '注册中...',
+      hasAccount: '已有账户？',
+      loginLink: '立即登录',
+      successTitle: '注册成功！',
+      successMessage: '请查收邮箱验证邮件，验证后即可登录。',
+      backToLogin: '返回登录',
+      signupError: '注册失败，请稍后重试',
+      termsNote: '注册即表示您同意我们的服务条款',
+      error: '配置加载失败',
+    },
+    terms: {
+      title: '服务条款',
+      lastUpdated: '最后更新：2024年6月',
+      sections: [
+        {
+          title: '1. 服务说明',
+          content: [
+            'AI Startup Scout 是一款 Chrome 浏览器扩展，为用户提供 AI 创业项目的搜索和分析服务。',
+            '我们保留随时修改、暂停或终止服务的权利。',
+          ],
+        },
+        {
+          title: '2. 用户责任',
+          content: [
+            '用户需确保提供的信息准确真实。',
+            '用户不得利用本服务从事任何违法或侵权活动。',
+            '用户应对其账户安全负责。',
+          ],
+        },
+        {
+          title: '3. 付费服务',
+          content: [
+            '付费订阅服务将按月收费，具体价格以定价页面为准。',
+            '订阅费用将在每个计费周期开始时自动收取。',
+            '用户可随时取消订阅，取消后当前计费周期仍有效。',
+          ],
+        },
+        {
+          title: '4. 数据与隐私',
+          content: [
+            '我们重视用户隐私，数据处理遵循隐私政策。',
+            '用户数据仅用于提供服务，不会出售给第三方。',
+          ],
+        },
+        {
+          title: '5. 免责声明',
+          content: [
+            '本服务提供的分析仅供参考，不构成投资建议。',
+            '我们不对用户基于本服务做出的决策承担责任。',
+          ],
+        },
+        {
+          title: '6. 争议解决',
+          content: [
+            '如发生争议，双方应友好协商解决。',
+            '协商不成的，可提交至相关仲裁机构。',
+          ],
+        },
+      ],
+    },
   },
   'en': {
     nav: {
@@ -199,6 +429,166 @@ export const translations: Record<Locale, Translation> = {
       support: 'Support & Feedback',
       privacy: 'Privacy Policy',
       tagline: 'AI-powered startup project search engine',
+    },
+    pricing: {
+      title: 'Choose Your Plan',
+      subtitle: 'From free version to enterprise service, find the solution that suits you best',
+      plans: [
+        {
+          name: 'Free',
+          price: '$0',
+          period: '/month',
+          description: 'Basic features for startup enthusiasts',
+          features: [
+            'Daily AI Startup Newsletter',
+            'Basic project search',
+            '3 bookmarks',
+            'Weekly market summary',
+            'Community access',
+          ],
+          buttonText: 'Get Started',
+        },
+        {
+          name: 'Pro',
+          price: '$4.99',
+          period: '/month',
+          description: 'Deep analysis for professionals',
+          features: [
+            'AI deep analysis',
+            'Unlimited bookmarks',
+            'Real-time alerts',
+            'Market trend reports',
+            'Priority support',
+            'Export reports',
+          ],
+          buttonText: 'Subscribe',
+          popular: true,
+        },
+        {
+          name: 'Investor',
+          price: '$34.99',
+          period: '/month',
+          description: 'Selected projects for investors',
+          features: [
+            'Selected project recommendations',
+            'Investment value assessment',
+            'Team background analysis',
+            'Competitor comparison matrix',
+            'Dedicated support',
+            'API access',
+          ],
+          buttonText: 'Contact Us',
+        },
+        {
+          name: 'Enterprise',
+          price: '$169',
+          period: '/time',
+          description: 'Project matching service for institutional investors',
+          features: [
+            'One-on-one project matching',
+            'Customized screening',
+            'Demo arrangement',
+            'Investment template',
+            'Legal consultation',
+            'Full-process advisor',
+          ],
+          buttonText: 'Book Consultation',
+        },
+      ],
+      faqTitle: 'FAQ',
+      faqItems: [
+        { question: 'What\'s the difference between Free and Pro?', answer: 'Free provides daily newsletter and basic search, Pro offers deep AI analysis, unlimited bookmarks and more.' },
+        { question: 'Can I cancel subscription anytime?', answer: 'Yes, you can cancel anytime. You can still use features for the current month, no charge next month.' },
+        { question: 'How does Enterprise service work?', answer: 'Enterprise is a one-time service. After booking, our dedicated advisor will contact you to arrange the process.' },
+      ],
+    },
+    login: {
+      title: 'Login',
+      subtitle: 'Login to your AI Startup Scout account',
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      password: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      submitButton: 'Login',
+      submittingButton: 'Logging in...',
+      forgotPassword: 'Forgot password?',
+      noAccount: 'Don\'t have an account?',
+      signupLink: 'Sign up now',
+      error: 'Configuration load failed',
+      loginSuccess: 'Login successful',
+      loginError: 'Login failed',
+      oauthGoogle: 'Login with Google',
+      oauthGithub: 'Login with GitHub',
+    },
+    signup: {
+      title: 'Sign Up',
+      subtitle: 'Create your AI Startup Scout account',
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      password: 'Password',
+      passwordPlaceholder: 'Enter password (at least 6 characters)',
+      confirmPassword: 'Confirm Password',
+      confirmPasswordPlaceholder: 'Enter password again',
+      submitButton: 'Sign Up',
+      submittingButton: 'Signing up...',
+      hasAccount: 'Already have an account?',
+      loginLink: 'Login now',
+      successTitle: 'Sign Up Successful!',
+      successMessage: 'Please check your email for verification, then you can login.',
+      backToLogin: 'Back to Login',
+      signupError: 'Sign up failed, please try again later',
+      termsNote: 'By signing up, you agree to our Terms of Service',
+      error: 'Configuration load failed',
+    },
+    terms: {
+      title: 'Terms of Service',
+      lastUpdated: 'Last Updated: June 2024',
+      sections: [
+        {
+          title: '1. Service Description',
+          content: [
+            'AI Startup Scout is a Chrome browser extension providing AI startup project search and analysis services.',
+            'We reserve the right to modify, suspend or terminate the service at any time.',
+          ],
+        },
+        {
+          title: '2. User Responsibilities',
+          content: [
+            'Users must ensure the information provided is accurate and authentic.',
+            'Users shall not use this service for any illegal or infringing activities.',
+            'Users are responsible for their account security.',
+          ],
+        },
+        {
+          title: '3. Paid Services',
+          content: [
+            'Paid subscription services will be charged monthly, specific prices are shown on the pricing page.',
+            'Subscription fees will be automatically charged at the beginning of each billing cycle.',
+            'Users can cancel subscription anytime, current billing cycle still valid after cancellation.',
+          ],
+        },
+        {
+          title: '4. Data & Privacy',
+          content: [
+            'We value user privacy, data processing follows our Privacy Policy.',
+            'User data is only used to provide services and will not be sold to third parties.',
+          ],
+        },
+        {
+          title: '5. Disclaimer',
+          content: [
+            'Analysis provided by this service is for reference only and does not constitute investment advice.',
+            'We are not responsible for decisions made by users based on this service.',
+          ],
+        },
+        {
+          title: '6. Dispute Resolution',
+          content: [
+            'In case of disputes, both parties should negotiate in good faith.',
+            'If negotiation fails, may submit to relevant arbitration institution.',
+          ],
+        },
+      ],
     },
   },
 };
