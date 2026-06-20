@@ -12,6 +12,8 @@ import { Inspector } from 'react-dev-inspector';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 // 导入 Cookie 同意弹窗组件（GDPR合规）
 import { CookieConsent } from '@/components/CookieConsent';
+// 导入 Supabase 配置 Provider
+import { SupabaseConfigProvider } from '@/lib/supabase-config-inject';
 // 导入全局样式
 import './globals.css';
 
@@ -59,14 +61,17 @@ export default function RootLayout({
     <html lang="en">
       {/* body: 抗锯齿字体渲染 */}
       <body className={`antialiased`}>
-        {/* GA4 Google Analytics 跟踪（仅生产环境加载）*/}
-        <GoogleAnalytics />
-        {/* Cookie 同意弹窗（GDPR合规）*/}
-        <CookieConsent />
-        {/* 开发环境加载 React Inspector，用于点击页面元素定位源码 */}
-        {isDev && <Inspector />}
-        {/* 子页面内容插槽 */}
-        {children}
+        {/* Supabase 配置 Provider，提供全局 Supabase 客户端配置 */}
+        <SupabaseConfigProvider>
+          {/* GA4 Google Analytics 跟踪（仅生产环境加载）*/}
+          <GoogleAnalytics />
+          {/* Cookie 同意弹窗（GDPR合规）*/}
+          <CookieConsent />
+          {/* 开发环境加载 React Inspector，用于点击页面元素定位源码 */}
+          {isDev && <Inspector />}
+          {/* 子页面内容插槽 */}
+          {children}
+        </SupabaseConfigProvider>
       </body>
     </html>
   );
