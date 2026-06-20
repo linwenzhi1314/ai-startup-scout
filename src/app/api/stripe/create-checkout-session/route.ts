@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// 懒加载 Stripe 客户端（避免构建时检查环境变量）
+// 懒加载 Stripe 客户端（避免构建时检查环境变量）- v2
 let stripeClient: Stripe | null = null;
 
 const getStripeClient = (): Stripe => {
