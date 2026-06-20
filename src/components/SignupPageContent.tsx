@@ -14,7 +14,7 @@ interface SignupPageContentProps {
 export default function SignupPageContent({ locale }: SignupPageContentProps) {
   const t = translations[locale].signup;
   const router = useRouter();
-  const { config, isLoading, error: configError } = useSupabaseConfig();
+  const { error: configError } = useSupabaseConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,7 +24,6 @@ export default function SignupPageContent({ locale }: SignupPageContentProps) {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config) return;
 
     if (password !== confirmPassword) {
       setError(locale === 'zh-Hans' ? '两次密码不一致' : 'Passwords do not match');
@@ -57,22 +56,6 @@ export default function SignupPageContent({ locale }: SignupPageContentProps) {
       setLoading(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
-        <div className="text-[#F1F5F9]">{locale === 'zh-Hans' ? '加载中...' : 'Loading...'}</div>
-      </div>
-    );
-  }
-
-  if (configError) {
-    return (
-      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
-        <div className="text-red-500">{t.error}: {configError}</div>
-      </div>
-    );
-  }
 
   if (success) {
     return (
@@ -108,6 +91,13 @@ export default function SignupPageContent({ locale }: SignupPageContentProps) {
           <h1 className="text-2xl font-bold text-[#F1F5F9]">{t.title}</h1>
           <p className="text-[#94A3B8] mt-2">{t.subtitle}</p>
         </div>
+
+        {/* Config Error Warning */}
+        {configError && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4 text-red-400 text-sm">
+            {t.error}: {configError}
+          </div>
+        )}
 
         {/* Signup Form */}
         <form onSubmit={handleSignup} className="bg-[#1A1D27] rounded-xl p-6 space-y-4">

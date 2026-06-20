@@ -14,7 +14,7 @@ interface LoginPageContentProps {
 export default function LoginPageContent({ locale }: LoginPageContentProps) {
   const t = translations[locale].login;
   const router = useRouter();
-  const { config, isLoading, error: configError } = useSupabaseConfig();
+  const { config, error: configError } = useSupabaseConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +22,8 @@ export default function LoginPageContent({ locale }: LoginPageContentProps) {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config) return;
-
+    
+    // 如果配置未加载完成，尝试直接使用浏览器客户端
     setLoading(true);
     setError(null);
 
@@ -46,22 +46,6 @@ export default function LoginPageContent({ locale }: LoginPageContentProps) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
-        <div className="text-[#F1F5F9]">{locale === 'zh-Hans' ? '加载中...' : 'Loading...'}</div>
-      </div>
-    );
-  }
-
-  if (configError) {
-    return (
-      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
-        <div className="text-red-500">{t.error}: {configError}</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0F1117] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -75,6 +59,13 @@ export default function LoginPageContent({ locale }: LoginPageContentProps) {
           <h1 className="text-2xl font-bold text-[#F1F5F9]">{t.title}</h1>
           <p className="text-[#94A3B8] mt-2">{t.subtitle}</p>
         </div>
+
+        {/* Config Error Warning */}
+        {configError && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4 text-red-400 text-sm">
+            {t.error}: {configError}
+          </div>
+        )}
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="bg-[#1A1D27] rounded-xl p-6 space-y-4">
