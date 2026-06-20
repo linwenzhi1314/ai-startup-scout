@@ -142,6 +142,196 @@ export interface Translation {
       content: string[];
     }>;
   };
+
+  // 用户仪表盘
+  dashboard: {
+    title: string;
+    welcome: string;
+    subscription: {
+      title: string;
+      plan: string;
+      status: string;
+      statusActive: string;
+      statusInactive: string;
+      expires: string;
+      upgradeButton: string;
+    };
+    stats: {
+      searches: string;
+      bookmarks: string;
+      analyses: string;
+    };
+    recentSearches: {
+      title: string;
+      empty: string;
+    };
+    bookmarks: {
+      title: string;
+      empty: string;
+      viewAll: string;
+    };
+    quickActions: {
+      title: string;
+      newSearch: string;
+      getReport: string;
+      viewTrends: string;
+    };
+    sidebar: {
+      overview: string;
+      bookmarks: string;
+      history: string;
+      settings: string;
+      logout: string;
+    };
+  };
+
+  // 账户设置
+  settings: {
+    title: string;
+    profile: {
+      title: string;
+      email: string;
+      name: string;
+      namePlaceholder: string;
+      saveButton: string;
+      savingButton: string;
+      successMessage: string;
+    };
+    password: {
+      title: string;
+      current: string;
+      currentPlaceholder: string;
+      new: string;
+      newPlaceholder: string;
+      confirm: string;
+      confirmPlaceholder: string;
+      changeButton: string;
+      changingButton: string;
+      successMessage: string;
+    };
+    subscription: {
+      title: string;
+      currentPlan: string;
+      billingCycle: string;
+      nextBilling: string;
+      changePlan: string;
+      cancelPlan: string;
+    };
+    danger: {
+      title: string;
+      deleteAccount: string;
+      deleteWarning: string;
+      deleteButton: string;
+    };
+    sidebar: {
+      profile: string;
+      password: string;
+      subscription: string;
+      danger: string;
+    };
+  };
+
+  // 帮助中心
+  help: {
+    title: string;
+    subtitle: string;
+    categories: {
+      gettingStarted: string;
+      account: string;
+      subscription: string;
+      extension: string;
+    };
+    faq: Array<{
+      category: string;
+      items: Array<{
+        question: string;
+        answer: string;
+      }>;
+    }>;
+    contact: {
+      title: string;
+      email: string;
+      discord: string;
+      responseTime: string;
+    };
+  };
+
+  // 后台管理
+  admin: {
+    title: string;
+    dashboard: {
+      users: string;
+      activeUsers: string;
+      subscriptions: string;
+      revenue: string;
+    };
+    users: {
+      title: string;
+      email: string;
+      plan: string;
+      status: string;
+      createdAt: string;
+      actions: string;
+    };
+    subscriptions: {
+      title: string;
+      active: string;
+      cancelled: string;
+      totalRevenue: string;
+    };
+    sidebar: {
+      overview: string;
+      users: string;
+      subscriptions: string;
+      analytics: string;
+    };
+  };
+
+  // 关于我们
+  about: {
+    title: string;
+    subtitle: string;
+    mission: {
+      title: string;
+      content: string;
+    };
+    team: {
+      title: string;
+      members: Array<{
+        name: string;
+        role: string;
+        bio: string;
+      }>;
+    };
+    story: {
+      title: string;
+      content: string[];
+    };
+    values: {
+      title: string;
+      items: Array<{
+        title: string;
+        desc: string;
+      }>;
+    };
+    contact: {
+      title: string;
+      email: string;
+      location: string;
+    };
+  };
+
+  // 博客
+  blog: {
+    title: string;
+    subtitle: string;
+    readMore: string;
+    categories: string[];
+    recentPosts: {
+      title: string;
+      empty: string;
+    };
+  };
 }
 
 export const translations: Record<Locale, Translation> = {
@@ -366,6 +556,212 @@ export const translations: Record<Locale, Translation> = {
         },
       ],
     },
+    dashboard: {
+      title: '用户仪表盘',
+      welcome: '欢迎回来',
+      subscription: {
+        title: '订阅状态',
+        plan: '当前方案',
+        status: '状态',
+        statusActive: '有效',
+        statusInactive: '未订阅',
+        expires: '到期时间',
+        upgradeButton: '升级方案',
+      },
+      stats: {
+        searches: '搜索次数',
+        bookmarks: '收藏项目',
+        analyses: 'AI 分析',
+      },
+      recentSearches: {
+        title: '最近搜索',
+        empty: '暂无搜索记录',
+      },
+      bookmarks: {
+        title: '我的收藏',
+        empty: '暂无收藏项目',
+        viewAll: '查看全部',
+      },
+      quickActions: {
+        title: '快捷操作',
+        newSearch: '新搜索',
+        getReport: '获取报告',
+        viewTrends: '查看趋势',
+      },
+      sidebar: {
+        overview: '概览',
+        bookmarks: '收藏',
+        history: '历史',
+        settings: '设置',
+        logout: '退出登录',
+      },
+    },
+    settings: {
+      title: '账户设置',
+      profile: {
+        title: '个人信息',
+        email: '邮箱',
+        name: '姓名',
+        namePlaceholder: '请输入姓名',
+        saveButton: '保存',
+        savingButton: '保存中...',
+        successMessage: '信息已更新',
+      },
+      password: {
+        title: '修改密码',
+        current: '当前密码',
+        currentPlaceholder: '请输入当前密码',
+        new: '新密码',
+        newPlaceholder: '请输入新密码',
+        confirm: '确认密码',
+        confirmPlaceholder: '请再次输入新密码',
+        changeButton: '修改密码',
+        changingButton: '修改中...',
+        successMessage: '密码已更新',
+      },
+      subscription: {
+        title: '订阅管理',
+        currentPlan: '当前方案',
+        billingCycle: '计费周期',
+        nextBilling: '下次扣费',
+        changePlan: '更换方案',
+        cancelPlan: '取消订阅',
+      },
+      danger: {
+        title: '危险区域',
+        deleteAccount: '删除账户',
+        deleteWarning: '删除账户将永久清除所有数据，此操作不可撤销。',
+        deleteButton: '删除账户',
+      },
+      sidebar: {
+        profile: '个人信息',
+        password: '密码',
+        subscription: '订阅',
+        danger: '危险区域',
+      },
+    },
+    help: {
+      title: '帮助中心',
+      subtitle: '有问题？我们随时为您解答',
+      categories: {
+        gettingStarted: '入门指南',
+        account: '账户问题',
+        subscription: '订阅与支付',
+        extension: '扩展使用',
+      },
+      faq: [
+        {
+          category: '入门指南',
+          items: [
+            { question: '如何安装扩展？', answer: '访问 Chrome Web Store，搜索 AI Startup Scout，点击"添加到 Chrome"即可安装。' },
+            { question: '如何开始搜索？', answer: '安装后点击浏览器工具栏中的扩展图标，输入关键词即可开始搜索 AI 创业项目。' },
+          ],
+        },
+        {
+          category: '账户问题',
+          items: [
+            { question: '如何修改密码？', answer: '登录后进入账户设置 → 密码，输入当前密码和新密码即可修改。' },
+            { question: '忘记密码怎么办？', answer: '在登录页面点击"忘记密码"，输入邮箱后我们会发送重置链接。' },
+          ],
+        },
+        {
+          category: '订阅与支付',
+          items: [
+            { question: '支持哪些支付方式？', answer: '我们支持支付宝、信用卡（Visa/MasterCard）等多种支付方式。' },
+            { question: '如何取消订阅？', answer: '进入账户设置 → 订阅管理，点击"取消订阅"即可。取消后当前周期仍有效。' },
+          ],
+        },
+        {
+          category: '扩展使用',
+          items: [
+            { question: '搜索结果不准确怎么办？', answer: '尝试使用更具体的关键词，或选择分类筛选（融资/产品/开源/模型）。' },
+            { question: '如何收藏项目？', answer: '在搜索结果中点击项目卡片上的收藏图标，即可添加到收藏列表。' },
+          ],
+        },
+      ],
+      contact: {
+        title: '联系我们',
+        email: 'support@aistartupscout.com',
+        discord: '加入 Discord 社区',
+        responseTime: '通常在24小时内回复',
+      },
+    },
+    admin: {
+      title: '后台管理',
+      dashboard: {
+        users: '总用户',
+        activeUsers: '活跃用户',
+        subscriptions: '订阅用户',
+        revenue: '本月收入',
+      },
+      users: {
+        title: '用户管理',
+        email: '邮箱',
+        plan: '方案',
+        status: '状态',
+        createdAt: '注册时间',
+        actions: '操作',
+      },
+      subscriptions: {
+        title: '订阅管理',
+        active: '活跃订阅',
+        cancelled: '已取消',
+        totalRevenue: '总收入',
+      },
+      sidebar: {
+        overview: '概览',
+        users: '用户',
+        subscriptions: '订阅',
+        analytics: '分析',
+      },
+    },
+    about: {
+      title: '关于我们',
+      subtitle: '让每个人都能发现 AI 创业机会',
+      mission: {
+        title: '我们的使命',
+        content: 'AI Startup Scout 致力于让 AI 创业信息触手可及，帮助创业者、投资人和从业者快速发现有价值的项目，洞察行业趋势。',
+      },
+      team: {
+        title: '核心团队',
+        members: [
+          { name: '张明', role: '创始人 & CEO', bio: '前字节跳动产品经理，专注 AI 领域 5 年' },
+          { name: '李华', role: '技术负责人', bio: '前腾讯工程师，全栈开发经验 8 年' },
+          { name: '王芳', role: '产品负责人', bio: '前美团产品总监，用户体验专家' },
+        ],
+      },
+      story: {
+        title: '我们的故事',
+        content: [
+          '2023年初，我们在寻找 AI 创业项目时发现信息分散、难以系统化研究。',
+          '于是我们开发了 AI Startup Scout，用技术解决这个痛点。',
+          '如今，已有超过 10,000 用户使用我们的产品发现 AI 创业机会。',
+        ],
+      },
+      values: {
+        title: '我们的价值观',
+        items: [
+          { title: '用户至上', desc: '一切以用户价值为导向' },
+          { title: '持续创新', desc: '不断探索更好的解决方案' },
+          { title: '开放透明', desc: '保持诚实、开放的沟通' },
+        ],
+      },
+      contact: {
+        title: '联系我们',
+        email: 'hello@aistartupscout.com',
+        location: '中国深圳',
+      },
+    },
+    blog: {
+      title: '博客',
+      subtitle: 'AI 创业洞察与行业分析',
+      readMore: '阅读更多',
+      categories: ['全部', '行业分析', '产品更新', '用户故事', '技术分享'],
+      recentPosts: {
+        title: '最新文章',
+        empty: '暂无文章',
+      },
+    },
   },
   'en': {
     nav: {
@@ -589,6 +985,212 @@ export const translations: Record<Locale, Translation> = {
           ],
         },
       ],
+    },
+    dashboard: {
+      title: 'Dashboard',
+      welcome: 'Welcome back',
+      subscription: {
+        title: 'Subscription',
+        plan: 'Current Plan',
+        status: 'Status',
+        statusActive: 'Active',
+        statusInactive: 'Not subscribed',
+        expires: 'Expires',
+        upgradeButton: 'Upgrade',
+      },
+      stats: {
+        searches: 'Searches',
+        bookmarks: 'Bookmarks',
+        analyses: 'AI Analyses',
+      },
+      recentSearches: {
+        title: 'Recent Searches',
+        empty: 'No recent searches',
+      },
+      bookmarks: {
+        title: 'My Bookmarks',
+        empty: 'No bookmarks yet',
+        viewAll: 'View All',
+      },
+      quickActions: {
+        title: 'Quick Actions',
+        newSearch: 'New Search',
+        getReport: 'Get Report',
+        viewTrends: 'View Trends',
+      },
+      sidebar: {
+        overview: 'Overview',
+        bookmarks: 'Bookmarks',
+        history: 'History',
+        settings: 'Settings',
+        logout: 'Logout',
+      },
+    },
+    settings: {
+      title: 'Account Settings',
+      profile: {
+        title: 'Profile',
+        email: 'Email',
+        name: 'Name',
+        namePlaceholder: 'Enter your name',
+        saveButton: 'Save',
+        savingButton: 'Saving...',
+        successMessage: 'Profile updated',
+      },
+      password: {
+        title: 'Change Password',
+        current: 'Current Password',
+        currentPlaceholder: 'Enter current password',
+        new: 'New Password',
+        newPlaceholder: 'Enter new password',
+        confirm: 'Confirm Password',
+        confirmPlaceholder: 'Enter new password again',
+        changeButton: 'Change Password',
+        changingButton: 'Changing...',
+        successMessage: 'Password updated',
+      },
+      subscription: {
+        title: 'Subscription',
+        currentPlan: 'Current Plan',
+        billingCycle: 'Billing Cycle',
+        nextBilling: 'Next Billing',
+        changePlan: 'Change Plan',
+        cancelPlan: 'Cancel Subscription',
+      },
+      danger: {
+        title: 'Danger Zone',
+        deleteAccount: 'Delete Account',
+        deleteWarning: 'Deleting your account will permanently remove all data. This action cannot be undone.',
+        deleteButton: 'Delete Account',
+      },
+      sidebar: {
+        profile: 'Profile',
+        password: 'Password',
+        subscription: 'Subscription',
+        danger: 'Danger Zone',
+      },
+    },
+    help: {
+      title: 'Help Center',
+      subtitle: 'Have questions? We\'re here to help',
+      categories: {
+        gettingStarted: 'Getting Started',
+        account: 'Account',
+        subscription: 'Subscription & Payment',
+        extension: 'Extension',
+      },
+      faq: [
+        {
+          category: 'Getting Started',
+          items: [
+            { question: 'How to install the extension?', answer: 'Visit Chrome Web Store, search for AI Startup Scout, and click "Add to Chrome" to install.' },
+            { question: 'How to start searching?', answer: 'After installation, click the extension icon in your browser toolbar and enter keywords to search AI startup projects.' },
+          ],
+        },
+        {
+          category: 'Account',
+          items: [
+            { question: 'How to change password?', answer: 'Go to Settings → Password after login, enter current and new password to change.' },
+            { question: 'What if I forgot my password?', answer: 'Click "Forgot password" on login page, enter your email and we\'ll send a reset link.' },
+          ],
+        },
+        {
+          category: 'Subscription & Payment',
+          items: [
+            { question: 'What payment methods are supported?', answer: 'We support Alipay, credit cards (Visa/MasterCard) and more.' },
+            { question: 'How to cancel subscription?', answer: 'Go to Settings → Subscription and click "Cancel Subscription". Current billing cycle remains valid after cancellation.' },
+          ],
+        },
+        {
+          category: 'Extension',
+          items: [
+            { question: 'Search results not accurate?', answer: 'Try using more specific keywords or select category filters (Funding/Product/Open Source/Model).' },
+            { question: 'How to bookmark projects?', answer: 'Click the bookmark icon on project cards in search results to add to your bookmark list.' },
+          ],
+        },
+      ],
+      contact: {
+        title: 'Contact Us',
+        email: 'support@aistartupscout.com',
+        discord: 'Join Discord Community',
+        responseTime: 'Usually respond within 24 hours',
+      },
+    },
+    admin: {
+      title: 'Admin Dashboard',
+      dashboard: {
+        users: 'Total Users',
+        activeUsers: 'Active Users',
+        subscriptions: 'Subscribers',
+        revenue: 'Monthly Revenue',
+      },
+      users: {
+        title: 'User Management',
+        email: 'Email',
+        plan: 'Plan',
+        status: 'Status',
+        createdAt: 'Created',
+        actions: 'Actions',
+      },
+      subscriptions: {
+        title: 'Subscription Management',
+        active: 'Active',
+        cancelled: 'Cancelled',
+        totalRevenue: 'Total Revenue',
+      },
+      sidebar: {
+        overview: 'Overview',
+        users: 'Users',
+        subscriptions: 'Subscriptions',
+        analytics: 'Analytics',
+      },
+    },
+    about: {
+      title: 'About Us',
+      subtitle: 'Discover AI startup opportunities for everyone',
+      mission: {
+        title: 'Our Mission',
+        content: 'AI Startup Scout is dedicated to making AI startup information accessible, helping entrepreneurs, investors and professionals quickly discover valuable projects and industry trends.',
+      },
+      team: {
+        title: 'Core Team',
+        members: [
+          { name: 'Zhang Ming', role: 'Founder & CEO', bio: 'Former ByteDance PM, 5 years in AI' },
+          { name: 'Li Hua', role: 'Tech Lead', bio: 'Former Tencent engineer, 8 years full-stack' },
+          { name: 'Wang Fang', role: 'Product Lead', bio: 'Former Meituan PM Director, UX expert' },
+        ],
+      },
+      story: {
+        title: 'Our Story',
+        content: [
+          'In early 2023, we found AI startup information scattered and hard to research systematically.',
+          'So we built AI Startup Scout to solve this pain point with technology.',
+          'Today, over 10,000 users use our product to discover AI startup opportunities.',
+        ],
+      },
+      values: {
+        title: 'Our Values',
+        items: [
+          { title: 'User First', desc: 'Everything oriented by user value' },
+          { title: 'Continuous Innovation', desc: 'Always exploring better solutions' },
+          { title: 'Open & Transparent', desc: 'Honest and open communication' },
+        ],
+      },
+      contact: {
+        title: 'Contact Us',
+        email: 'hello@aistartupscout.com',
+        location: 'Shenzhen, China',
+      },
+    },
+    blog: {
+      title: 'Blog',
+      subtitle: 'AI startup insights and industry analysis',
+      readMore: 'Read More',
+      categories: ['All', 'Industry Analysis', 'Product Updates', 'User Stories', 'Tech'],
+      recentPosts: {
+        title: 'Recent Posts',
+        empty: 'No posts yet',
+      },
     },
   },
 };
