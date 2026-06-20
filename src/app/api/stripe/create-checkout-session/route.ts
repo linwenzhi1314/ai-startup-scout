@@ -17,21 +17,21 @@ const getStripeClient = (): Stripe => {
   return stripeClient;
 };
 
-// 定价方案配置
+// 定价方案配置（使用真实的 Stripe Price ID）
 const PRICING_PLANS: Record<string, { priceId: string; name: string }> = {
-  // 专业版 - 月付
+  // 专业版 - 月付 $9
   'pro_monthly': {
-    priceId: 'price_pro_monthly', // 需要在 Stripe 创建产品后替换
+    priceId: 'price_1TkNOCMMBAjcEo2mzUBAr9U',
     name: '专业版 (月付)',
   },
-  // 投资版 - 月付
+  // 投资版 - 月付 $49
   'investor_monthly': {
-    priceId: 'price_investor_monthly',
+    priceId: 'price_1TkN2nCMMBAjcEo25UHLEPeW',
     name: '投资版 (月付)',
   },
-  // 企业版 - 一次性
+  // 企业版 - 联系销售（不使用 Stripe）
   'enterprise': {
-    priceId: 'price_enterprise',
+    priceId: '',
     name: '企业版服务',
   },
 };
@@ -54,28 +54,24 @@ export async function POST(request: NextRequest) {
 
     // 创建 Checkout Session
     const stripe = getStripeClient();
+    const plan = PRICING_PLANS[planId];
+    
+    if (!plan || !plan.priceId) {
+      return NextResponse.json(
+        { error: 'Invalid planId' },
+        { status: 400 }
+      );
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'alipay'], // 支持信用卡和支付宝
       line_items: [
         {
-          price_data: {
-            currency: locale === 'en' ? 'usd' : 'cny',
-            product_data: {
-              name: PRICING_PLANS[planId]?.name || 'AI Startup Scout Subscription',
-            },
-            unit_amount: planId === 'pro_monthly' 
-              ? (locale === 'en' ? 499 : 2900) // $4.99 或 ¥29
-              : planId === 'investor_monthly' 
-                ? (locale === 'en' ? 3499 : 19900) // $34.99 或 ¥199
-                : (locale === 'en' ? 16900 : 99900), // $169 或 ¥999
-            recurring: planId !== 'enterprise' 
-              ? { interval: 'month' } 
-              : undefined,
-          },
+          price: plan.priceId,
           quantity: 1,
         },
       ],
-      mode: planId === 'enterprise' ? 'payment' : 'subscription',
+      mode: 'subscription',
       success_url: `${process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'https://aistartupscout.com'}/${locale || 'zh-Hans'}/dashboard?payment=success`,
       cancel_url: `${process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'https://aistartupscout.com'}/${locale || 'zh-Hans'}/pricing?payment=cancelled`,
       metadata: {
