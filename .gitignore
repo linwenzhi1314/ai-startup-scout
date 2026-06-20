@@ -14,6 +14,9 @@ __pycache__/
 .env
 .cozeproj/reduction
 
+# Vercel API config (contains sensitive token)
+.vercel-config
+
 # JS/TS bundlers & build outputs
 .next
 .nuxt
