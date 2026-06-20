@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'alipay'], // 支持信用卡和支付宝
+      payment_method_types: ['card'], // 订阅模式只支持信用卡
       line_items: [
         {
           price: plan.priceId,
