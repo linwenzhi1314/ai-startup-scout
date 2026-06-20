@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Locale, Translation } from '@/lib/i18n/translations';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 interface HomePageContentProps {
   locale: Locale;
@@ -27,10 +28,29 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
   const [submitting, setSubmitting] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [subscribeMessage, setSubscribeMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const d = process.env.NEXT_PUBLIC_COZE_PROJECT_DOMAIN_DEFAULT || window.location.origin || '';
     setDomain(d);
+
+    // 检查用户登录状态
+    try {
+      const supabase = getSupabaseBrowserClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setIsLoggedIn(!!session);
+      });
+
+      // 监听登录状态变化
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+      });
+
+      return () => subscription.unsubscribe();
+    } catch {
+      // Supabase 配置未加载时，默认未登录
+      setIsLoggedIn(false);
+    }
   }, []);
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -105,12 +125,12 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
           >
             {t.nav.installExtension}
           </a>
-          {/* Dashboard 和 Sign Up 按钮 */}
+          {/* Dashboard/Login 按钮 - 根据登录状态切换 */}
           <a
-            href={`${basePath}/dashboard`}
+            href={isLoggedIn ? `${basePath}/dashboard` : `${basePath}/login`}
             className="text-sm text-slate-300 hover:text-white transition-colors hidden md:block"
           >
-            {t.nav.dashboard}
+            {isLoggedIn ? t.nav.dashboard : t.nav.login}
           </a>
           <a
             href={`${basePath}/signup`}

@@ -13,6 +13,7 @@ export interface Translation {
     installExtension: string;
     dashboard: string;
     signup: string;
+    login: string;
   };
   
   // Hero 区域
@@ -344,6 +345,7 @@ export const translations: Record<Locale, Translation> = {
       installExtension: '安装扩展',
       dashboard: '仪表盘',
       signup: '注册',
+      login: '登录',
     },
     hero: {
       badge: 'Chrome 扩展',
@@ -774,6 +776,7 @@ export const translations: Record<Locale, Translation> = {
       installExtension: 'Install Extension',
       dashboard: 'Dashboard',
       signup: 'Sign Up',
+      login: 'Login',
     },
     hero: {
       badge: 'Chrome Extension',
