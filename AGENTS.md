@@ -99,3 +99,22 @@ AI Startup Scout - Chrome 浏览器扩展，用于搜索 AI 软件创业项目�
 - **Web Search**: 使用 `SearchClient` from `coze-coding-dev-sdk`
 - **LLM**: 使用 `LLMClient` from `coze-coding-dev-sdk`，默认使用流式输出
 - **Header 转发**: 必须使用 `HeaderUtils.extractForwardHeaders(request.headers)`
+
+## 许可证合规规范（付费 SaaS 闭源产品）
+
+### 许可证风险等级
+| 风险等级 | 许可证类型 | 说明 |
+|---------|-----------|------|
+| ✅ **零风险** | MIT、Apache-2.0、BSD、ISC | 可自由商用闭源 |
+| ⚠️ **动态调用安全** | LGPL | 动态链接调用不传染主业务 |
+| ❌ **绝对禁止** | GPL、AGPL、SSPL | 强传染/网络服务传染/全栈开源要求 |
+
+### 引入新依赖流程
+1. 安装前检查许可证：`pnpm licenses list | grep -E "GPL|AGPL|SSPL"`
+2. 如发现高风险许可证，立即移除并寻找替代方案
+3. 优先选择 MIT/Apache-2.0 许可证的替代库
+
+### 当前项目许可证状态
+- 主依赖均为 MIT/Apache-2.0/BSD（零风险）
+- 仅 `@img/sharp-libvips-linux-x64` 为 LGPL-3.0（动态调用，安全）
+- 无 GPL/AGPL/SSPL 高风险依赖
