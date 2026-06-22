@@ -31,7 +31,7 @@ export interface CreateCheckoutRequest {
 export interface CreateCheckoutResponse {
   success: boolean;
   sessionId?: string;
-  url?: string; // 支付页面 URL
+  url?: string | null; // 支付页面 URL
   provider: PaymentProvider;
   error?: string;
 }

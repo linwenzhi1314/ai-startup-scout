@@ -277,7 +277,7 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
 }
 
 // 支付配置管理组件
-function PaymentSettingsSection({ locale: string }) {
+function PaymentSettingsSection({ locale }: { locale: string }) {
   const [providers, setProviders] = useState<ProviderMetadata[]>([]);
   const [activeProvider, setActiveProvider] = useState<PaymentProvider | null>(null);
   const [loading, setLoading] = useState(true);

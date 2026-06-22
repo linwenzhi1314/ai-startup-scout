@@ -13,7 +13,8 @@ import {
   WebhookResult,
   UserSubscription,
   PlanConfig,
-} from './types';
+  PlanId,
+} from '../types';
 
 // 定价方案配置（使用真实的 Stripe Price ID）
 const STRIPE_PLANS: Record<string, PlanConfig & { priceId: string }> = {
@@ -199,12 +200,12 @@ export class StripeAdapter implements PaymentAdapter {
       return {
         id: subscription.id,
         userId: subscription.metadata?.userId || '',
-        planId: (subscription.metadata?.planId as any) || 'pro_monthly',
+        planId: (subscription.metadata?.planId as PlanId) || 'pro_monthly',
         provider: this.name,
         status: this.mapStripeStatus(subscription.status),
-        currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       };
     } catch (error) {
       console.error('[Stripe] Get subscription error:', error);

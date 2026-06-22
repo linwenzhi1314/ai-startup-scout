@@ -43,11 +43,11 @@ export class PaddleAdapter implements PaymentAdapter {
   feeDescription = '5% + $0.50';
 
   private getApiKey(): string | null {
-    return process.env.PADDLE_API_KEY;
+    return process.env.PADDLE_API_KEY || null;
   }
 
   private getWebhookSecret(): string | null {
-    return process.env.PADDLE_WEBHOOK_SECRET_KEY;
+    return process.env.PADDLE_WEBHOOK_SECRET_KEY || null;
   }
 
   private getBaseUrl(): string {

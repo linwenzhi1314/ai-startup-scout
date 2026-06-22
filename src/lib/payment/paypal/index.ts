@@ -41,11 +41,11 @@ export class PayPalAdapter implements PaymentAdapter {
   feeDescription = '约 3-4%（跨境可能更高）';
 
   private getClientId(): string | null {
-    return process.env.PAYPAL_CLIENT_ID;
+    return process.env.PAYPAL_CLIENT_ID || null;
   }
 
   private getClientSecret(): string | null {
-    return process.env.PAYPAL_CLIENT_SECRET;
+    return process.env.PAYPAL_CLIENT_SECRET || null;
   }
 
   private getBaseUrl(): string {

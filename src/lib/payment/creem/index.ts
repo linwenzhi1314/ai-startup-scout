@@ -42,11 +42,11 @@ export class CreemAdapter implements PaymentAdapter {
   feeDescription = '约 4-5%（含税务处理）';
 
   private getApiKey(): string | null {
-    return process.env.CREEM_API_KEY;
+    return process.env.CREEM_API_KEY || null;
   }
 
   private getWebhookSecret(): string | null {
-    return process.env.CREEM_WEBHOOK_SECRET;
+    return process.env.CREEM_WEBHOOK_SECRET || null;
   }
 
   private getBaseUrl(): string {

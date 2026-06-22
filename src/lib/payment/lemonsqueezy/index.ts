@@ -43,11 +43,11 @@ export class LemonSqueezyAdapter implements PaymentAdapter {
   feeDescription = '5% + $0.50 + 2.5% 支付处理费';
 
   private getApiKey(): string | null {
-    return process.env.LEMONSQUEEZY_API_KEY;
+    return process.env.LEMONSQUEEZY_API_KEY || null;
   }
 
   private getWebhookSecret(): string | null {
-    return process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+    return process.env.LEMONSQUEEZY_WEBHOOK_SECRET || null;
   }
 
   private getBaseUrl(): string {
