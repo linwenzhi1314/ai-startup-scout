@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,10 +13,15 @@ import {
   DollarSign,
   Activity,
   Settings,
-  Shield
+  Shield,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { Translation } from '@/lib/i18n/translations';
+import { ProviderMetadata, PaymentProvider } from '@/lib/payment/types';
 
 interface AdminPageContentProps {
   translation: Translation;
@@ -93,6 +98,14 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               {t.sidebar.analytics}
+            </Button>
+            <Button
+              variant={activeTab === 'payment' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-[#94A3B8] hover:text-[#F1F5F9]"
+              onClick={() => setActiveTab('payment')}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              支付配置
             </Button>
           </nav>
 
@@ -252,8 +265,239 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
               </CardContent>
             </Card>
           )}
+
+          {/* Payment Settings Tab */}
+          {activeTab === 'payment' && (
+            <PaymentSettingsSection locale={locale} />
+          )}
         </main>
       </div>
+    </div>
+  );
+}
+
+// 支付配置管理组件
+function PaymentSettingsSection({ locale: string }) {
+  const [providers, setProviders] = useState<ProviderMetadata[]>([]);
+  const [activeProvider, setActiveProvider] = useState<PaymentProvider | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [switching, setSwitching] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPaymentConfig();
+  }, []);
+
+  const fetchPaymentConfig = async () => {
+    try {
+      const res = await fetch('/api/payment/config');
+      const data = await res.json();
+      if (data.success) {
+        setProviders(data.providers);
+        setActiveProvider(data.config.activeProvider);
+      }
+    } catch (error) {
+      console.error('Failed to fetch payment config:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSwitchProvider = async (provider: PaymentProvider) => {
+    setSwitching(true);
+    setMessage(null);
+    try {
+      const res = await fetch('/api/payment/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      setMessage(data.message || data.error);
+      if (data.success) {
+        // 刷新配置
+        await fetchPaymentConfig();
+      }
+    } catch (error) {
+      setMessage('切换失败，请稍后重试');
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="bg-[#1A1D27] border-[#2D3348]">
+        <CardContent className="py-12">
+          <div className="text-center text-[#94A3B8]">加载中...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 当前激活方案 */}
+      <Card className="bg-[#1A1D27] border-[#2D3348]">
+        <CardHeader>
+          <CardTitle className="text-[#F1F5F9] flex items-center gap-2">
+            <Zap className="w-5 h-5 text-[#F59E0B]" />
+            当前支付方案
+          </CardTitle>
+          <CardDescription className="text-[#94A3B8]">
+            当前正在使用的支付方案，所有支付请求将通过此方案处理
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeProvider && (
+            <div className="flex items-center gap-4">
+              <Badge className="bg-[#6366F1]/20 text-[#6366F1] text-lg px-4 py-2">
+                {providers.find(p => p.name === activeProvider)?.displayName || activeProvider}
+              </Badge>
+              <span className="text-[#94A3B8]">
+                {providers.find(p => p.name === activeProvider)?.configured ? '✅ 已配置' : '⚠️ 未配置'}
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 所有支付方案列表 */}
+      <Card className="bg-[#1A1D27] border-[#2D3348]">
+        <CardHeader>
+          <CardTitle className="text-[#F1F5F9]">支付方案列表</CardTitle>
+          <CardDescription className="text-[#94A3B8]">
+            点击方案卡片可查看详情，切换方案需更新环境变量
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            {providers.map((provider) => (
+              <Card 
+                key={provider.name}
+                className={`bg-[#0F1117] border transition-all cursor-pointer hover:border-[#6366F1] ${
+                  provider.name === activeProvider 
+                    ? 'border-[#6366F1] ring-1 ring-[#6366F1]' 
+                    : 'border-[#2D3348]'
+                }`}
+              >
+                <CardContent className="pt-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#F1F5F9] flex items-center gap-2">
+                        {provider.displayName}
+                        {provider.name === activeProvider && (
+                          <Badge className="bg-[#F59E0B]/20 text-[#F59E0B] ml-2">当前</Badge>
+                        )}
+                      </h3>
+                      <p className="text-[#94A3B8] text-sm mt-1">{provider.feeDescription}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {provider.configured ? (
+                        <Badge className="bg-[#10B981]/20 text-[#10B981]">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          已配置
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-[#F59E0B]/20 text-[#F59E0B]">
+                          <XCircle className="w-3 h-3 mr-1" />
+                          未配置
+                        </Badge>
+                      )}
+                      {provider.handlesTax && (
+                        <Badge className="bg-[#6366F1]/20 text-[#6366F1] text-xs">自动税务</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 特性列表 */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {provider.features.slice(0, 3).map((feature, idx) => (
+                      <span key={idx} className="text-xs text-[#94A3B8] bg-[#1A1D27] px-2 py-1 rounded">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* 操作按钮 */}
+                  <div className="flex gap-2 mt-3">
+                    {provider.configured && provider.name !== activeProvider && (
+                      <Button 
+                        size="sm"
+                        className="bg-[#6366F1] hover:bg-[#6366F1]/80 text-white"
+                        onClick={() => handleSwitchProvider(provider.name)}
+                        disabled={switching}
+                      >
+                        切换到此方案
+                      </Button>
+                    )}
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      className="border-[#2D3348] text-[#94A3B8] hover:text-[#F1F5F9]"
+                      onClick={() => window.open(provider.website, '_blank')}
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      官网
+                    </Button>
+                  </div>
+
+                  {/* 未配置提示 */}
+                  {!provider.configured && (
+                    <div className="mt-3 p-2 bg-[#F59E0B]/10 rounded text-xs text-[#F59E0B]">
+                      需要配置环境变量才能使用
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 提示信息 */}
+      {message && (
+        <Card className="bg-[#1A1D27] border-[#2D3348]">
+          <CardContent className="py-4">
+            <p className="text-[#94A3B8]">{message}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 配置指南 */}
+      <Card className="bg-[#1A1D27] border-[#2D3348]">
+        <CardHeader>
+          <CardTitle className="text-[#F1F5F9]">环境变量配置指南</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 text-sm">
+            <div className="p-3 bg-[#0F1117] rounded border border-[#2D3348]">
+              <p className="text-[#6366F1] font-medium mb-2">Stripe（需要美国公司）</p>
+              <code className="text-[#94A3B8] block">STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET</code>
+            </div>
+            <div className="p-3 bg-[#0F1117] rounded border border-[#2D3348]">
+              <p className="text-[#F59E0B] font-medium mb-2">Creem（推荐，个人可用）</p>
+              <code className="text-[#94A3B8] block">CREEM_API_KEY, CREEM_WEBHOOK_SECRET</code>
+            </div>
+            <div className="p-3 bg-[#0F1117] rounded border border-[#2D3348]">
+              <p className="text-[#10B981] font-medium mb-2">LemonSqueezy（个人可用）</p>
+              <code className="text-[#94A3B8] block">LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_WEBHOOK_SECRET</code>
+            </div>
+            <div className="p-3 bg-[#0F1117] rounded border border-[#2D3348]">
+              <p className="text-[#6366F1] font-medium mb-2">Paddle（需要审核）</p>
+              <code className="text-[#94A3B8] block">PADDLE_API_KEY, PADDLE_WEBHOOK_SECRET_KEY</code>
+            </div>
+            <div className="p-3 bg-[#0F1117] rounded border border-[#2D3348]">
+              <p className="text-[#94A3B8] font-medium mb-2">PayPal（传统方案）</p>
+              <code className="text-[#94A3B8] block">PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET</code>
+            </div>
+            <div className="p-3 bg-[#0F1117] rounded border border-[#6366F1]">
+              <p className="text-[#6366F1] font-medium mb-2">切换方案</p>
+              <code className="text-[#94A3B8] block">PAYMENT_PROVIDER=creem|stripe|lemonsqueezy|paddle|paypal</code>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
