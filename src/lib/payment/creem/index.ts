@@ -110,20 +110,8 @@ export class CreemAdapter implements PaymentAdapter {
         },
         body: JSON.stringify({
           product_id: plan.productId,
-          customer_email: request.userId, // 如果有邮箱可以传入
           success_url: request.successUrl || `${baseUrl}/${locale}/dashboard?payment=success&provider=creem`,
-          // 注意: Creem 不支持 cancel_url 参数
-          metadata: {
-            userId: request.userId,
-            planId: request.planId,
-            locale,
-          },
-          checkout_data: {
-            custom_data: {
-              userId: request.userId,
-              planId: request.planId,
-            },
-          },
+          request_id: `checkout_${request.userId || 'guest'}_${Date.now()}`,
         }),
       });
 
