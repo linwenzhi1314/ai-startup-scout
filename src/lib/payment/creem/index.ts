@@ -14,14 +14,14 @@ import {
   PlanConfig,
 } from '../types';
 
-// 定价方案配置（Creem 使用 variantId）
-const CREEM_PLANS: Record<string, PlanConfig & { variantId: string }> = {
+// 定价方案配置（Creem 使用产品 ID）
+const CREEM_PLANS: Record<string, PlanConfig> = {
   'pro_monthly': {
     id: 'pro_monthly',
     name: '专业版 (月付)',
     price: 9,
     currency: 'USD',
-    variantId: 'creem_pro_monthly', // 需要在 Creem 后台创建产品后获取真实 ID
+    productId: process.env.CREEM_PRO_PRODUCT_ID || '',
     description: '$9/月，适合个人创业者',
   },
   'investor_monthly': {
@@ -29,7 +29,7 @@ const CREEM_PLANS: Record<string, PlanConfig & { variantId: string }> = {
     name: '投资版 (月付)',
     price: 49,
     currency: 'USD',
-    variantId: 'creem_investor_monthly',
+    productId: process.env.CREEM_INVESTOR_PRODUCT_ID || '',
     description: '$49/月，适合专业投资人',
   },
 };
@@ -91,7 +91,7 @@ export class CreemAdapter implements PaymentAdapter {
           'X-API-Key': apiKey,
         },
         body: JSON.stringify({
-          variant_id: plan.variantId,
+          product_id: plan.productId,
           customer_email: request.userId, // 如果有邮箱可以传入
           success_url: request.successUrl || `${baseUrl}/${locale}/dashboard?payment=success&provider=creem`,
           cancel_url: request.cancelUrl || `${baseUrl}/${locale}/pricing?payment=cancelled&provider=creem`,

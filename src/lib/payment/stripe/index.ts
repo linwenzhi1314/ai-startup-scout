@@ -16,14 +16,14 @@ import {
   PlanId,
 } from '../types';
 
-// 定价方案配置（使用真实的 Stripe Price ID）
-const STRIPE_PLANS: Record<string, PlanConfig & { priceId: string }> = {
+// 定价方案配置（使用环境变量中的 Stripe Price ID）
+const STRIPE_PLANS: Record<string, PlanConfig> = {
   'pro_monthly': {
     id: 'pro_monthly',
     name: '专业版 (月付)',
     price: 9,
     currency: 'USD',
-    priceId: 'price_1TkN0OCMMBAjcEo2mzUBAr9U',
+    productId: process.env.STRIPE_PRO_PRICE_ID || 'price_1TkN0OCMMBAjcEo2mzUBAr9U',
     description: '$9/月，适合个人创业者',
   },
   'investor_monthly': {
@@ -31,7 +31,7 @@ const STRIPE_PLANS: Record<string, PlanConfig & { priceId: string }> = {
     name: '投资版 (月付)',
     price: 49,
     currency: 'USD',
-    priceId: 'price_1TkN2nCMMBAjcEo25UHLEPeW',
+    productId: process.env.STRIPE_INVESTOR_PRICE_ID || 'price_1TkN2nCMMBAjcEo25UHLEPeW',
     description: '$49/月，适合专业投资人',
   },
 };
@@ -89,7 +89,7 @@ export class StripeAdapter implements PaymentAdapter {
         payment_method_types: ['card'],
         line_items: [
           {
-            price: plan.priceId,
+            price: plan.productId,
             quantity: 1,
           },
         ],

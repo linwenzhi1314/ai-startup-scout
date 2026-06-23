@@ -15,14 +15,14 @@ import {
   PlanConfig,
 } from '../types';
 
-// 定价方案配置（LemonSqueezy 使用 variantId）
-const LEMON_PLANS: Record<string, PlanConfig & { variantId: string }> = {
+// 定价方案配置（LemonSqueezy 使用产品/variant ID）
+const LEMON_PLANS: Record<string, PlanConfig> = {
   'pro_monthly': {
     id: 'pro_monthly',
     name: '专业版 (月付)',
     price: 9,
     currency: 'USD',
-    variantId: 'lmsq_pro_monthly', // 需要在 LemonSqueezy 后台创建产品后获取真实 ID
+    productId: process.env.LEMONSQUEEZY_PRO_PRODUCT_ID || '',
     description: '$9/月，适合个人创业者',
   },
   'investor_monthly': {
@@ -30,7 +30,7 @@ const LEMON_PLANS: Record<string, PlanConfig & { variantId: string }> = {
     name: '投资版 (月付)',
     price: 49,
     currency: 'USD',
-    variantId: 'lmsq_investor_monthly',
+    productId: process.env.LEMONSQUEEZY_INVESTOR_PRODUCT_ID || '',
     description: '$49/月，适合专业投资人',
   },
 };
@@ -114,7 +114,7 @@ export class LemonSqueezyAdapter implements PaymentAdapter {
               variant: {
                 data: {
                   type: 'variants',
-                  id: plan.variantId,
+                  id: plan.productId,
                 },
               },
             },

@@ -15,6 +15,7 @@ export interface PlanConfig {
   name: string;
   price: number; // 月付价格（美元）
   currency: string;
+  productId?: string; // 各支付平台的 Product/Price ID
   description?: string;
 }
 
