@@ -15,14 +15,14 @@ import {
   PlanConfig,
 } from '../types';
 
-// 定价方案配置（LemonSqueezy 使用产品/variant ID）
+// 定价方案配置（LemonSqueezy 使用 Variant ID）
 const LEMON_PLANS: Record<string, PlanConfig> = {
   'pro_monthly': {
     id: 'pro_monthly',
     name: '专业版 (月付)',
     price: 9,
     currency: 'USD',
-    productId: process.env.LEMONSQUEEZY_PRO_PRODUCT_ID || '',
+    productId: process.env.LEMONSQUEEZY_PRO_VARIANT_ID || '',
     description: '$9/月，适合个人创业者',
   },
   'investor_monthly': {
@@ -30,7 +30,7 @@ const LEMON_PLANS: Record<string, PlanConfig> = {
     name: '投资版 (月付)',
     price: 49,
     currency: 'USD',
-    productId: process.env.LEMONSQUEEZY_INVESTOR_PRODUCT_ID || '',
+    productId: process.env.LEMONSQUEEZY_INVESTOR_VARIANT_ID || '',
     description: '$49/月，适合专业投资人',
   },
 };
