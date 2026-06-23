@@ -4,6 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 const locales = ['zh-Hans', 'en'];
 const defaultLocale = 'zh-Hans';
 
+// 不需要语言重定向的统一路径（后台管理等）
+const unifiedPaths = ['/admin', '/dashboard'];
+
 // 获取用户偏好语言
 function getLocaleFromRequest(request: NextRequest): string {
   // 1. 检查 Cookie 中是否有用户手动设置的语言偏好
@@ -52,6 +55,11 @@ export function middleware(request: NextRequest) {
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
   ) {
+    return NextResponse.next();
+  }
+
+  // 统一路径（后台管理等）不进行语言重定向
+  if (unifiedPaths.some(path => pathname === path || pathname.startsWith(`${path}/`))) {
     return NextResponse.next();
   }
 
