@@ -3,6 +3,7 @@
  * Merchant of Record - 自动处理税务
  * 无需公司实体，个人可用
  * 网站: https://creem.io
+ * 文档: https://docs.creem.io
  */
 
 import {
@@ -49,7 +50,16 @@ export class CreemAdapter implements PaymentAdapter {
     return process.env.CREEM_WEBHOOK_SECRET || null;
   }
 
+  /**
+   * 根据 API Key 自动判断使用测试或生产 API 端点
+   * 测试 Key 格式: creem_test_xxx -> test-api.creem.io
+   * 生产 Key 格式: creem_live_xxx -> api.creem.io
+   */
   private getBaseUrl(): string {
+    const apiKey = this.getApiKey() || '';
+    if (apiKey.startsWith('creem_test_')) {
+      return 'https://test-api.creem.io/v1';
+    }
     return 'https://api.creem.io/v1';
   }
 
@@ -73,7 +83,15 @@ export class CreemAdapter implements PaymentAdapter {
       return {
         success: false,
         provider: this.name,
-        error: 'Invalid planId',
+        error: `Invalid planId: ${request.planId}. Valid plans: ${Object.keys(CREEM_PLANS).join(', ')}`,
+      };
+    }
+
+    if (!plan.productId) {
+      return {
+        success: false,
+        provider: this.name,
+        error: `Product ID not configured for plan ${request.planId}. Please set CREEM_PRO_PRODUCT_ID or CREEM_INVESTOR_PRODUCT_ID.`,
       };
     }
 
@@ -82,26 +100,23 @@ export class CreemAdapter implements PaymentAdapter {
       const locale = request.locale || 'zh-Hans';
       
       // Creem Checkout API
-      // 参考: https://docs.creem.io/api-reference/checkout
-      const response = await fetch(`${this.getBaseUrl()}/checkout`, {
+      // 参考: https://docs.creem.io/api-reference/checkout/create
+      // 注意: 使用 x-api-key header（小写），测试环境用 test-api.creem.io
+      const response = await fetch(`${this.getBaseUrl()}/checkouts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'X-API-Key': apiKey,
+          'x-api-key': apiKey,
         },
         body: JSON.stringify({
           product_id: plan.productId,
           customer_email: request.userId, // 如果有邮箱可以传入
           success_url: request.successUrl || `${baseUrl}/${locale}/dashboard?payment=success&provider=creem`,
-          cancel_url: request.cancelUrl || `${baseUrl}/${locale}/pricing?payment=cancelled&provider=creem`,
+          // 注意: Creem 不支持 cancel_url 参数
           metadata: {
             userId: request.userId,
             planId: request.planId,
             locale,
-          },
-          checkout_options: {
-            include_quantity_selector: false,
           },
           checkout_data: {
             custom_data: {
@@ -115,19 +130,21 @@ export class CreemAdapter implements PaymentAdapter {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('[Creem] Checkout error:', data);
+        console.error('[Creem] Checkout error:', JSON.stringify(data));
         return {
           success: false,
           provider: this.name,
-          error: data.message || 'Failed to create checkout session',
+          error: data.message || data.error || 'Failed to create checkout session',
         };
       }
+
+      console.log('[Creem] Checkout created:', data);
 
       // Creem 返回 checkout_url
       return {
         success: true,
-        sessionId: data.id || data.checkout_id,
-        url: data.checkout_url || data.url,
+        sessionId: data.id,
+        url: data.checkout_url,
         provider: this.name,
       };
     } catch (error) {
@@ -198,12 +215,13 @@ export class CreemAdapter implements PaymentAdapter {
       // 处理 Creem 事件类型
       switch (payload.event_type) {
         case 'order_created':
+        case 'order_paid':
+        case 'order_refunded':
         case 'subscription_created':
         case 'subscription_updated':
         case 'subscription_cancelled':
         case 'subscription_expired':
-        case 'payment_success':
-        case 'payment_failed':
+        case 'subscription_renewed':
           console.log(`[Creem] Event received: ${payload.event_type}`, payload.data);
           break;
       }
