@@ -1,0 +1,50 @@
+# ===========================================
+# AI Startup Scout - Payment Environment Variables
+# ===========================================
+
+# -------------------
+# Payment Provider Switch
+# -------------------
+# Options: stripe | creem | lemonsqueezy | paddle | paypal
+PAYMENT_PROVIDER=creem
+
+# -------------------
+# Stripe (Existing - Keep as backup)
+# -------------------
+STRIPE_SECRET_KEY=sk_test_51TkKLHCMMBAjcEo2rRdKkUyLZp7Sv8xlZDtSANTANLl6EHwxHC8uFSGOdzhInJbjtjAdyBltF7TdegjQ7S3Eg0Qc00eTIMsxqX
+STRIPE_WEBHOOK_SECRET=whsec_IkWHpfEZ50UsXOoIQZPSxLzq6AEa91Vu
+STRIPE_PRO_PRICE_ID=price_1TkN0OCMMBAjcEo2mzUBAr9U
+STRIPE_INVESTOR_PRICE_ID=price_1TkN2nCMMBAjcEo25UHLEPeW
+
+# -------------------
+# Creem (Recommended - Primary)
+# -------------------
+CREEM_API_KEY=creem_test_6pGb9UYddazB9UwDYn12ng
+CREEM_WEBHOOK_SECRET=whsec_3GtdOTv2Yv2pyPsqG6DRDE
+CREEM_PRO_PRODUCT_ID=prod_1Ci9RHI5XmKLITnAS0PmSL
+CREEM_INVESTOR_PRODUCT_ID=prod_4WzgH6PpOOS64RMzCz1kHV
+
+# -------------------
+# LemonSqueezy (Alternative)
+# -------------------
+LEMONSQUEEZY_API_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NGQ1OWNlZi1kYmI4LTRlYTUtYjE3OC1kMjU0MGZjZDY5MTkiLCJqdGkiOiI3OWNkN2NjMGZiZmUzNTZhNWUxNzExYmU2YWFiYjM1OTM5NmVjNThmMzc4YWFiNDQ2ZDdmNmJjOWFiZTgzYWU1NmUxYjBmNWI4MWNkYThjNyIsImlhdCI6MTc4MjIwODAyMC42MTAxMzgsIm5iZiI6MTc4MjIwODAyMC42MTAxNDIsImV4cCI6MTc5Nzk4NDAwMC4wMzUwOCwic3ViIjoiNjM5NjI5Iiwic2NvcGVzIjpbXX0.25vnMEs5ivrn8hxfngJsGbnBTfCLwNj1SlX0mTNO-ppdyeB4UByiUPzqBEuG32xCT7kt4FGNJZRlHo6xyCC1P5rbneq2VjdVyZDiSDE7rsrRDhmb_0xGlUEn--nDLSp3VJXF9HAF6VBuRHtPq_PDptSjF3CzjRY9v6cfQLJu-JcOW0a_qJW9Clag5vgATUesXqLTPyYZ04f8tmgFiqM2eJ1Hd3SJ85LfG_cb9UDJqy1s5oPyRfv2HVMxAlL1begXGTgnKiTnfXt7A13qwSStKJ_qCAvzHbtBliGunj-t5im4Adjhk4P6WLGqdcmALOSROLULMMcXJsI_hGPvhfU4wcrgk6y9ca920cittUfyBBRndhOMwyAIRdzHUI9Jrkr33jnjoLTyvkdAB42gFGetw1WBge66-PnPCvweDGZatdv6FsPRj9c7MJWCgPvbxJf4sSc6RG8s5Au9uiH32jAKHdW0M3TWA8cvAZQGMg0nm41seYJtckgOJ_rkqvABgcQsYXhFkUVt_eO9ybz2h66rTLoiYsBQktAtAaPoWFo64d2MA4uh6rVYe53DFMQ7thIYi-fbp46rRGw1m8uZEa0SDl-a6mQCQkPRMiIRHSplzQVgxGoJXvWfUQEtMIqSDX0Ql417K4TjWsluaCrLsMHmzJ7qjcysk6dspyNysMffPf
+LEMONSQUEEZY_STORE_ID=415600
+LEMONSQUEEZY_WEBHOOK_SECRET=aistartupscout_ls_webhook_2026
+LEMONSQUEEZY_PRO_PRODUCT_ID=1168127
+LEMONSQUEEZY_INVESTOR_PRODUCT_ID=1168131
+
+# -------------------
+# Paddle (Future - Leave empty)
+# -------------------
+PADDLE_API_KEY=
+PADDLE_WEBHOOK_SECRET=
+PADDLE_PRO_PRODUCT_ID=
+PADDLE_INVESTOR_PRODUCT_ID=
+
+# -------------------
+# PayPal (Future - Leave empty)
+# -------------------
+PAYPAL_API_KEY=
+PAYPAL_WEBHOOK_SECRET=
+PAYPAL_PRO_PRODUCT_ID=
+PAYPAL_INVESTOR_PRODUCT_ID=
