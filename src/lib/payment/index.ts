@@ -16,6 +16,7 @@ export {
   getProvidersMetadata,
   isProviderAvailable,
   getRecommendedProvider,
+  adapters,
 } from './factory';
 
 // 各适配器（直接使用时需要）

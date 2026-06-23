@@ -1,11 +1,13 @@
 /**
  * 统一 Checkout API
  * 根据当前配置的支付方案自动选择适配器
+ * 支持从数据库动态切换支付方案
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getActiveAdapter, getAdapter, PaymentProvider } from '@/lib/payment';
+import { getAdapter, PaymentProvider } from '@/lib/payment';
 import { PlanId } from '@/lib/payment/types';
+import { getActiveProviderFromDB } from '@/lib/payment/db-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,14 +28,37 @@ export async function POST(request: NextRequest) {
     // 获取用户 ID（TODO: 从 Supabase session 获取）
     const userId = 'mock_user_id';
 
-    // 选择适配器：如果指定了 provider 则使用指定的，否则使用当前激活的
-    const adapter = provider ? getAdapter(provider) : getActiveAdapter();
+    // 确定使用哪个支付方案
+    let activeProvider: PaymentProvider;
+    let configSource: 'specified' | 'database' | 'fallback' = 'fallback';
+    
+    if (provider) {
+      // 如果请求中指定了 provider，直接使用
+      activeProvider = provider;
+      configSource = 'specified';
+    } else {
+      // 先从数据库获取配置
+      const dbProvider = await getActiveProviderFromDB();
+      
+      if (dbProvider) {
+        // 数据库有配置，优先使用（不管环境变量是否配置）
+        activeProvider = dbProvider;
+        configSource = 'database';
+      } else {
+        // 数据库没有配置，回退到环境变量或默认
+        activeProvider = getFallbackProvider();
+        configSource = 'fallback';
+      }
+    }
+
+    const adapter = getAdapter(activeProvider);
 
     // 检查适配器是否已配置
     if (!adapter.isConfigured()) {
       return NextResponse.json({
         error: `${adapter.displayName} is not configured. Please set the required environment variables.`,
         provider: adapter.name,
+        configSource,
         requiredEnvVars: getRequiredEnvVars(adapter.name),
       }, { status: 400 });
     }
@@ -70,6 +95,20 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * 获取回退支付方案（从环境变量或默认值）
+ */
+function getFallbackProvider(): PaymentProvider {
+  // 检查环境变量
+  const envProvider = process.env.PAYMENT_PROVIDER as PaymentProvider;
+  if (envProvider) {
+    return envProvider;
+  }
+
+  // 默认返回 creem
+  return 'creem';
 }
 
 // 获取各支付方案需要的环境变量

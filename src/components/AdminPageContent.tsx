@@ -290,11 +290,18 @@ function PaymentSettingsSection({ locale }: { locale: string }) {
 
   const fetchPaymentConfig = async () => {
     try {
-      const res = await fetch('/api/payment/config');
-      const data = await res.json();
-      if (data.success) {
-        setProviders(data.providers);
-        setActiveProvider(data.config.activeProvider);
+      // 获取支付方案配置状态
+      const configRes = await fetch('/api/payment/config');
+      const configData = await configRes.json();
+      
+      // 获取当前激活的支付方案（从数据库）
+      const providerRes = await fetch('/api/payment/provider');
+      const providerData = await providerRes.json();
+      
+      if (configData.success) {
+        setProviders(configData.providers);
+        // 使用数据库中的配置作为当前激活方案
+        setActiveProvider(providerData.activeProvider || configData.config.activeProvider);
       }
     } catch (error) {
       console.error('Failed to fetch payment config:', error);
@@ -307,7 +314,8 @@ function PaymentSettingsSection({ locale }: { locale: string }) {
     setSwitching(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/payment/config', {
+      // 调用 provider API 切换支付方案
+      const res = await fetch('/api/payment/provider', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider }),
