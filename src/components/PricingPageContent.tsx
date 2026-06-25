@@ -33,12 +33,18 @@ export function PricingPageContent({ locale }: PricingPageContentProps) {
       return;
     }
 
+    // 企业版跳转联系
+    if (planIndex === 3) {
+      window.location.href = `/${locale}/support`;
+      return;
+    }
+
     const planId = PLAN_IDS[planIndex];
     setError(null);
     setLoadingPlan(planId);
 
     try {
-      const response = await fetch('/api/stripe/create-checkout-session', {
+      const response = await fetch('/api/payment/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,17 +57,26 @@ export function PricingPageContent({ locale }: PricingPageContentProps) {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         throw new Error(data.error || 'Payment initialization failed');
       }
 
-      // 跳转到 Stripe Checkout 页面
+      // 跳转到支付页面
       if (data.url) {
         window.location.href = data.url;
       }
     } catch (err) {
       console.error('Payment error:', err);
-      setError(locale === 'zh-Hans' ? '支付初始化失败，请稍后重试' : 'Payment initialization failed, please try again');
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      
+      // 如果是支付方案未配置，提示更友好的信息
+      if (message.includes('not configured')) {
+        setError(locale === 'zh-Hans' 
+          ? '支付服务暂未配置，请联系客服' 
+          : 'Payment service is not configured yet, please contact support');
+      } else {
+        setError(locale === 'zh-Hans' ? '支付初始化失败，请稍后重试' : 'Payment initialization failed, please try again');
+      }
       setLoadingPlan(null);
     }
   };

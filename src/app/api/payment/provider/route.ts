@@ -4,8 +4,27 @@ import { getSupabaseClient } from '@/lib/supabase';
 // 支持的支付方案
 const SUPPORTED_PROVIDERS = ['stripe', 'creem', 'lemonsqueezy', 'paddle', 'paypal'];
 
+// 管理员密钥（从环境变量读取，用于 API 鉴权）
+function getAdminSecret(): string {
+  return process.env.ADMIN_SECRET || 'ai-startup-scout-admin-2024';
+}
+
+// 验证管理员权限
+function isAdmin(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization');
+  const adminKey = request.headers.get('x-admin-key');
+  const urlKey = request.nextUrl.searchParams.get('admin_key');
+
+  // 支持三种方式验证
+  if (authHeader === `Bearer ${getAdminSecret()}`) return true;
+  if (adminKey === getAdminSecret()) return true;
+  if (urlKey === getAdminSecret()) return true;
+
+  return false;
+}
+
 /**
- * GET: 获取当前激活的支付方案
+ * GET: 获取当前激活的支付方案（公开接口，读取配置不需要鉴权）
  */
 export async function GET() {
   try {
@@ -49,9 +68,17 @@ export async function GET() {
 }
 
 /**
- * POST: 切换支付方案
+ * POST: 切换支付方案（需要管理员鉴权）
  */
 export async function POST(request: NextRequest) {
+  // 验证管理员权限
+  if (!isAdmin(request)) {
+    return NextResponse.json({
+      success: false,
+      error: 'Unauthorized. Admin access required.'
+    }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { provider } = body;

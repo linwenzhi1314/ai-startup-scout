@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,9 @@ import {
   ExternalLink,
   Zap,
   Sun,
-  Moon
+  Moon,
+  MessageSquare,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Translation } from '@/lib/i18n/translations';
@@ -51,11 +53,64 @@ const themes = {
   }
 };
 
+// 后台统计数据类型
+interface OverviewStats {
+  users: number;
+  subscriptions: number;
+  activeSubscriptions: number;
+  cancelledSubscriptions: number;
+  expiredSubscriptions: number;
+  revenue: string;
+  feedback: number;
+}
+
+interface UserItem {
+  id: number;
+  email: string;
+  plan: string;
+  planId: string;
+  status: string;
+  provider: string | null;
+  createdAt: string;
+}
+
+interface SubscriptionDetails {
+  stats: {
+    total: number;
+    active: number;
+    cancelled: number;
+    expired: number;
+    revenue: string;
+  };
+  planBreakdown: Record<string, number>;
+  providerBreakdown: Record<string, number>;
+  recentSubscriptions: Array<{
+    id: number;
+    email: string;
+    plan_id: string;
+    plan_name: string;
+    status: string;
+    provider: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+}
+
+const ADMIN_KEY = 'ai-startup-scout-admin-2024';
+
 export function AdminPageContent({ translation, locale }: AdminPageContentProps) {
   const t = translation.admin;
   const [activeTab, setActiveTab] = useState('overview');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [mounted, setMounted] = useState(false);
+
+  // 真实数据 state
+  const [overviewStats, setOverviewStats] = useState<OverviewStats | null>(null);
+  const [usersList, setUsersList] = useState<UserItem[]>([]);
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [subDetails, setSubDetails] = useState<SubscriptionDetails | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // 客户端挂载后读取 localStorage
   useEffect(() => {
@@ -74,25 +129,95 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
 
   const currentTheme = themes[theme];
 
-  // Mock data - will be replaced with real data from Supabase
-  const mockDashboard = {
-    users: 1247,
-    activeUsers: 892,
-    subscriptions: 156,
-    revenue: '$4,892'
-  };
+  // 获取管理员 headers
+  const getAdminHeaders = useCallback(() => {
+    const key = localStorage.getItem('admin-key') || ADMIN_KEY;
+    return { 'x-admin-key': key };
+  }, []);
 
-  const mockUsers = [
-    { id: 1, email: 'user1@example.com', plan: '专业版', status: 'active', createdAt: '2024-01-15' },
-    { id: 2, email: 'user2@example.com', plan: '免费版', status: 'active', createdAt: '2024-02-20' },
-    { id: 3, email: 'user3@example.com', plan: '投资版', status: 'active', createdAt: '2024-03-10' },
-    { id: 4, email: 'user4@example.com', plan: '专业版', status: 'cancelled', createdAt: '2024-04-05' },
-  ];
+  // 加载总览数据
+  const fetchOverview = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stats?section=overview', {
+        headers: getAdminHeaders(),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOverviewStats(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch overview:', error);
+    }
+  }, [getAdminHeaders]);
 
-  const mockSubscriptions = {
-    active: 156,
-    cancelled: 23,
-    totalRevenue: '$12,450'
+  // 加载用户列表
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stats?section=users', {
+        headers: getAdminHeaders(),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUsersList(data.data);
+        setUsersTotal(data.pagination?.total || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  }, [getAdminHeaders]);
+
+  // 加载订阅详情
+  const fetchSubscriptions = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stats?section=subscriptions', {
+        headers: getAdminHeaders(),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubDetails(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch subscriptions:', error);
+    }
+  }, [getAdminHeaders]);
+
+  // 根据当前 tab 加载数据
+  useEffect(() => {
+    if (!mounted) return;
+    
+    setLoading(true);
+    const load = async () => {
+      switch (activeTab) {
+        case 'overview':
+          await fetchOverview();
+          break;
+        case 'users':
+          await fetchUsers();
+          break;
+        case 'subscriptions':
+          await fetchSubscriptions();
+          break;
+      }
+      setLoading(false);
+    };
+    load();
+  }, [activeTab, mounted, fetchOverview, fetchUsers, fetchSubscriptions]);
+
+  // 刷新当前 tab
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    switch (activeTab) {
+      case 'overview':
+        await fetchOverview();
+        break;
+      case 'users':
+        await fetchUsers();
+        break;
+      case 'subscriptions':
+        await fetchSubscriptions();
+        break;
+    }
+    setRefreshing(false);
   };
 
   // 防止 hydration mismatch
@@ -105,7 +230,7 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
       <div className="flex">
         {/* Sidebar */}
         <aside 
-          className="w-64 border-r min-h-screen p-4" 
+          className="w-64 border-r min-h-screen p-4 flex flex-col" 
           style={{ backgroundColor: currentTheme.sidebar, borderColor: currentTheme.border }}
         >
           <div className="mb-8">
@@ -124,7 +249,7 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                   onClick={() => toggleTheme('light')}
                   title="亮色主题"
                 >
-                  <Sun className={`h-4 w-4 ${theme === 'light' ? 'text-[#F59E0B]' : ''}`} style={{ color: theme === 'light' ? '#F59E0B' : currentTheme.textSecondary }} />
+                  <Sun className="h-4 w-4" style={{ color: theme === 'light' ? '#F59E0B' : currentTheme.textSecondary }} />
                 </Button>
                 <Button
                   size="sm"
@@ -140,7 +265,7 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
             <Badge className="bg-[#F59E0B]/20 text-[#F59E0B]">管理员</Badge>
           </div>
           
-          <nav className="space-y-2">
+          <nav className="space-y-2 flex-1">
             <Button
               variant={activeTab === 'overview' ? 'secondary' : 'ghost'}
               className="w-full justify-start"
@@ -188,7 +313,7 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
             </Button>
           </nav>
 
-          <div className="mt-8 pt-8 border-t" style={{ borderColor: currentTheme.border }}>
+          <div className="pt-4 border-t" style={{ borderColor: currentTheme.border }}>
             <Link href={`/${locale}/dashboard`}>
               <Button variant="ghost" className="w-full justify-start" style={{ color: currentTheme.textSecondary }}>
                 ← 返回用户仪表盘
@@ -199,19 +324,32 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
 
         {/* Main Content */}
         <main className="flex-1 p-8">
-          <h2 className="text-2xl font-bold mb-8" style={{ color: currentTheme.textPrimary }}>{t.title}</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{t.title}</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              刷新
+            </Button>
+          </div>
 
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <>
-              {/* Stats Cards */}
               <div className="grid grid-cols-4 gap-4 mb-8">
                 <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
                       <Users className="w-8 h-8 text-[#6366F1]" />
                       <div>
-                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockDashboard.users}</p>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.users ?? '-'}
+                        </p>
                         <p style={{ color: currentTheme.textSecondary }}>{t.dashboard.users}</p>
                       </div>
                     </div>
@@ -222,8 +360,10 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                     <div className="flex items-center gap-3">
                       <Activity className="w-8 h-8 text-[#10B981]" />
                       <div>
-                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockDashboard.activeUsers}</p>
-                        <p style={{ color: currentTheme.textSecondary }}>{t.dashboard.activeUsers}</p>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.activeSubscriptions ?? '-'}
+                        </p>
+                        <p style={{ color: currentTheme.textSecondary }}>活跃订阅</p>
                       </div>
                     </div>
                   </CardContent>
@@ -233,7 +373,9 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-8 h-8 text-[#F59E0B]" />
                       <div>
-                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockDashboard.subscriptions}</p>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.subscriptions ?? '-'}
+                        </p>
                         <p style={{ color: currentTheme.textSecondary }}>{t.dashboard.subscriptions}</p>
                       </div>
                     </div>
@@ -244,8 +386,53 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                     <div className="flex items-center gap-3">
                       <DollarSign className="w-8 h-8 text-[#10B981]" />
                       <div>
-                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockDashboard.revenue}</p>
-                        <p style={{ color: currentTheme.textSecondary }}>{t.dashboard.revenue}</p>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.revenue ?? '-'}
+                        </p>
+                        <p style={{ color: currentTheme.textSecondary }}>月度收入</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 额外统计 */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-8 h-8 text-[#6366F1]" />
+                      <div>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.feedback ?? '-'}
+                        </p>
+                        <p style={{ color: currentTheme.textSecondary }}>用户反馈</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <XCircle className="w-8 h-8 text-[#EF4444]" />
+                      <div>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.cancelledSubscriptions ?? '-'}
+                        </p>
+                        <p style={{ color: currentTheme.textSecondary }}>已取消</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-8 h-8 text-[#94A3B8]" />
+                      <div>
+                        <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                          {overviewStats?.expiredSubscriptions ?? '-'}
+                        </p>
+                        <p style={{ color: currentTheme.textSecondary }}>已过期</p>
                       </div>
                     </div>
                   </CardContent>
@@ -258,39 +445,51 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
           {activeTab === 'users' && (
             <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
               <CardHeader>
-                <CardTitle style={{ color: currentTheme.textPrimary }}>{t.users.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2" style={{ color: currentTheme.textPrimary }}>
+                  {t.users.title}
+                  <Badge variant="outline" style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}>
+                    共 {usersTotal} 人
+                  </Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <table className="w-full">
-                  <thead>
-                    <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
-                      <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.email}</th>
-                      <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.plan}</th>
-                      <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.status}</th>
-                      <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.createdAt}</th>
-                      <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockUsers.map((user) => (
-                      <tr key={user.id} style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
-                        <td className="py-3" style={{ color: currentTheme.textPrimary }}>{user.email}</td>
-                        <td className="py-3" style={{ color: currentTheme.textPrimary }}>{user.plan}</td>
-                        <td className="py-3">
-                          <Badge className={user.status === 'active' ? 'bg-[#10B981]/20 text-[#10B981]' : 'bg-[#F59E0B]/20 text-[#F59E0B]'}>
-                            {user.status}
-                          </Badge>
-                        </td>
-                        <td className="py-3" style={{ color: currentTheme.textSecondary }}>{user.createdAt}</td>
-                        <td className="py-3">
-                          <Button variant="ghost" size="sm" className="text-[#6366F1] hover:text-[#6366F1]">
-                            查看
-                          </Button>
-                        </td>
+                {usersList.length === 0 ? (
+                  <div className="text-center py-12" style={{ color: currentTheme.textSecondary }}>
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>暂无用户数据</p>
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead>
+                      <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                        <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.email}</th>
+                        <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.plan}</th>
+                        <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.status}</th>
+                        <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>支付方案</th>
+                        <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>{t.users.createdAt}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {usersList.map((user) => (
+                        <tr key={user.id} style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                          <td className="py-3" style={{ color: currentTheme.textPrimary }}>{user.email}</td>
+                          <td className="py-3" style={{ color: currentTheme.textPrimary }}>{user.plan}</td>
+                          <td className="py-3">
+                            <Badge className={user.status === 'active' ? 'bg-[#10B981]/20 text-[#10B981]' : user.status === 'free' ? 'bg-[#94A3B8]/20 text-[#94A3B8]' : 'bg-[#F59E0B]/20 text-[#F59E0B]'}>
+                              {user.status === 'active' ? '活跃' : user.status === 'free' ? '免费' : user.status}
+                            </Badge>
+                          </td>
+                          <td className="py-3" style={{ color: currentTheme.textSecondary }}>
+                            {user.provider || '-'}
+                          </td>
+                          <td className="py-3" style={{ color: currentTheme.textSecondary }}>
+                            {new Date(user.createdAt).toLocaleDateString('zh-CN')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </CardContent>
             </Card>
           )}
@@ -303,7 +502,9 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <CreditCard className="w-8 h-8 text-[#10B981] mx-auto mb-2" />
-                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockSubscriptions.active}</p>
+                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                        {subDetails?.stats.active ?? '-'}
+                      </p>
                       <p style={{ color: currentTheme.textSecondary }}>{t.subscriptions.active}</p>
                     </div>
                   </CardContent>
@@ -312,7 +513,9 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <CreditCard className="w-8 h-8 text-[#F59E0B] mx-auto mb-2" />
-                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockSubscriptions.cancelled}</p>
+                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                        {subDetails?.stats.cancelled ?? '-'}
+                      </p>
                       <p style={{ color: currentTheme.textSecondary }}>{t.subscriptions.cancelled}</p>
                     </div>
                   </CardContent>
@@ -321,9 +524,94 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <DollarSign className="w-8 h-8 text-[#6366F1] mx-auto mb-2" />
-                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>{mockSubscriptions.totalRevenue}</p>
+                      <p className="text-3xl font-bold" style={{ color: currentTheme.textPrimary }}>
+                        {subDetails?.stats.revenue ?? '-'}
+                      </p>
                       <p style={{ color: currentTheme.textSecondary }}>{t.subscriptions.totalRevenue}</p>
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 最近订阅记录 */}
+              {subDetails?.recentSubscriptions && subDetails.recentSubscriptions.length > 0 && (
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardHeader>
+                    <CardTitle style={{ color: currentTheme.textPrimary }}>最近订阅记录</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <table className="w-full">
+                      <thead>
+                        <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                          <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>邮箱</th>
+                          <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>套餐</th>
+                          <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>状态</th>
+                          <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>支付方案</th>
+                          <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>创建时间</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subDetails.recentSubscriptions.map((sub) => (
+                          <tr key={sub.id} style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                            <td className="py-3" style={{ color: currentTheme.textPrimary }}>{sub.email || '-'}</td>
+                            <td className="py-3" style={{ color: currentTheme.textPrimary }}>{sub.plan_name || sub.plan_id}</td>
+                            <td className="py-3">
+                              <Badge className={
+                                sub.status === 'active' ? 'bg-[#10B981]/20 text-[#10B981]' :
+                                sub.status === 'cancelled' ? 'bg-[#EF4444]/20 text-[#EF4444]' :
+                                'bg-[#94A3B8]/20 text-[#94A3B8]'
+                              }>
+                                {sub.status}
+                              </Badge>
+                            </td>
+                            <td className="py-3" style={{ color: currentTheme.textSecondary }}>{sub.provider}</td>
+                            <td className="py-3" style={{ color: currentTheme.textSecondary }}>
+                              {new Date(sub.created_at).toLocaleDateString('zh-CN')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 方案分布 */}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardHeader>
+                    <CardTitle style={{ color: currentTheme.textPrimary }}>套餐分布</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {subDetails?.planBreakdown && Object.entries(subDetails.planBreakdown).map(([plan, count]) => (
+                      <div key={plan} className="flex justify-between py-2" style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                        <span style={{ color: currentTheme.textPrimary }}>{plan}</span>
+                        <Badge variant="outline" style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}>
+                          {count}
+                        </Badge>
+                      </div>
+                    ))}
+                    {(!subDetails?.planBreakdown || Object.keys(subDetails.planBreakdown).length === 0) && (
+                      <p style={{ color: currentTheme.textSecondary }} className="text-center py-4">暂无数据</p>
+                    )}
+                  </CardContent>
+                </Card>
+                <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+                  <CardHeader>
+                    <CardTitle style={{ color: currentTheme.textPrimary }}>支付方案分布</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {subDetails?.providerBreakdown && Object.entries(subDetails.providerBreakdown).map(([prov, count]) => (
+                      <div key={prov} className="flex justify-between py-2" style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                        <span style={{ color: currentTheme.textPrimary }}>{prov}</span>
+                        <Badge variant="outline" style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}>
+                          {count}
+                        </Badge>
+                      </div>
+                    ))}
+                    {(!subDetails?.providerBreakdown || Object.keys(subDetails.providerBreakdown).length === 0) && (
+                      <p style={{ color: currentTheme.textSecondary }} className="text-center py-4">暂无数据</p>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -393,10 +681,14 @@ function PaymentSettingsSection({ locale, theme, currentTheme }: { locale: strin
     setSwitching(true);
     setMessage(null);
     try {
-      // 调用 provider API 切换支付方案
+      // 调用 provider API 切换支付方案（需要管理员鉴权）
+      const adminKey = localStorage.getItem('admin-key') || ADMIN_KEY;
       const res = await fetch('/api/payment/provider', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+        },
         body: JSON.stringify({ provider }),
       });
       const data = await res.json();
