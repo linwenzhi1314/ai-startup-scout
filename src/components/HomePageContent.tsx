@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Locale, Translation } from '@/lib/i18n/translations';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { useManagedContent } from '@/hooks/useManagedContent';
 
 interface HomePageContentProps {
   locale: Locale;
@@ -22,6 +23,12 @@ const trackEvent = (eventName: string, eventParams?: Record<string, string>) => 
 };
 
 export function HomePageContent({ locale, t }: HomePageContentProps) {
+  // 从数据库加载各区块内容，fallback 到硬编码翻译
+  const { data: hero } = useManagedContent('hero', locale, t.hero);
+  const { data: features } = useManagedContent('features', locale, t.features);
+  const { data: howItWorks } = useManagedContent('howItWorks', locale, t.howItWorks);
+  const { data: subscribe } = useManagedContent('subscribe', locale, t.subscribe);
+
   const [domain, setDomain] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
@@ -71,17 +78,17 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
 
       if (data.success) {
         setSubscribeStatus('success');
-        setSubscribeMessage(data.message || t.subscribe.successMessage);
+        setSubscribeMessage(data.message || subscribe.successMessage);
         setEmail('');
         setRole('');
         trackEvent('subscribe_success', { role });
       } else {
         setSubscribeStatus('error');
-        setSubscribeMessage(data.error || t.subscribe.errorMessage);
+        setSubscribeMessage(data.error || subscribe.errorMessage);
       }
     } catch {
       setSubscribeStatus('error');
-      setSubscribeMessage(t.subscribe.errorMessage);
+      setSubscribeMessage(subscribe.errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -146,21 +153,21 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
       <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-16 pb-20 md:pt-24 md:pb-28">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-xs text-indigo-300">{t.hero.badge}</span>
+          <span className="text-xs text-indigo-300">{hero.badge}</span>
         </div>
 
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl leading-tight">
-          {t.hero.titleLine1}
+          {hero.titleLine1}
           <br />
           <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-amber-400 bg-clip-text text-transparent">
-            {t.hero.titleLine2Highlight}
+            {hero.titleLine2Highlight}
           </span>
         </h1>
 
         <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed">
-          {t.hero.description}
+          {hero.description}
           <br className="hidden md:block" />
-          {t.hero.descriptionLine2}
+          {hero.descriptionLine2}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
@@ -169,14 +176,14 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
             onClick={() => trackEvent('click_cta', { button_name: 'start', button_location: 'hero' })}
             className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/25 text-base"
           >
-            {t.hero.startButton}
+            {hero.startButton}
           </a>
           <a
             href="#features"
             onClick={() => trackEvent('click_cta', { button_name: 'learn', button_location: 'hero' })}
             className="px-8 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-medium rounded-xl transition-all text-base"
           >
-            {t.hero.learnButton}
+            {hero.learnButton}
           </a>
         </div>
 
@@ -202,10 +209,10 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
-                <span className="text-xs text-slate-500">{t.hero.mockupSearchPlaceholder}</span>
+                <span className="text-xs text-slate-500">{hero.mockupSearchPlaceholder}</span>
               </div>
               <div className="flex gap-1.5 mt-2">
-                {t.hero.mockupTabs.map((tab, i) => (
+                {hero.mockupTabs.map((tab, i) => (
                   <span
                     key={tab}
                     className={`px-2 py-0.5 text-[10px] rounded-full ${i === 0 ? 'bg-indigo-600 text-white' : 'border border-[#2D3348] text-slate-500'}`}
@@ -216,7 +223,7 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
               </div>
             </div>
             <div className="px-4 pb-3 space-y-2">
-              {t.hero.mockupItems.map((item) => (
+              {hero.mockupItems.map((item) => (
                 <div key={item.name} className="bg-[#232736] border border-[#2D3348] rounded-lg p-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold text-slate-200">{item.name}</span>
@@ -231,7 +238,7 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
                 </svg>
-                <span className="text-[10px] text-amber-400 font-medium">{t.hero.mockupAiAnalysis}</span>
+                <span className="text-[10px] text-amber-400 font-medium">{hero.mockupAiAnalysis}</span>
               </div>
             </div>
           </div>
@@ -242,8 +249,8 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
       <section id="features" className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t.features.title}</h2>
-            <p className="mt-4 text-slate-400 text-lg">{t.features.subtitle}</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{features.title}</h2>
+            <p className="mt-4 text-slate-400 text-lg">{features.subtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -255,8 +262,8 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                     <path d="m21 21-4.35-4.35" />
                   </svg>
                 ),
-                title: t.features.items[0].title,
-                desc: t.features.items[0].desc,
+                title: features.items[0].title,
+                desc: features.items[0].desc,
               },
               {
                 icon: (
@@ -265,8 +272,8 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                     <path d="M9 21h6M10 17v4M14 17v4" />
                   </svg>
                 ),
-                title: t.features.items[1].title,
-                desc: t.features.items[1].desc,
+                title: features.items[1].title,
+                desc: features.items[1].desc,
               },
               {
                 icon: (
@@ -274,8 +281,8 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                   </svg>
                 ),
-                title: t.features.items[2].title,
-                desc: t.features.items[2].desc,
+                title: features.items[2].title,
+                desc: features.items[2].desc,
               },
             ].map((feature) => (
               <div
@@ -297,12 +304,12 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
       <section id="how-it-works" className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t.howItWorks.title}</h2>
-            <p className="mt-4 text-slate-400 text-lg">{t.howItWorks.subtitle}</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{howItWorks.title}</h2>
+            <p className="mt-4 text-slate-400 text-lg">{howItWorks.subtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {t.howItWorks.items.map((item) => (
+            {howItWorks.items.map((item) => (
               <div key={item.step} className="text-center">
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white text-xl font-bold mb-5">
                   {item.step}
@@ -324,7 +331,7 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                 <path d="M2 17L12 22L22 17" />
                 <path d="M2 12L12 17L22 12" />
               </svg>
-              {t.howItWorks.installButton}
+              {howItWorks.installButton}
             </a>
           </div>
         </div>
@@ -333,9 +340,9 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
       {/* 订阅区域 */}
       <section className="relative z-10 px-6 md:px-12 py-20">
         <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{t.subscribe.title}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{subscribe.title}</h2>
           <p className="mt-4 text-slate-400 text-lg mb-8">
-            {t.subscribe.subtitle}
+            {subscribe.subtitle}
           </p>
 
           <form onSubmit={handleSubscribe} className="space-y-4">
@@ -344,7 +351,7 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.subscribe.placeholder}
+                placeholder={subscribe.placeholder}
                 required
                 className="flex-1 px-4 py-3 bg-[#232736] border border-[#2D3348] rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
               />
@@ -353,12 +360,12 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
                 disabled={submitting || !email || !role}
                 className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all whitespace-nowrap"
               >
-                {submitting ? t.subscribe.buttonSubmitting : email && !role ? t.subscribe.buttonSelectRole : t.subscribe.button}
+                {submitting ? subscribe.buttonSubmitting : email && !role ? subscribe.buttonSelectRole : subscribe.button}
               </button>
             </div>
 
             <div className="flex flex-wrap justify-center gap-2">
-              {t.subscribe.roles.map((item) => (
+              {subscribe.roles.map((item) => (
                 <button
                   type="button"
                   key={item.value}
@@ -388,7 +395,7 @@ export function HomePageContent({ locale, t }: HomePageContentProps) {
           </form>
 
           <p className="text-xs text-slate-500 mt-4">
-            {t.subscribe.privacyNote}
+            {subscribe.privacyNote}
           </p>
         </div>
       </section>

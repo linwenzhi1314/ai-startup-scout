@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { getTranslation, type Locale } from '@/lib/i18n/translations';
+import { useSiteContent } from '@/hooks/useSiteContent';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Check, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 
@@ -12,9 +13,28 @@ interface PricingPageContentProps {
 // 计划 ID 映射
 const PLAN_IDS = ['free', 'pro_monthly', 'investor_monthly', 'enterprise'];
 
+interface PricingPlan {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  buttonText: string;
+  popular?: boolean;
+}
+
+interface PricingData {
+  title: string;
+  subtitle: string;
+  plans: PricingPlan[];
+  faqTitle: string;
+  faqItems: Array<{ question: string; answer: string }>;
+}
+
 export function PricingPageContent({ locale }: PricingPageContentProps) {
   const t = getTranslation(locale);
-  const pricing = t.pricing;
+  const { data: dbPricing, loading } = useSiteContent<PricingData>('pricing', locale);
+  const pricing = dbPricing || t.pricing;
   const [expandedFaqs, setExpandedFaqs] = useState<number[]>([]);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

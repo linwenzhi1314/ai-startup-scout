@@ -323,6 +323,15 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
               <FileText className="w-4 h-4 mr-2" />
               页面管理
             </Button>
+            <Button
+              variant={activeTab === 'content' ? 'secondary' : 'ghost'}
+              className="w-full justify-start"
+              style={{ color: currentTheme.textSecondary }}
+              onClick={() => setActiveTab('content')}
+            >
+              <Globe className="w-4 h-4 mr-2" />
+              内容管理
+            </Button>
           </nav>
 
           <div className="pt-4 border-t" style={{ borderColor: currentTheme.border }}>
@@ -654,7 +663,281 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
           {activeTab === 'pages' && (
             <PagesManagementSection locale={locale} theme={theme} currentTheme={currentTheme} />
           )}
+
+          {/* Content Management Tab */}
+          {activeTab === 'content' && (
+            <ContentManagementSection locale={locale} theme={theme} currentTheme={currentTheme} />
+          )}
         </main>
+      </div>
+    </div>
+  );
+}
+
+// 内容管理组件
+const CONTENT_SECTIONS = [
+  { id: 'pricing', name: '定价方案', icon: '💰', desc: '套餐价格、功能列表、FAQ' },
+  { id: 'hero', name: '首页 Hero', icon: '🏠', desc: '标题、描述、演示数据' },
+  { id: 'features', name: '功能介绍', icon: '⚡', desc: '核心功能标题和描述' },
+  { id: 'howItWorks', name: '使用步骤', icon: '📋', desc: '三步引导说明' },
+  { id: 'about', name: '关于页面', icon: '👤', desc: '团队、使命、价值观' },
+  { id: 'help', name: '帮助中心', icon: '❓', desc: 'FAQ 问答对' },
+  { id: 'blog', name: '博客', icon: '📝', desc: '文章列表' },
+  { id: 'terms', name: '服务条款', icon: '📜', desc: '法律文本' },
+  { id: 'privacy', name: '隐私政策', icon: '🔒', desc: '隐私法律文本' },
+  { id: 'subscribe', name: '邮件订阅', icon: '📧', desc: '订阅表单文案' },
+];
+
+function ContentManagementSection({ locale, theme, currentTheme }: { locale: string; theme: 'dark' | 'light'; currentTheme: typeof themes.dark }) {
+  const [sections, setSections] = useState<Array<{ section: string; updatedAt: string; hasZh: boolean; hasEn: boolean }>>([]);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [editLocale, setEditLocale] = useState<'zh' | 'en'>('zh');
+  const [editContent, setEditContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
+  const fetchSections = async () => {
+    try {
+      const res = await fetch('/api/content');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setSections(data.sections);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch sections:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadSectionContent = async (sectionId: string) => {
+    setSelectedSection(sectionId);
+    try {
+      const res = await fetch(`/api/content?section=${sectionId}&locale=${editLocale}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.content) {
+          setEditContent(JSON.stringify(data.content, null, 2));
+        } else {
+          setEditContent('{}');
+        }
+      }
+    } catch {
+      setEditContent('{}');
+    }
+  };
+
+  const switchLocale = async (newLocale: 'zh' | 'en') => {
+    setEditLocale(newLocale);
+    if (selectedSection) {
+      try {
+        const res = await fetch(`/api/content?section=${selectedSection}&locale=${newLocale}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.content) {
+            setEditContent(JSON.stringify(data.content, null, 2));
+          } else {
+            setEditContent('{}');
+          }
+        }
+      } catch {
+        setEditContent('{}');
+      }
+    }
+  };
+
+  const saveContent = async () => {
+    if (!selectedSection) return;
+    setSaving(true);
+    setMessage(null);
+    try {
+      const parsed = JSON.parse(editContent);
+      const res = await fetch('/api/content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': 'ai-startup-scout-admin-2024',
+        },
+        body: JSON.stringify({
+          section: selectedSection,
+          locale: editLocale,
+          content: parsed,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setMessage({ type: 'success', text: `${selectedSection}/${editLocale} 已保存` });
+          fetchSections();
+        } else {
+          setMessage({ type: 'error', text: data.error || '保存失败' });
+        }
+      } else {
+        setMessage({ type: 'error', text: `HTTP ${res.status}` });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'JSON 格式错误' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const sectionMeta = CONTENT_SECTIONS.find(s => s.id === selectedSection);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin" style={{ color: currentTheme.textSecondary }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: currentTheme.textPrimary }}>内容管理</h2>
+          <p className="text-sm mt-1" style={{ color: currentTheme.textSecondary }}>编辑网站内容，保存后前台实时同步</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+          onClick={fetchSections}
+        >
+          <RefreshCw className="w-3 h-3 mr-1" />
+          刷新
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Section List */}
+        <div className="lg:col-span-1 space-y-2">
+          {CONTENT_SECTIONS.map(section => {
+            const dbSection = sections.find(s => s.section === section.id);
+            return (
+              <Card
+                key={section.id}
+                className="cursor-pointer transition-all hover:scale-[1.02]"
+                style={{
+                  backgroundColor: selectedSection === section.id ? `${currentTheme.cardInner}` : currentTheme.card,
+                  borderColor: selectedSection === section.id ? '#6366F1' : currentTheme.border,
+                  borderWidth: selectedSection === section.id ? 2 : 1,
+                }}
+                onClick={() => loadSectionContent(section.id)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{section.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm" style={{ color: currentTheme.textPrimary }}>{section.name}</p>
+                      <p className="text-xs truncate" style={{ color: currentTheme.textSecondary }}>{section.desc}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {dbSection?.hasZh && <Badge className="bg-[#6366F1]/20 text-[#6366F1] text-[10px] px-1">中</Badge>}
+                      {dbSection?.hasEn && <Badge className="bg-[#10B981]/20 text-[#10B981] text-[10px] px-1">EN</Badge>}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Right: Editor */}
+        <div className="lg:col-span-2">
+          {selectedSection ? (
+            <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2" style={{ color: currentTheme.textPrimary }}>
+                    <span className="text-lg">{sectionMeta?.icon}</span>
+                    {sectionMeta?.name}
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant={editLocale === 'zh' ? 'default' : 'outline'}
+                      onClick={() => switchLocale('zh')}
+                      style={editLocale === 'zh' ? { backgroundColor: '#6366F1' } : { borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                    >
+                      中文
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={editLocale === 'en' ? 'default' : 'outline'}
+                      onClick={() => switchLocale('en')}
+                      style={editLocale === 'en' ? { backgroundColor: '#6366F1' } : { borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                    >
+                      English
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {message && (
+                  <div className={`p-3 rounded text-sm ${message.type === 'success' ? 'bg-[#10B981]/20 text-[#10B981]' : 'bg-red-500/20 text-red-400'}`}>
+                    {message.text}
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs font-medium mb-2 block" style={{ color: currentTheme.textSecondary }}>
+                    JSON 内容（编辑后点击保存，前台将实时同步）
+                  </label>
+                  <textarea
+                    className="w-full h-96 p-3 rounded-lg font-mono text-sm border focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
+                    style={{
+                      backgroundColor: currentTheme.cardInner,
+                      color: currentTheme.textPrimary,
+                      borderColor: currentTheme.border,
+                    }}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs" style={{ color: currentTheme.textSecondary }}>
+                    修改后保存，前台页面将自动从数据库读取最新内容
+                  </p>
+                  <Button
+                    onClick={saveContent}
+                    disabled={saving}
+                    style={{ backgroundColor: '#6366F1', color: '#fff' }}
+                  >
+                    {saving ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        保存中...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        保存
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+              <CardContent className="flex flex-col items-center justify-center h-64">
+                <Globe className="w-12 h-12 mb-4" style={{ color: currentTheme.textSecondary }} />
+                <p className="font-medium" style={{ color: currentTheme.textPrimary }}>选择一个内容区块</p>
+                <p className="text-sm mt-1" style={{ color: currentTheme.textSecondary }}>从左侧列表选择要编辑的内容</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
