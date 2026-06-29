@@ -8,8 +8,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdapter, PaymentProvider } from '@/lib/payment';
 import { PlanId } from '@/lib/payment/types';
 import { getActiveProviderFromDB } from '@/lib/payment/db-config';
-import { HeaderUtils } from 'coze-coding-dev-sdk';
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -27,9 +25,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 从请求中获取用户标识
-    // 优先从 Supabase auth cookie 获取，否则从 header 获取，最后用匿名标识
-    const forwardHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const userId = forwardHeaders['x-user-id'] || request.headers.get('x-user-id') || 'anonymous';
+    // 优先从 header 获取，最后用匿名标识
+    const userId = request.headers.get('x-user-id') || 'anonymous';
 
     // 确定使用哪个支付方案
     let activeProvider: PaymentProvider;
