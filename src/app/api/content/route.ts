@@ -18,43 +18,41 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     if (section) {
+      // Use RPC to bypass PostgREST schema cache issues
       const { data, error } = await supabase
-        .from('site_content')
-        .select('section, content, updated_at')
-        .eq('section', section)
-        .single();
+        .rpc('get_site_content', { p_section: section });
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         console.error('[content API] Query error:', error, 'section:', section);
         return NextResponse.json({ error: 'Content not found', section, details: error?.message }, { status: 404 });
       }
 
+      const row = data[0];
+
       // Return locale-specific content if requested
-      const localizedContent = locale && data?.content?.[locale] 
-        ? data.content[locale] 
-        : data?.content;
+      const localizedContent = locale && row?.content?.[locale] 
+        ? row.content[locale] 
+        : row?.content;
 
       return NextResponse.json({
         success: true,
-        section: data.section,
+        section: row.section,
         content: localizedContent,
-        fullContent: data.content,
-        updatedAt: data.updated_at,
+        fullContent: row.content,
+        updatedAt: row.updated_at,
       });
     }
 
     // Get all sections
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('section, content, updated_at')
-      .order('section');
+    const { data: allData, error: allError } = await supabase
+      .rpc('get_site_content', { p_section: null });
 
-    if (error) {
+    if (allError) {
       return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
     }
 
     // Return list with summaries
-    const sections = (data || []).map((item: { section: string; content: Record<string, unknown>; updated_at: string }) => ({
+    const sections = (allData || []).map((item: { section: string; content: Record<string, unknown>; updated_at: string }) => ({
       section: item.section,
       updatedAt: item.updated_at,
       hasZh: !!(item.content?.zh),
@@ -95,21 +93,19 @@ export async function PUT(request: NextRequest) {
 
     const supabase = getSupabaseClient();
 
-    // Get current content first
-    const { data: existing, error: fetchError } = await supabase
-      .from('site_content')
-      .select('content')
-      .eq('section', section)
-      .single();
+    // Get current content first using RPC
+    const { data: existingRows, error: fetchError } = await supabase
+      .rpc('get_site_content', { p_section: section });
 
-    if (fetchError) {
+    if (fetchError || !existingRows || existingRows.length === 0) {
       return NextResponse.json({ error: 'Section not found', section }, { status: 404 });
     }
 
     // Merge new locale content into existing
-    const currentContent = (existing?.content || {}) as Record<string, unknown>;
+    const currentContent = (existingRows[0]?.content || {}) as Record<string, unknown>;
     const updatedContent = { ...currentContent, [locale]: content };
 
+    // Update using RPC - need direct SQL since RPC is read-only
     const { error: updateError } = await supabase
       .from('site_content')
       .update({ content: updatedContent, updated_at: new Date().toISOString(), updated_by: 'admin' })
