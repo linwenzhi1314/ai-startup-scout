@@ -689,7 +689,7 @@ const CONTENT_SECTIONS = [
 ];
 
 function ContentManagementSection({ locale, theme, currentTheme }: { locale: string; theme: 'dark' | 'light'; currentTheme: typeof themes.dark }) {
-  const [sections, setSections] = useState<Array<{ section: string; updatedAt: string; hasZh: boolean; hasEn: boolean }>>([]);
+  const [sections, setSections] = useState<Array<{ section: string; hasZh: boolean; hasEn: boolean }>>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [editLocale, setEditLocale] = useState<'zh' | 'en'>('zh');
   const [editContent, setEditContent] = useState<string>('');
@@ -707,7 +707,18 @@ function ContentManagementSection({ locale, theme, currentTheme }: { locale: str
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          setSections(data.sections);
+          // API returns { data: { sectionName: { content, updatedAt } } }
+          const sectionsMap = data.data || data.sections || {};
+          const sectionEntries = Object.entries(sectionsMap).map(([key, val]: [string, unknown]) => {
+            const content = (val as Record<string, unknown>)?.content || val;
+            const c = content as Record<string, unknown>;
+            return {
+              section: key,
+              hasZh: !!(c && c.zh),
+              hasEn: !!(c && c.en),
+            };
+          });
+          setSections(sectionEntries.length > 0 ? sectionEntries : CONTENT_SECTIONS.map(s => ({ section: s.id, hasZh: false, hasEn: false })));
         }
       }
     } catch (err) {

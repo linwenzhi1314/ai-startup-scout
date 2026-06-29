@@ -20,39 +20,62 @@ export async function GET(request: NextRequest) {
     const userId = authHeader?.replace('Bearer ', '');
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ 
+        success: true, 
+        data: { 
+          user: null, 
+          subscription: null 
+        } 
+      });
     }
 
-    // Get user subscription
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
     // Get user profile from auth
-    const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+    let userEmail = '';
+    let userCreatedAt = '';
+    try {
+      const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+      userEmail = user?.email || '';
+      userCreatedAt = user?.created_at || '';
+    } catch {
+      // Auth lookup may fail for non-authenticated users
+    }
+
+    // Get user subscription - wrap in try/catch since table may not be in schema cache
+    let subscription = null;
+    try {
+      const { data: subData } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (subData) {
+        subscription = {
+          planId: subData.plan_id as string,
+          planName: subData.plan_name as string,
+          status: subData.status as string,
+          provider: subData.provider as string,
+          currentPeriodStart: subData.current_period_start as string,
+          currentPeriodEnd: subData.current_period_end as string,
+          cancelAtPeriodEnd: subData.cancel_at_period_end as boolean,
+        };
+      }
+    } catch {
+      // Table may not exist yet in schema cache
+    }
 
     return NextResponse.json({
       success: true,
       data: {
         user: {
           id: userId,
-          email: user?.email || '',
-          createdAt: user?.created_at || '',
+          email: userEmail,
+          createdAt: userCreatedAt,
         },
-        subscription: subscription ? {
-          planId: subscription.plan_id as string,
-          planName: subscription.plan_name as string,
-          status: subscription.status as string,
-          provider: subscription.provider as string,
-          currentPeriodStart: subscription.current_period_start as string,
-          currentPeriodEnd: subscription.current_period_end as string,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end as boolean,
-        } : null,
+        subscription,
       }
     });
   } catch (error) {
