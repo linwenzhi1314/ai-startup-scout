@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
         .eq('section', section)
         .single();
 
-      if (error) {
-        return NextResponse.json({ error: 'Content not found', section }, { status: 404 });
+      if (error || !data) {
+        console.error('[content API] Query error:', error, 'section:', section);
+        return NextResponse.json({ error: 'Content not found', section, details: error?.message }, { status: 404 });
       }
 
       // Return locale-specific content if requested
