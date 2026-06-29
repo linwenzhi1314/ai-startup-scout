@@ -18,111 +18,101 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseClient();
 
     if (section) {
-      // Use RPC to bypass PostgREST schema cache issues
       const { data, error } = await supabase
-        .rpc('get_site_content', { p_section: section });
+        .from('site_content')
+        .select('section, content, updated_at')
+        .eq('section', section)
+        .single();
 
-      if (error || !data || data.length === 0) {
-        console.error('[content API] Query error:', error, 'section:', section);
-        return NextResponse.json({ error: 'Content not found', section, details: error?.message }, { status: 404 });
+      if (error || !data) {
+        console.error('[content API] Query error:', error?.message, 'section:', section);
+        return NextResponse.json({ 
+          error: 'Content not found', 
+          section, 
+          details: error?.message 
+        }, { status: 404 });
       }
 
-      const row = data[0];
-
       // Return locale-specific content if requested
-      const localizedContent = locale && row?.content?.[locale] 
-        ? row.content[locale] 
-        : row?.content;
+      const localizedContent = locale && data?.content?.[locale] 
+        ? data.content[locale] 
+        : data?.content;
 
       return NextResponse.json({
         success: true,
-        section: row.section,
+        section: data.section,
         content: localizedContent,
-        fullContent: row.content,
-        updatedAt: row.updated_at,
+        fullContent: data.content,
+        updatedAt: data.updated_at,
       });
     }
 
     // Get all sections
     const { data: allData, error: allError } = await supabase
-      .rpc('get_site_content', { p_section: null });
+      .from('site_content')
+      .select('section, content, updated_at')
+      .order('section');
 
     if (allError) {
-      return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
+      console.error('[content API] All query error:', allError.message);
+      return NextResponse.json({ error: 'Failed to fetch content', details: allError.message }, { status: 500 });
     }
 
-    // Return list with summaries
-    const sections = (allData || []).map((item: { section: string; content: Record<string, unknown>; updated_at: string }) => ({
-      section: item.section,
-      updatedAt: item.updated_at,
-      hasZh: !!(item.content?.zh),
-      hasEn: !!(item.content?.en),
-    }));
+    // Build localized map
+    const contentMap: Record<string, { content: Record<string, unknown>; updatedAt: string }> = {};
+    for (const row of allData || []) {
+      contentMap[row.section] = {
+        content: locale && row.content?.[locale] ? row.content[locale] as Record<string, unknown> : row.content as Record<string, unknown>,
+        updatedAt: row.updated_at,
+      };
+    }
 
-    return NextResponse.json({ success: true, sections, total: sections.length });
+    return NextResponse.json({ success: true, data: contentMap });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[content API] Unexpected error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// PUT /api/content — update a section
+// PUT /api/content - Update a section's content
 export async function PUT(request: NextRequest) {
-  if (!verifyAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
-    const body = await request.json();
-    const { section, locale, content } = body as {
-      section: string;
-      locale: string;
-      content: unknown;
-    };
-
-    if (!section || !locale || content === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields: section, locale, content' },
-        { status: 400 }
-      );
+    if (!verifyAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['zh', 'en'].includes(locale)) {
-      return NextResponse.json({ error: 'Invalid locale. Must be zh or en' }, { status: 400 });
+    const body = await request.json() as { section?: string; content?: Record<string, unknown> };
+    const { section, content } = body;
+
+    if (!section || !content) {
+      return NextResponse.json({ error: 'Section and content are required' }, { status: 400 });
     }
 
     const supabase = getSupabaseClient();
 
-    // Get current content first using RPC
-    const { data: existingRows, error: fetchError } = await supabase
-      .rpc('get_site_content', { p_section: section });
-
-    if (fetchError || !existingRows || existingRows.length === 0) {
-      return NextResponse.json({ error: 'Section not found', section }, { status: 404 });
-    }
-
-    // Merge new locale content into existing
-    const currentContent = (existingRows[0]?.content || {}) as Record<string, unknown>;
-    const updatedContent = { ...currentContent, [locale]: content };
-
-    // Update using RPC - need direct SQL since RPC is read-only
-    const { error: updateError } = await supabase
+    const { data, error } = await supabase
       .from('site_content')
-      .update({ content: updatedContent, updated_at: new Date().toISOString(), updated_by: 'admin' })
-      .eq('section', section);
+      .upsert({
+        section,
+        content,
+        updated_at: new Date().toISOString(),
+        updated_by: 'admin',
+      }, { onConflict: 'section' })
+      .select('section, content, updated_at')
+      .single();
 
-    if (updateError) {
-      return NextResponse.json({ error: 'Failed to update content', details: updateError.message }, { status: 500 });
+    if (error) {
+      console.error('[content API] Upsert error:', error.message);
+      return NextResponse.json({ error: 'Failed to update content', details: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Content updated: ${section}/${locale}`,
-      section,
-      locale,
+    return NextResponse.json({ 
+      success: true, 
+      section: data.section, 
+      updatedAt: data.updated_at 
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[content API] PUT error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
