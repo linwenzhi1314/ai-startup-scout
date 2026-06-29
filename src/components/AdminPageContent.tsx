@@ -21,6 +21,9 @@ import {
   Moon,
   MessageSquare,
   RefreshCw,
+  FileText,
+  Globe,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Translation } from '@/lib/i18n/translations';
@@ -310,6 +313,15 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
             >
               <Settings className="w-4 h-4 mr-2" />
               支付配置
+            </Button>
+            <Button
+              variant={activeTab === 'pages' ? 'secondary' : 'ghost'}
+              className="w-full justify-start"
+              style={{ color: currentTheme.textSecondary }}
+              onClick={() => setActiveTab('pages')}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              页面管理
             </Button>
           </nav>
 
@@ -637,8 +649,324 @@ export function AdminPageContent({ translation, locale }: AdminPageContentProps)
           {activeTab === 'payment' && (
             <PaymentSettingsSection locale={locale} theme={theme} currentTheme={currentTheme} />
           )}
+
+          {/* Pages Management Tab */}
+          {activeTab === 'pages' && (
+            <PagesManagementSection locale={locale} theme={theme} currentTheme={currentTheme} />
+          )}
         </main>
       </div>
+    </div>
+  );
+}
+
+// 页面管理组件
+interface PageInfo {
+  path: string;
+  nameZh: string;
+  nameEn: string;
+  description: string;
+  category: string;
+  icon: string;
+}
+
+const sitePages: PageInfo[] = [
+  // 核心页面
+  { path: '/', nameZh: '首页', nameEn: 'Home', description: '产品落地页，展示核心功能与安装入口', category: '核心', icon: '🏠' },
+  { path: '/pricing', nameZh: '定价页', nameEn: 'Pricing', description: '套餐对比与付费入口', category: '核心', icon: '💰' },
+  { path: '/about', nameZh: '关于我们', nameEn: 'About', description: '团队介绍与产品愿景', category: '核心', icon: '👥' },
+  { path: '/blog', nameZh: '博客', nameEn: 'Blog', description: '产品动态与行业洞察文章', category: '核心', icon: '📝' },
+  // 用户功能
+  { path: '/login', nameZh: '登录', nameEn: 'Login', description: '用户登录页面', category: '用户', icon: '🔑' },
+  { path: '/signup', nameZh: '注册', nameEn: 'Signup', description: '新用户注册页面', category: '用户', icon: '✨' },
+  { path: '/dashboard', nameZh: '用户仪表盘', nameEn: 'Dashboard', description: '已登录用户的主控制面板', category: '用户', icon: '📊' },
+  { path: '/dashboard/settings', nameZh: '用户设置', nameEn: 'Dashboard Settings', description: '账户设置与偏好管理', category: '用户', icon: '⚙️' },
+  { path: '/subscribe', nameZh: '邮件订阅', nameEn: 'Subscribe', description: '邮件通讯订阅入口', category: '用户', icon: '📬' },
+  // 支持与合规
+  { path: '/help', nameZh: '帮助中心', nameEn: 'Help', description: '常见问题与使用指南', category: '支持', icon: '❓' },
+  { path: '/support', nameZh: '客服支持', nameEn: 'Support', description: '联系客服与提交工单', category: '支持', icon: '🛟' },
+  { path: '/privacy', nameZh: '隐私政策', nameEn: 'Privacy Policy', description: '数据收集与隐私保护条款', category: '合规', icon: '🔒' },
+  { path: '/terms', nameZh: '服务条款', nameEn: 'Terms of Service', description: '使用条款与法律声明', category: '合规', icon: '📜' },
+  // 管理
+  { path: '/admin', nameZh: '后台管理', nameEn: 'Admin', description: '管理员控制面板（当前页面）', category: '管理', icon: '🛡️' },
+];
+
+function PagesManagementSection({ locale, currentTheme }: { locale: string; theme: 'dark' | 'light'; currentTheme: typeof themes.dark }) {
+  const [domain, setDomain] = useState('');
+  const [previewLang, setPreviewLang] = useState<'zh-Hans' | 'en'>('zh-Hans');
+
+  useEffect(() => {
+    // 从 API 获取域名
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.domain) setDomain(data.domain);
+      })
+      .catch(() => {
+        // fallback
+        if (typeof window !== 'undefined') {
+          setDomain(window.location.host);
+        }
+      });
+  }, []);
+
+  // 分类
+  const categories = ['核心', '用户', '支持', '合规', '管理'];
+  const categoryColors: Record<string, string> = {
+    '核心': 'bg-[#6366F1]/20 text-[#6366F1]',
+    '用户': 'bg-[#10B981]/20 text-[#10B981]',
+    '支持': 'bg-[#F59E0B]/20 text-[#F59E0B]',
+    '合规': 'bg-[#94A3B8]/20 text-[#94A3B8]',
+    '管理': 'bg-[#EF4444]/20 text-[#EF4444]',
+  };
+
+  const getPageUrl = (page: PageInfo) => {
+    const prefix = previewLang === 'zh-Hans' ? '/zh-Hans' : '/en';
+    const path = page.path === '/' ? '' : page.path;
+    return `${prefix}${path}`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 顶部工具栏 */}
+      <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Globe className="w-5 h-5 text-[#6366F1]" />
+              <div>
+                <p className="font-medium" style={{ color: currentTheme.textPrimary }}>站点域名</p>
+                <p className="text-sm" style={{ color: currentTheme.textSecondary }}>{domain || '加载中...'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm" style={{ color: currentTheme.textSecondary }}>预览语言：</span>
+              <Button
+                size="sm"
+                variant={previewLang === 'zh-Hans' ? 'default' : 'outline'}
+                className={previewLang === 'zh-Hans' ? 'bg-[#6366F1] hover:bg-[#6366F1]/80 text-white' : ''}
+                style={previewLang !== 'zh-Hans' ? { borderColor: currentTheme.border, color: currentTheme.textSecondary } : {}}
+                onClick={() => setPreviewLang('zh-Hans')}
+              >
+                中文
+              </Button>
+              <Button
+                size="sm"
+                variant={previewLang === 'en' ? 'default' : 'outline'}
+                className={previewLang === 'en' ? 'bg-[#6366F1] hover:bg-[#6366F1]/80 text-white' : ''}
+                style={previewLang !== 'en' ? { borderColor: currentTheme.border, color: currentTheme.textSecondary } : {}}
+                onClick={() => setPreviewLang('en')}
+              >
+                English
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 统计 */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6 text-[#6366F1]" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{sitePages.length}</p>
+                <p style={{ color: currentTheme.textSecondary }}>总页面数</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Globe className="w-6 h-6 text-[#10B981]" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>2</p>
+                <p style={{ color: currentTheme.textSecondary }}>支持语言</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <Eye className="w-6 h-6 text-[#F59E0B]" />
+              <div>
+                <p className="text-2xl font-bold" style={{ color: currentTheme.textPrimary }}>{sitePages.length * 2}</p>
+                <p style={{ color: currentTheme.textSecondary }}>可访问 URL</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 按分类列出页面 */}
+      {categories.map(category => {
+        const pages = sitePages.filter(p => p.category === category);
+        if (pages.length === 0) return null;
+        return (
+          <Card key={category} style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2" style={{ color: currentTheme.textPrimary }}>
+                <Badge className={categoryColors[category] || 'bg-[#94A3B8]/20 text-[#94A3B8]'}>
+                  {category}
+                </Badge>
+                <span>{category}页面</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <table className="w-full">
+                <thead>
+                  <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                    <th className="text-left py-3 w-8"></th>
+                    <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>页面名称</th>
+                    <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>路径</th>
+                    <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>描述</th>
+                    <th className="text-right py-3" style={{ color: currentTheme.textSecondary }}>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pages.map(page => (
+                    <tr key={page.path} style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                      <td className="py-3 text-lg">{page.icon}</td>
+                      <td className="py-3">
+                        <div>
+                          <p className="font-medium" style={{ color: currentTheme.textPrimary }}>
+                            {previewLang === 'zh-Hans' ? page.nameZh : page.nameEn}
+                          </p>
+                          <p className="text-xs" style={{ color: currentTheme.textSecondary }}>
+                            {previewLang === 'zh-Hans' ? page.nameEn : page.nameZh}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <code className="text-xs px-2 py-1 rounded" style={{ color: '#6366F1', backgroundColor: currentTheme.cardInner }}>
+                          {page.path}
+                        </code>
+                      </td>
+                      <td className="py-3 text-sm" style={{ color: currentTheme.textSecondary }}>{page.description}</td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                            onClick={() => window.open(getPageUrl(page), '_blank')}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            预览
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                            onClick={() => {
+                              const url = `https://github.com/linwenzhi1314/ai-startup-scout/edit/main/src/app${getPageUrl(page)}/page.tsx`;
+                              window.open(url, '_blank');
+                            }}
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            编辑
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        );
+      })}
+
+      {/* Chrome 扩展页面 */}
+      <Card style={{ backgroundColor: currentTheme.card, borderColor: currentTheme.border }}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2" style={{ color: currentTheme.textPrimary }}>
+            <Badge className="bg-[#F59E0B]/20 text-[#F59E0B]">扩展</Badge>
+            <span>Chrome 扩展页面</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                <th className="text-left py-3 w-8"></th>
+                <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>页面</th>
+                <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>文件路径</th>
+                <th className="text-left py-3" style={{ color: currentTheme.textSecondary }}>说明</th>
+                <th className="text-right py-3" style={{ color: currentTheme.textSecondary }}>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                <td className="py-3 text-lg">🧩</td>
+                <td className="py-3 font-medium" style={{ color: currentTheme.textPrimary }}>Popup 弹窗</td>
+                <td className="py-3">
+                  <code className="text-xs px-2 py-1 rounded" style={{ color: '#F59E0B', backgroundColor: currentTheme.cardInner }}>
+                    public/extension/popup.html
+                  </code>
+                </td>
+                <td className="py-3 text-sm" style={{ color: currentTheme.textSecondary }}>扩展弹窗主界面，搜索与分析入口</td>
+                <td className="py-3 text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                    onClick={() => window.open('https://github.com/linwenzhi1314/ai-startup-scout/edit/main/public/extension/popup.html', '_blank')}
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    编辑
+                  </Button>
+                </td>
+              </tr>
+              <tr style={{ borderBottomWidth: 1, borderColor: currentTheme.border }}>
+                <td className="py-3 text-lg">⚙️</td>
+                <td className="py-3 font-medium" style={{ color: currentTheme.textPrimary }}>Background Worker</td>
+                <td className="py-3">
+                  <code className="text-xs px-2 py-1 rounded" style={{ color: '#F59E0B', backgroundColor: currentTheme.cardInner }}>
+                    public/extension/background.js
+                  </code>
+                </td>
+                <td className="py-3 text-sm" style={{ color: currentTheme.textSecondary }}>Service Worker，处理扩展后台逻辑</td>
+                <td className="py-3 text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                    onClick={() => window.open('https://github.com/linwenzhi1314/ai-startup-scout/edit/main/public/extension/background.js', '_blank')}
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    编辑
+                  </Button>
+                </td>
+              </tr>
+              <tr>
+                <td className="py-3 text-lg">📋</td>
+                <td className="py-3 font-medium" style={{ color: currentTheme.textPrimary }}>Manifest</td>
+                <td className="py-3">
+                  <code className="text-xs px-2 py-1 rounded" style={{ color: '#F59E0B', backgroundColor: currentTheme.cardInner }}>
+                    public/extension/manifest.json
+                  </code>
+                </td>
+                <td className="py-3 text-sm" style={{ color: currentTheme.textSecondary }}>扩展清单配置（权限、版本等）</td>
+                <td className="py-3 text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    style={{ borderColor: currentTheme.border, color: currentTheme.textSecondary }}
+                    onClick={() => window.open('https://github.com/linwenzhi1314/ai-startup-scout/edit/main/public/extension/manifest.json', '_blank')}
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    编辑
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
